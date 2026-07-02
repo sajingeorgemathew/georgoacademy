@@ -1,7 +1,8 @@
 "use client";
 
+import Image from "next/image";
 import { useState, type FormEvent } from "react";
-import { Container, SectionHeading } from "./primitives";
+import { Eyebrow } from "./primitives";
 import {
   earlyAccessSchema,
   willingnessToPayValues,
@@ -11,22 +12,24 @@ import {
 type Status = "idle" | "submitting" | "success" | "error";
 
 const preparingOptions = [
-  "Yes, actively preparing",
-  "Just getting started",
-  "Planning to start soon",
+  "Yes, I am preparing now",
+  "I plan to prepare soon",
+  "I am only exploring",
   "Not sure yet",
 ];
 
-const testDateOptions = [
-  "Within 1 month",
-  "1 to 3 months away",
-  "3 to 6 months away",
-  "No date set yet",
+const practiceMethodOptions = [
+  "Tutor or class",
+  "YouTube",
+  "Apps",
+  "Friends or family",
+  "I do not practice speaking yet",
+  "Other",
 ];
 
-const labelClass = "block text-sm font-medium text-slate-800";
+const labelClass = "block text-sm font-medium text-foreground/80";
 const inputClass =
-  "mt-2 block w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-sm outline-none transition-colors placeholder:text-slate-400 focus:border-brand focus:ring-2 focus:ring-brand/20";
+  "mt-2 block w-full rounded-xl border border-foreground/15 bg-white px-4 py-3 text-sm text-foreground shadow-sm outline-none transition-colors placeholder:text-foreground/40 focus:border-brand focus:ring-2 focus:ring-brand/20";
 
 export function EarlyAccessForm() {
   const [status, setStatus] = useState<Status>("idle");
@@ -86,19 +89,34 @@ export function EarlyAccessForm() {
   return (
     <section
       id="early-access"
-      className="scroll-mt-16 border-t border-slate-200 bg-white"
+      className="relative isolate scroll-mt-16 overflow-hidden bg-ink text-cream"
     >
-      <Container className="py-20 sm:py-24">
-        <SectionHeading
-          eyebrow="Early access"
-          title="Get early access to CELPIP speaking practice"
-          subtitle="Tell us a little about your CELPIP journey and we will add you to the early access list."
-        />
+      {/* City image with a dark overlay, echoing the closing Canva section. */}
+      <Image
+        src="/canada-city-hero.jpg"
+        alt=""
+        aria-hidden
+        fill
+        sizes="100vw"
+        className="object-cover opacity-40"
+      />
+      <div className="absolute inset-0 bg-gradient-to-b from-ink via-ink/90 to-ink/95" />
 
-        <div className="mx-auto mt-12 max-w-2xl">
+      <div className="relative mx-auto grid w-full max-w-6xl gap-12 px-5 py-20 sm:px-8 sm:py-28 lg:grid-cols-2 lg:gap-16">
+        <div className="lg:pt-6">
+          <Eyebrow className="text-brand">Early access</Eyebrow>
+          <h2 className="mt-5 font-serif text-4xl font-semibold leading-tight tracking-tight text-cream sm:text-5xl">
+            Tell us your CELPIP speaking goal
+          </h2>
+          <p className="mt-6 max-w-md text-lg leading-8 text-cream/75">
+            Your answers will help shape the first version of the practice tool.
+          </p>
+        </div>
+
+        <div>
           {status === "success" ? (
-            <div className="rounded-2xl border border-green-200 bg-green-50 p-8 text-center">
-              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-green-100 text-green-700">
+            <div className="rounded-3xl bg-cream p-10 text-center text-foreground shadow-xl">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-brand/15 text-brand">
                 <svg
                   className="h-6 w-6"
                   viewBox="0 0 20 20"
@@ -112,10 +130,10 @@ export function EarlyAccessForm() {
                   />
                 </svg>
               </div>
-              <h3 className="mt-4 text-xl font-semibold text-slate-900">
+              <h3 className="mt-5 font-serif text-2xl font-semibold text-foreground">
                 Thank you. You are on the early access list.
               </h3>
-              <p className="mt-2 text-sm text-slate-600">
+              <p className="mt-3 text-sm text-foreground/60">
                 We will be in touch as the full practice app gets closer to
                 launch.
               </p>
@@ -124,7 +142,7 @@ export function EarlyAccessForm() {
             <form
               onSubmit={handleSubmit}
               noValidate
-              className="rounded-2xl border border-slate-200 bg-slate-50/60 p-6 shadow-sm sm:p-8"
+              className="rounded-3xl bg-cream p-6 text-foreground shadow-xl sm:p-8"
             >
               <div className="grid gap-6 sm:grid-cols-2">
                 <div>
@@ -159,7 +177,7 @@ export function EarlyAccessForm() {
 
                 <div>
                   <label htmlFor="preparing_status" className={labelClass}>
-                    Are you currently preparing for CELPIP?
+                    Are you preparing for CELPIP now?
                   </label>
                   <select
                     id="preparing_status"
@@ -180,38 +198,38 @@ export function EarlyAccessForm() {
                   <label htmlFor="test_date" className={labelClass}>
                     When is your test?
                   </label>
-                  <select
+                  <input
                     id="test_date"
                     name="test_date"
-                    defaultValue=""
+                    type="text"
                     className={inputClass}
-                  >
-                    <option value="">Select an option</option>
-                    {testDateOptions.map((option) => (
-                      <option key={option} value={option}>
-                        {option}
-                      </option>
-                    ))}
-                  </select>
+                    placeholder="For example, next month or no date yet"
+                  />
                 </div>
               </div>
 
               <div className="mt-6">
                 <label htmlFor="current_practice_method" className={labelClass}>
-                  How do you currently practice speaking?
+                  How are you practicing speaking right now?
                 </label>
-                <input
+                <select
                   id="current_practice_method"
                   name="current_practice_method"
-                  type="text"
+                  defaultValue=""
                   className={inputClass}
-                  placeholder="Tutoring, self-study, classes, or not yet"
-                />
+                >
+                  <option value="">Select an option</option>
+                  {practiceMethodOptions.map((option) => (
+                    <option key={option} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div className="mt-6">
                 <label htmlFor="hardest_part" className={labelClass}>
-                  What is the hardest part of CELPIP speaking for you?
+                  What feels hardest in CELPIP speaking?
                 </label>
                 <textarea
                   id="hardest_part"
@@ -224,21 +242,21 @@ export function EarlyAccessForm() {
 
               <fieldset className="mt-6">
                 <legend className={labelClass}>
-                  Would you pay around $20/month for realistic speaking practice
-                  with AI feedback?
+                  Would you pay around $20/month for realistic CELPIP speaking
+                  practice with feedback?
                 </legend>
                 <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:gap-6">
                   {willingnessToPayValues.map((option) => (
                     <label
                       key={option}
-                      className="flex cursor-pointer items-center gap-2 text-sm text-slate-800"
+                      className="flex cursor-pointer items-center gap-2 text-sm text-foreground/80"
                     >
                       <input
                         type="radio"
                         name="willingness_to_pay"
                         value={option}
                         required
-                        className="h-4 w-4 border-slate-300 text-brand focus:ring-brand"
+                        className="h-4 w-4 border-foreground/30 text-brand focus:ring-brand"
                       />
                       {option}
                     </label>
@@ -262,7 +280,7 @@ export function EarlyAccessForm() {
               {status === "error" && errorMessage ? (
                 <p
                   role="alert"
-                  className="mt-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+                  className="mt-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
                 >
                   {errorMessage}
                 </p>
@@ -271,18 +289,20 @@ export function EarlyAccessForm() {
               <button
                 type="submit"
                 disabled={status === "submitting"}
-                className="mt-8 inline-flex h-12 w-full items-center justify-center rounded-full bg-brand px-8 text-base font-semibold text-white shadow-sm transition-colors hover:bg-brand-dark disabled:cursor-not-allowed disabled:opacity-70"
+                className="mt-8 inline-flex h-13 w-full items-center justify-center rounded-full bg-brand px-8 py-3.5 text-base font-semibold text-white shadow-sm transition-colors hover:bg-brand-dark disabled:cursor-not-allowed disabled:opacity-70"
               >
-                {status === "submitting" ? "Submitting..." : "Get early access"}
+                {status === "submitting"
+                  ? "Submitting..."
+                  : "Join the early access list"}
               </button>
 
-              <p className="mt-4 text-center text-xs leading-5 text-slate-500">
+              <p className="mt-4 text-center text-xs leading-5 text-foreground/50">
                 We will only use your details to contact you about early access.
               </p>
             </form>
           )}
         </div>
-      </Container>
+      </div>
     </section>
   );
 }

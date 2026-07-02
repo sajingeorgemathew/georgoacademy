@@ -1,43 +1,63 @@
-import { Container } from "./primitives";
+import Image from "next/image";
+import { Container, Eyebrow } from "./primitives";
 
 export function HeroSection() {
   return (
-    <section className="relative overflow-hidden border-b border-slate-200 bg-gradient-to-b from-white via-blue-50/40 to-background">
-      <Container className="py-20 sm:py-28">
-        <div className="mx-auto max-w-3xl text-center">
-          <span className="inline-flex items-center rounded-full border border-blue-200 bg-blue-50 px-4 py-1.5 text-sm font-medium text-brand-dark">
-            Georgo Academy CELPIP Speaking Practice
-          </span>
+    <section className="relative isolate overflow-hidden bg-ink text-cream">
+      {/* Full bleed Canadian city hero image with a dark editorial overlay. */}
+      <Image
+        src="/canada-city-hero.jpg"
+        alt="A Canadian city skyline"
+        fill
+        priority
+        sizes="100vw"
+        className="object-cover"
+      />
+      <div className="absolute inset-0 bg-gradient-to-r from-ink/95 via-ink/80 to-ink/40" />
+      <div className="absolute inset-0 bg-gradient-to-t from-ink/90 via-transparent to-ink/40" />
 
-          <h1 className="mt-6 text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl md:text-6xl">
-            Walk into your CELPIP speaking test knowing exactly what to expect.
+      <Container className="relative flex min-h-[92vh] flex-col justify-between py-8 sm:py-10">
+        <div className="flex items-center gap-3">
+          <Image
+            src="/georgo-logo.png"
+            alt="Georgo Academy"
+            width={48}
+            height={48}
+            className="h-11 w-11 rounded-xl object-contain"
+          />
+          <span className="text-lg font-semibold tracking-tight text-cream">
+            Georgo Academy
+          </span>
+        </div>
+
+        <div className="max-w-3xl">
+          <Eyebrow className="text-brand">CELPIP Speaking Practice</Eyebrow>
+
+          <h1 className="mt-6 font-serif text-5xl font-semibold leading-[1.02] tracking-tight text-cream sm:text-6xl lg:text-7xl">
+            Walk into CELPIP speaking with more confidence.
           </h1>
 
-          <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-slate-600 sm:text-xl">
-            Practice CELPIP-style speaking tasks on a timer, get instant AI
-            feedback, and see what is costing you points before test day.
+          <p className="mt-6 max-w-xl text-lg leading-8 text-cream/80">
+            Answer a few quick questions and get early access to a timed CELPIP
+            speaking practice experience with AI feedback.
           </p>
 
-          <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
+          <div className="mt-9">
             <a
               href="#early-access"
-              className="inline-flex h-12 w-full items-center justify-center rounded-full bg-brand px-8 text-base font-semibold text-white shadow-sm transition-colors hover:bg-brand-dark sm:w-auto"
+              className="inline-flex h-14 items-center justify-center rounded-full bg-brand px-9 text-base font-semibold text-white shadow-lg shadow-brand/20 transition-colors hover:bg-brand-dark"
             >
-              Get early access
-            </a>
-            <a
-              href="#how-it-works"
-              className="inline-flex h-12 w-full items-center justify-center rounded-full border border-slate-300 bg-white px-8 text-base font-semibold text-slate-800 transition-colors hover:border-slate-400 hover:bg-slate-50 sm:w-auto"
-            >
-              See how it works
+              Start the quick form
             </a>
           </div>
 
-          <p className="mx-auto mt-6 max-w-xl text-sm leading-6 text-slate-500">
-            Built for CELPIP test-takers who want realistic speaking practice
-            between classes, tutoring, or self-study.
+          <p className="mt-8 max-w-md text-sm leading-6 text-cream/70">
+            3 free practice attempts planned. Then expected pricing: $5 for 10
+            attempts or $20/month unlimited.
           </p>
         </div>
+
+        <div aria-hidden className="h-2" />
       </Container>
     </section>
   );
