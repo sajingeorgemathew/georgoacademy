@@ -1,10 +1,19 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f8fafc;
-  --foreground: #0f172a;
-  --brand: #1d4ed8;
-  --brand-dark: #1e3a8a;
+  /* Warm editorial palette inspired by the Canva reference. */
+  --background: #f7f2e7;
+  --foreground: #1a1712;
+
+  /* Warm terracotta accent used for the pricing block and buttons. */
+  --brand: #c1743a;
+  --brand-dark: #a25e2c;
+
+  /* Section tones. */
+  --cream: #f7f2e7;
+  --cream-soft: #efe7d3;
+  --ink: #17140f;
+  --ink-soft: #221d16;
 }
 
 @theme inline {
@@ -12,7 +21,12 @@
   --color-foreground: var(--foreground);
   --color-brand: var(--brand);
   --color-brand-dark: var(--brand-dark);
+  --color-cream: var(--cream);
+  --color-cream-soft: var(--cream-soft);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
   --font-sans: var(--font-geist-sans);
+  --font-serif: var(--font-fraunces);
   --font-mono: var(--font-geist-mono);
 }
 
