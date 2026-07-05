@@ -68,7 +68,7 @@ export const recordingCopy = {
   recordedLengthLabel: "Recorded length",
   successHeading: "Recording saved",
   successText:
-    "Your speaking response has been saved. In the next step, this recording will be transcribed and used to generate AI-supported practice feedback.",
+    "Your speaking response has been saved. Submit it for feedback to receive AI-supported practice feedback with an estimated practice level.",
   statusIdle: "Start recording when you are ready to speak your answer.",
   statusRequesting:
     "Waiting for microphone access. Please allow microphone use in your browser.",
@@ -127,6 +127,69 @@ export const transcriptCopy = {
     transcriptSaveFailed:
       "We could not save your transcript. Please try again.",
   },
+} as const;
+
+// Student facing copy for the AI feedback step. Server code reuses the
+// error messages so the API and the UI always say the same thing.
+export const feedbackCopy = {
+  submit: "Submit for feedback",
+  working: "Preparing your feedback",
+  tryAgain: "Try again",
+  processingHeading: "Preparing your speaking feedback",
+  processingText:
+    "We are reviewing your recorded answer and preparing detailed practice feedback. This can take up to a minute. Please keep this page open.",
+  errors: {
+    invalidRequest:
+      "We could not read that request. Please refresh the page and try again.",
+    sessionExpired:
+      "Your session has ended. Please sign in again to get your feedback.",
+    requestFailed:
+      "We could not prepare your feedback. Please try again.",
+    attemptNotFound:
+      "We could not find this practice attempt. Please record a new answer.",
+    attemptNotOwned:
+      "This practice attempt does not belong to your account.",
+    audioMissing:
+      "This attempt does not have a saved recording, so it cannot be reviewed. Please record a new answer.",
+    taskMissing:
+      "We could not load the task for this attempt. Please try again.",
+    notConfigured:
+      "Feedback is not available right now. Please try again later.",
+    scoringFailed:
+      "We could not prepare feedback for this answer. Please try again.",
+    scoreSaveFailed:
+      "We could not save your feedback. Please try again.",
+  },
+} as const;
+
+// Student facing copy for the attempt result page.
+export const resultCopy = {
+  pageBadge: "Practice feedback",
+  pageHeading: "Your speaking feedback",
+  readyText: "Your practice feedback is ready.",
+  levelHeading: "Estimated practice level",
+  levelScale: "out of 12",
+  practiceEstimateNote:
+    "This estimated level is a practice guide from Toronto Academy CELPIP Practice. It is not an official CELPIP score.",
+  skillBreakdownHeading: "Skill breakdown",
+  skillScoreScale: "/ 12",
+  improvementLabel: "Try this next",
+  strengthsHeading: "What you did well",
+  improvementsHeading: "What to improve next",
+  nextStepsHeading: "Your next steps",
+  transcriptHeading: "Transcript of your answer",
+  transcriptNote:
+    "This transcript is generated from your recording and may not be perfect. It is used to support your practice feedback.",
+  actionsLabel: "Continue practicing",
+  practiceAnotherTask: "Practice another task",
+  backToTasks: "Back to speaking tasks",
+  tryTaskAgain: "Try this task again",
+  notReadyHeading: "Your feedback is not ready yet",
+  notReadyText:
+    "This attempt does not have feedback yet. Return to your recording and choose Submit for feedback, or start a new practice session.",
+  failedHeading: "We could not prepare this feedback",
+  failedText:
+    "Something went wrong while preparing feedback for this attempt. Please return to your recording and submit it again, or start a new practice session.",
 } as const;
 
 // Label and next-step hint shown for each phase.
