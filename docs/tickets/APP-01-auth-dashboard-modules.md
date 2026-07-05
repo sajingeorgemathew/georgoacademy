@@ -1,10 +1,10 @@
-# APP-01 - Auth, Student Dashboard, and Module Cards
+# APP-01 - Auth, Dashboard, and Module Cards
 
 ## Goal
 
 Build the first real app foundation for Toronto Academy CELPIP Practice.
 
-This ticket adds user authentication, protected student dashboard, profile creation, and module cards.
+This ticket adds Supabase Auth, protected dashboard routing, profile creation, module cards, and a placeholder CELPIP Speaking module route.
 
 Do not build recording yet.
 Do not build transcription yet.
@@ -16,30 +16,80 @@ Do not build the full speaking practice screen yet.
 
 Toronto Academy CELPIP Practice
 
-## Current product direction
+## Core UX rule
 
-The app is a Toronto Academy test-prep platform.
+Every route must make the next action clear.
 
-First active module:
-CELPIP Speaking Practice
+Each screen should answer:
 
-Future modules:
-CELPIP Writing Practice
-CELPIP Reading Practice
-CELPIP Listening Practice
-Live CELPIP Classes
+1. Where am I?
+2. What can I do here?
+3. What should I click next?
+4. How do I go back?
+5. What happens if something fails?
 
-## User flow for this ticket
+## Route map
 
-1. User visits the landing page at /
-2. User can click a sign in or get started button
-3. User can create an account
-4. User can log in
-5. User is redirected to /dashboard
+Public routes:
+
+- /
+  Landing page
+
+- /signup
+  Create account
+
+- /login
+  Sign in
+
+- /auth/callback
+  Supabase auth callback
+
+Protected routes:
+
+- /dashboard
+  Student dashboard with module cards
+
+- /dashboard/speaking
+  Placeholder CELPIP Speaking module page
+
+Do not build task library, recording, transcription, or scoring in /dashboard/speaking yet. This page should only confirm that the speaking module is the next area.
+
+## User flow
+
+1. User lands on /
+2. User clicks Get started
+3. User goes to /signup
+4. User creates account
+5. User is redirected to /dashboard or sees email confirmation message
 6. User sees module cards
-7. CELPIP Speaking is active
-8. Writing, Reading, Listening, and Live Classes show as coming soon
-9. User can sign out
+7. User clicks CELPIP Speaking Practice
+8. User goes to /dashboard/speaking placeholder
+9. User can return to /dashboard
+10. User can sign out
+
+## Logged out flow
+
+If a logged out user visits:
+
+- /dashboard
+- /dashboard/speaking
+
+They must be redirected to:
+
+- /login
+
+## Logged in flow
+
+If a logged in user visits:
+
+- /login
+- /signup
+
+They can be redirected to:
+
+- /dashboard
+
+This is preferred, but not mandatory if it adds complexity.
 
 ## Required routes
 
@@ -48,13 +98,11 @@ Create or update:
 src/app/(auth)/login/page.tsx
 src/app/(auth)/signup/page.tsx
 src/app/auth/callback/route.ts
+src/app/dashboard/layout.tsx
 src/app/dashboard/page.tsx
 src/app/dashboard/loading.tsx
 src/app/dashboard/error.tsx
-
-Optional if useful:
-
-src/app/(app)/layout.tsx
+src/app/dashboard/speaking/page.tsx
 
 ## Required components
 
@@ -63,19 +111,26 @@ Create:
 src/components/auth/LoginForm.tsx
 src/components/auth/SignupForm.tsx
 src/components/app/AppHeader.tsx
+src/components/app/DashboardShell.tsx
 src/components/app/ModuleCard.tsx
 src/components/app/SignOutButton.tsx
-src/components/app/DashboardShell.tsx
 
-## Required Supabase helpers
+Optional if useful:
 
-Use the existing Supabase helpers from INFRA-01:
+src/components/app/AppFooter.tsx
+src/components/app/BackToDashboardLink.tsx
+
+## Supabase helpers
+
+Use the existing helpers from INFRA-01:
 
 src/lib/supabase/client.ts
 src/lib/supabase/server.ts
 src/lib/supabase/admin.ts
 
-Do not expose the service role key to client components.
+Client components must use the browser client only.
+Server components and route handlers can use the server client.
+Do not use the admin client in client components.
 
 ## Database migration
 
@@ -83,105 +138,155 @@ Create:
 
 supabase/migrations/002_auth_profile_trigger.sql
 
-The migration should create or replace a trigger function that automatically creates a public.profiles row when a new auth.users row is created.
+The migration should create or replace a trigger function that automatically inserts a row into public.profiles when a new auth.users row is created.
 
 The profile row should include:
-- id
-- email
-- full_name from raw_user_meta_data if available
-- role as student
 
-Also make sure updated_at is maintained on profile updates if not already handled.
+- id from new.id
+- email from new.email
+- full_name from new.raw_user_meta_data if available
+- role as student
+- created_at
+- updated_at
+
+Also add or confirm an updated_at trigger for public.profiles updates.
+
+The migration must be safe to run in hosted Supabase SQL Editor.
 
 ## Auth requirements
 
-Use Supabase Auth.
-
 Signup form fields:
+
 - full_name
 - email
 - password
 
 Login form fields:
+
 - email
 - password
 
-After successful signup:
-- show a friendly message if email confirmation is required
-- otherwise redirect to /dashboard
+Signup behavior:
 
-After successful login:
-- redirect to /dashboard
+- Create user with full_name stored in options.data
+- If email confirmation is required, show a friendly message
+- If session exists immediately, redirect to /dashboard
 
-Dashboard:
-- must be protected
-- if no user session exists, redirect to /login
-- fetch modules from public.modules
-- display active and coming soon modules
+Login behavior:
 
-Sign out:
-- signs user out
-- redirects to /
+- Successful login redirects to /dashboard
+- Failed login shows a clear friendly error
 
-## Landing page update
+Sign out behavior:
 
-Update the existing public landing page header or CTA area to include:
+- Signs user out
+- Redirects to /
 
-- Sign in
-- Get started
+## Dashboard requirements
 
-Get started should go to /signup.
-Sign in should go to /login.
+Dashboard must be protected server side.
 
-Do not redesign the landing page in this ticket. Only add small navigation links or buttons if needed.
+Dashboard should fetch modules from public.modules.
 
-## Dashboard design
+Display these module cards from the modules table:
 
-Keep the dashboard clean and professional.
+- CELPIP Speaking Practice
+- CELPIP Writing Practice
+- CELPIP Reading Practice
+- CELPIP Listening Practice
+- Live CELPIP Classes
+
+CELPIP Speaking Practice:
+
+- status active
+- button text: Open module
+- link: /dashboard/speaking
+
+Other modules:
+
+- status coming_soon
+- button text: Coming soon
+- disabled button
+
+## Dashboard UX
 
 Dashboard sections:
 
-1. Header
+1. App header
+
+Show:
+
 - Toronto Academy CELPIP Practice
-- Signed in user email
+- User email
 - Sign out button
 
 2. Welcome card
+
 Heading:
+
 Welcome to your CELPIP practice dashboard
 
 Text:
+
 Start with CELPIP Speaking Practice. More practice modules are coming soon.
 
 3. Module cards
 
-CELPIP Speaking Practice:
-- status active
-- button text: Open module
-- link can go to # for now or /dashboard?module=celpip-speaking until the speaking module ticket exists
+Each card should show:
 
-CELPIP Writing Practice:
-- coming soon
+- module title
+- short description
+- status badge
+- next action button
 
-CELPIP Reading Practice:
-- coming soon
+4. Subtle disclaimer
 
-CELPIP Listening Practice:
-- coming soon
+Use:
 
-Live CELPIP Classes:
-- coming soon
-
-Do not build the module detail page yet.
-
-## Copy requirements
-
-Use Toronto Academy branding.
-
-Do not mention Georgo Academy in the dashboard.
-
-Use this disclaimer somewhere subtle in the app footer or dashboard:
 Practice estimates and feedback are for preparation only and are not official CELPIP scores.
+
+## Speaking placeholder route
+
+Create /dashboard/speaking.
+
+This page should:
+
+- Be protected by dashboard layout
+- Show heading: CELPIP Speaking Practice
+- Explain that timed speaking tasks, recording, and AI feedback will be added next
+- Show a Back to dashboard link
+- Not show fake tasks yet
+- Not build recording
+- Not build AI scoring
+
+## Landing page update
+
+Update the existing landing page only enough to add navigation links:
+
+- Sign in links to /login
+- Get started links to /signup
+
+Do not redesign the landing page.
+
+## Mobile UX requirements
+
+- Auth forms must be easy to complete on mobile
+- Dashboard cards must stack cleanly on mobile
+- Header must not overflow on mobile
+- Sign out must remain visible
+- Buttons must be large enough to tap
+- User must always have a clear path back to dashboard
+
+## Loading and error states
+
+Add:
+
+- dashboard/loading.tsx
+- dashboard/error.tsx
+
+Loading state should be simple and branded.
+
+Error state should show a friendly message and a link back to /dashboard or /.
 
 ## Environment variables
 
@@ -194,21 +299,22 @@ NEXT_PUBLIC_APP_URL
 
 Do not use old SUPABASE_URL.
 
-## Manual hosted Supabase workflow
+## Hosted Supabase workflow
 
 We are using hosted Supabase only.
 
-Do not require local Supabase.
+Do not set up local Supabase.
 Do not require Supabase CLI.
-Create the SQL migration locally, but the user will manually copy and run it in hosted Supabase SQL Editor.
+Create the SQL migration locally, but the user will copy and run it in hosted Supabase SQL Editor.
 
 ## Security requirements
 
 - .env.local must stay ignored
-- service role key must not be imported in client components
-- dashboard must use server-side session check
-- client forms must use the browser Supabase client only
-- protected routes must not show dashboard data without a session
+- Service role key must not be imported in client components
+- Dashboard must use server-side session check
+- Client forms must use the browser Supabase client only
+- Protected routes must not show dashboard data without a session
+- Do not print real environment values
 
 ## Important UI copy rule
 
@@ -216,16 +322,19 @@ Do not use long hyphens or em dashes anywhere in UI copy, comments, docs, or pro
 
 ## Done criteria
 
-- /login page works
 - /signup page works
+- /login page works
 - /dashboard is protected
-- successful login redirects to /dashboard
-- sign out works
-- dashboard shows module cards from Supabase modules table
-- landing page has sign in and get started links
-- profile row is created for new signups after migration is run
+- /dashboard/speaking is protected
+- Successful login redirects to /dashboard
+- Sign out works
+- Dashboard shows module cards from Supabase modules table
+- CELPIP Speaking card links to /dashboard/speaking
+- Coming soon modules are clearly disabled
+- Landing page has Sign in and Get started links
+- New signup creates auth user
+- After migration, new signup creates profile row
 - npm run lint passes
 - npm run build passes
-- no secrets are committed
-- no service role key is used in client components
-EOF
+- No secrets are committed
+- No service role key is used in client components

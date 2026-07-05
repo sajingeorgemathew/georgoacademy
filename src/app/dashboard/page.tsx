@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { DashboardShell } from "@/components/app/DashboardShell";
 import { ModuleCard, type Module } from "@/components/app/ModuleCard";
 
 export const metadata: Metadata = {
@@ -12,8 +11,9 @@ export const metadata: Metadata = {
 export default async function DashboardPage() {
   const supabase = await createSupabaseServerClient();
 
-  // Server side session check. getUser validates the session against
-  // Supabase instead of trusting the cookie contents.
+  // The dashboard layout already checks the session, but layouts do not
+  // re-render on client navigation, so the page verifies it again close to
+  // the data. getUser validates against Supabase instead of trusting cookies.
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -34,7 +34,7 @@ export default async function DashboardPage() {
   const moduleList = (modules ?? []) as Module[];
 
   return (
-    <DashboardShell userEmail={user.email ?? "Signed in"}>
+    <>
       <section className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-ink/5 sm:p-8">
         <h1 className="font-serif text-2xl font-semibold tracking-tight text-ink sm:text-3xl">
           Welcome to your CELPIP practice dashboard
@@ -62,6 +62,6 @@ export default async function DashboardPage() {
           </div>
         )}
       </section>
-    </DashboardShell>
+    </>
   );
 }
