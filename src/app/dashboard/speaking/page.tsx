@@ -1,18 +1,27 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { SpeakingHero } from "@/components/speaking/SpeakingHero";
+import { SpeakingTaskGrid } from "@/components/speaking/SpeakingTaskGrid";
+import { SpeakingEmptyState } from "@/components/speaking/SpeakingEmptyState";
+import type { SpeakingTaskRow } from "@/features/speaking/task-types";
+import { normalizeSpeakingTask } from "@/features/speaking/task-utils";
 
 export const metadata: Metadata = {
   title: "CELPIP Speaking Practice - Toronto Academy CELPIP Practice",
-  description: "CELPIP speaking practice module.",
+  description:
+    "Choose a CELPIP speaking task type and practice with Toronto Academy prompts.",
 };
 
-// Placeholder for the speaking module. Timed tasks, recording, and AI
-// feedback arrive in a later ticket.
+// Speaking module task library. Lists the 8 CELPIP speaking task types
+// from Supabase. Recording, timing, and AI feedback arrive in later
+// tickets.
 export default async function SpeakingPage() {
   const supabase = await createSupabaseServerClient();
 
+  // The dashboard layout already checks the session, but layouts do not
+  // re-render on client navigation, so the page verifies it again close
+  // to the data.
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -21,38 +30,31 @@ export default async function SpeakingPage() {
     redirect("/login");
   }
 
+  const { data: tasks, error } = await supabase
+    .from("tasks")
+    .select(
+      "id, task_type, title, prompt, status, sort_order, modules!inner(slug), speaking_task_details(task_number, prep_seconds, speaking_seconds, scoring_focus)",
+    )
+    .eq("modules.slug", "celpip-speaking")
+    .eq("status", "active")
+    .order("sort_order", { ascending: true });
+
+  if (error) {
+    throw new Error("Could not load speaking tasks. Please try again.");
+  }
+
+  const taskList = ((tasks ?? []) as unknown as SpeakingTaskRow[]).map(
+    normalizeSpeakingTask,
+  );
+
   return (
-    <section className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-ink/5 sm:p-8">
-      <Link
-        href="/dashboard"
-        className="inline-flex items-center gap-1.5 text-sm font-semibold text-brand transition-colors hover:text-brand-dark"
-      >
-        <span aria-hidden>&larr;</span>
-        Back to dashboard
-      </Link>
-
-      <h1 className="mt-4 font-serif text-2xl font-semibold tracking-tight text-ink sm:text-3xl">
-        CELPIP Speaking Practice
-      </h1>
-
-      <span className="mt-3 inline-flex rounded-full bg-brand/10 px-3 py-1 text-xs font-semibold text-brand">
-        Module in progress
-      </span>
-
-      <p className="mt-4 max-w-2xl text-sm leading-6 text-ink/70 sm:text-base">
-        You are in the right place. Timed speaking tasks, voice recording, and
-        AI feedback will be added here next. Check back soon to start your
-        first practice attempt.
-      </p>
-
-      <div className="mt-8">
-        <Link
-          href="/dashboard"
-          className="inline-flex h-11 items-center justify-center rounded-full bg-brand px-6 text-sm font-semibold text-white shadow-lg shadow-brand/20 transition-colors hover:bg-brand-dark"
-        >
-          Back to dashboard
-        </Link>
-      </div>
-    </section>
+    <>
+      <SpeakingHero />
+      {taskList.length === 0 ? (
+        <SpeakingEmptyState />
+      ) : (
+        <SpeakingTaskGrid tasks={taskList} />
+      )}
+    </>
   );
 }
