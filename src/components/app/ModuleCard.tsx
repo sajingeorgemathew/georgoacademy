@@ -9,10 +9,17 @@ export type Module = {
   sort_order: number;
 };
 
+// Maps module slugs to their app routes. Modules without a route here are
+// shown as coming soon even if marked active in the database.
+const moduleRoutes: Record<string, string> = {
+  "celpip-speaking": "/dashboard/speaking",
+};
+
 // Card for a practice module. Active modules link into the module, coming
 // soon modules render as a disabled preview.
 export function ModuleCard({ module }: { module: Module }) {
-  const isActive = module.status === "active";
+  const href = moduleRoutes[module.slug];
+  const isActive = module.status === "active" && Boolean(href);
 
   return (
     <article
@@ -44,7 +51,7 @@ export function ModuleCard({ module }: { module: Module }) {
       <div className="mt-auto pt-5">
         {isActive ? (
           <Link
-            href={`/dashboard?module=${module.slug}`}
+            href={href}
             className="inline-flex h-11 items-center justify-center rounded-full bg-brand px-6 text-sm font-semibold text-white shadow-lg shadow-brand/20 transition-colors hover:bg-brand-dark"
           >
             Open module
