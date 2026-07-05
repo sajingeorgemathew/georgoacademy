@@ -22,8 +22,8 @@ export const metadata: Metadata = {
 };
 
 // Timed practice screen for one speaking task. The task is fetched on
-// the server and only safe fields are passed to the client timer shell.
-// No recording happens and no attempt rows are created in this ticket.
+// the server and only safe fields are passed to the client shell, which
+// handles the timers, browser recording, and the audio upload.
 export default async function TimedPracticePage({
   params,
 }: {
@@ -53,7 +53,7 @@ export default async function TimedPracticePage({
   const { data: row, error } = await supabase
     .from("tasks")
     .select(
-      "id, task_type, title, prompt, status, sort_order, modules!inner(slug), speaking_task_details(task_number, prep_seconds, speaking_seconds, scoring_focus)",
+      "id, module_id, task_type, title, prompt, status, sort_order, modules!inner(slug), speaking_task_details(task_number, prep_seconds, speaking_seconds, scoring_focus)",
     )
     .eq("id", taskId)
     .eq("modules.slug", "celpip-speaking")
@@ -70,9 +70,18 @@ export default async function TimedPracticePage({
 
   const task = normalizeSpeakingTask(row as unknown as SpeakingTaskRow);
 
-  // Only the fields the timer needs cross into the client component.
+  // The module id is needed for the attempt row created on submit. The
+  // inner join on modules guarantees it exists for a returned row.
+  const moduleId = (row as unknown as { module_id: string | null }).module_id;
+
+  if (!moduleId) {
+    notFound();
+  }
+
+  // Only the fields the practice shell needs cross into the client.
   const practiceTask: PracticeTask = {
     id: task.id,
+    moduleId,
     title: task.title,
     prompt: task.prompt,
     taskType: task.task_type,

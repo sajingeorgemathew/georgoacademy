@@ -1,27 +1,57 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import type {
+  RecordedAudio,
+  RecordingState,
+} from "@/features/speaking/audio-utils";
 import {
   practiceCopy,
+  recordingCopy,
   type PracticePhase,
   type PracticeTask,
 } from "@/features/speaking/practice-flow";
+import { submitRecording } from "@/features/speaking/recording-upload";
 import {
   getDeadline,
   getRemainingSeconds,
 } from "@/features/speaking/timer-utils";
+import { AudioPlaybackCard } from "./AudioPlaybackCard";
+import { AudioRecorder } from "./AudioRecorder";
 import { PracticeCompletionCard } from "./PracticeCompletionCard";
 import { PracticeControls } from "./PracticeControls";
 import { PracticePhaseCard } from "./PracticePhaseCard";
 import { PracticePromptCard } from "./PracticePromptCard";
 import { PracticeTimer } from "./PracticeTimer";
+import { RecordingStatusCard } from "./RecordingStatusCard";
+import { RecordingSuccessCard } from "./RecordingSuccessCard";
+import { SubmitRecordingButton } from "./SubmitRecordingButton";
 
-// Client shell for the timed practice flow. Owns the phase state and
-// the countdown, and receives only safe task data from the server page.
+// Client shell for the timed practice flow. Owns the phase state, the
+// countdown, and the recording lifecycle, and receives only safe task
+// data from the server page.
 export function TimedPracticeShell({ task }: { task: PracticeTask }) {
   const [phase, setPhase] = useState<PracticePhase>("intro");
   const [remaining, setRemaining] = useState(task.prepSeconds);
+  const [recordingState, setRecordingState] = useState<RecordingState>("idle");
+  const [recording, setRecording] = useState<
+    (RecordedAudio & { url: string }) | null
+  >(null);
+  const [recordingError, setRecordingError] = useState<string | null>(null);
+
+  // Tracks the playback object URL so it can be revoked on re-record
+  // and on unmount without an extra render.
+  const playbackUrlRef = useRef<string | null>(null);
+
+  const releasePlaybackUrl = () => {
+    if (playbackUrlRef.current) {
+      URL.revokeObjectURL(playbackUrlRef.current);
+      playbackUrlRef.current = null;
+    }
+  };
+
+  useEffect(() => releasePlaybackUrl, []);
 
   // Starting a timed phase resets the countdown in the same click, so
   // the effect below only has to run the interval.
@@ -56,12 +86,70 @@ export function TimedPracticeShell({ task }: { task: PracticeTask }) {
       setRemaining(left);
       if (left <= 0) {
         window.clearInterval(id);
+        // Leaving the speaking phase stops an active recording
+        // automatically. It is not submitted until the user submits.
         setPhase(phase === "preparation" ? "ready_to_speak" : "complete");
       }
     }, 250);
 
     return () => window.clearInterval(id);
   }, [phase, task.prepSeconds, task.speakingSeconds]);
+
+  // Called when the recorder delivers the final audio, whether the
+  // student stopped it or speaking time ran out. Stopping the recording
+  // ends the speaking phase and moves into review.
+  const handleRecorded = (
+    blob: Blob,
+    mimeType: string,
+    durationSeconds: number,
+  ) => {
+    releasePlaybackUrl();
+    const url = URL.createObjectURL(blob);
+    playbackUrlRef.current = url;
+    setRecording({ blob, mimeType, durationSeconds, url });
+    setRecordingState("recorded");
+    setRecordingError(null);
+    setPhase("complete");
+  };
+
+  const handleRecordingError = (message: string) => {
+    setRecordingState("error");
+    setRecordingError(message);
+  };
+
+  // Re-recording clears the previous take and restarts speaking time,
+  // so the new take happens under the same timed conditions.
+  const handleReRecord = () => {
+    releasePlaybackUrl();
+    setRecording(null);
+    setRecordingState("idle");
+    setRecordingError(null);
+    startSpeaking();
+  };
+
+  const handleSubmit = async () => {
+    if (!recording || recordingState === "uploading") {
+      return;
+    }
+    setRecordingState("uploading");
+    setRecordingError(null);
+
+    const result = await submitRecording({
+      taskId: task.id,
+      moduleId: task.moduleId,
+      blob: recording.blob,
+      mimeType: recording.mimeType,
+      durationSeconds: recording.durationSeconds,
+    });
+
+    if (result.ok) {
+      setRecordingState("uploaded");
+    } else {
+      // Keep the recording so the student can retry the submission.
+      setRecordingState("recorded");
+      setRecordingError(result.message);
+    }
+  };
 
   // Timer display for phases without a running countdown: intro shows
   // the full preparation time, ready_to_speak the full speaking time.
@@ -74,6 +162,63 @@ export function TimedPracticeShell({ task }: { task: PracticeTask }) {
     ? task.speakingSeconds
     : task.prepSeconds;
   const timerSeconds = timerIsRunning ? remaining : timerTotal;
+
+  // The recorder is still delivering audio for a brief moment after
+  // speaking time ends, so the complete phase waits for it.
+  const recorderIsFinishing =
+    recordingState === "recording" || recordingState === "requesting_permission";
+
+  const renderCompletePhase = () => {
+    if (recordingState === "uploaded") {
+      return <RecordingSuccessCard taskId={task.id} />;
+    }
+
+    if (recorderIsFinishing) {
+      return (
+        <RecordingStatusCard
+          state={recordingState}
+          errorMessage={null}
+          elapsedSeconds={0}
+          finishing
+        />
+      );
+    }
+
+    if (recording) {
+      return (
+        <div className="space-y-5">
+          <AudioPlaybackCard
+            audioUrl={recording.url}
+            durationSeconds={recording.durationSeconds}
+          />
+          {recordingError && (
+            <p
+              role="alert"
+              className="rounded-2xl bg-red-50 p-4 text-center text-sm leading-6 text-red-800 ring-1 ring-red-200"
+            >
+              {recordingError}
+            </p>
+          )}
+          <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+            <SubmitRecordingButton
+              uploading={recordingState === "uploading"}
+              onSubmit={handleSubmit}
+            />
+            <button
+              type="button"
+              onClick={handleReRecord}
+              disabled={recordingState === "uploading"}
+              className="inline-flex h-12 w-full items-center justify-center rounded-full bg-white px-8 text-sm font-semibold text-brand ring-1 ring-brand/30 transition-colors hover:bg-brand/5 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
+            >
+              {recordingCopy.reRecord}
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    return <PracticeCompletionCard taskId={task.id} />;
+  };
 
   return (
     <div className="mx-auto w-full max-w-2xl">
@@ -108,7 +253,7 @@ export function TimedPracticeShell({ task }: { task: PracticeTask }) {
           <PracticePhaseCard phase={phase} />
 
           {phase === "complete" ? (
-            <PracticeCompletionCard taskId={task.id} />
+            renderCompletePhase()
           ) : (
             <>
               <PracticeTimer
@@ -118,6 +263,16 @@ export function TimedPracticeShell({ task }: { task: PracticeTask }) {
                 running={timerIsRunning}
               />
               <PracticePromptCard prompt={task.prompt} />
+              {phase === "speaking" && (
+                <AudioRecorder
+                  canRecord
+                  recordingState={recordingState}
+                  errorMessage={recordingError}
+                  onStateChange={setRecordingState}
+                  onError={handleRecordingError}
+                  onRecorded={handleRecorded}
+                />
+              )}
               <PracticeControls
                 phase={phase}
                 onStartPreparation={startPreparation}
