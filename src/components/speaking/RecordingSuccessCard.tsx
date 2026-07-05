@@ -2,20 +2,27 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
+  feedbackCopy,
   practiceCopy,
   recordingCopy,
-  transcriptCopy,
 } from "@/features/speaking/practice-flow";
-import { requestTranscript } from "@/features/speaking/transcription-client";
-import { GenerateTranscriptButton } from "./GenerateTranscriptButton";
-import { TranscriptCard } from "./TranscriptCard";
+import { FeedbackProcessingCard } from "./FeedbackProcessingCard";
+import { SubmitForFeedbackButton } from "./SubmitForFeedbackButton";
 
-type TranscriptionState = "idle" | "working" | "success" | "error";
+type FeedbackState = "idle" | "working" | "error";
+
+type FeedbackResponse = {
+  ok?: boolean;
+  resultPath?: string;
+  error?: string;
+};
 
 // Success state after the recording has uploaded. From here the student
-// generates a transcript of their answer, then follows clear paths back
-// to the task detail page or the speaking task library.
+// submits the attempt for AI-supported feedback. Transcription happens
+// in the backend as part of that request; when the feedback is ready
+// the student is taken to the attempt result page.
 export function RecordingSuccessCard({
   taskId,
   attemptId,
@@ -23,29 +30,46 @@ export function RecordingSuccessCard({
   taskId: string;
   attemptId: string;
 }) {
-  const [state, setState] = useState<TranscriptionState>("idle");
-  const [transcript, setTranscript] = useState<string | null>(null);
+  const router = useRouter();
+  const [state, setState] = useState<FeedbackState>("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const handleGenerate = async () => {
+  const handleSubmit = async () => {
     if (state === "working") {
       return;
     }
     setState("working");
     setErrorMessage(null);
 
-    const result = await requestTranscript(attemptId);
+    try {
+      const response = await fetch("/api/speaking/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ attemptId }),
+      });
 
-    if (result.ok) {
-      setTranscript(result.transcript);
-      setState("success");
-    } else {
-      setErrorMessage(result.message);
+      const payload = (await response
+        .json()
+        .catch(() => null)) as FeedbackResponse | null;
+
+      if (response.ok && payload?.ok) {
+        // Stay in the working state so the processing card remains
+        // visible while the result page loads.
+        router.push(
+          payload.resultPath || `/dashboard/speaking/attempts/${attemptId}`,
+        );
+        return;
+      }
+
+      setErrorMessage(payload?.error || feedbackCopy.errors.requestFailed);
+      setState("error");
+    } catch {
+      setErrorMessage(feedbackCopy.errors.requestFailed);
       setState("error");
     }
   };
 
-  const showTranscript = state === "success" && transcript !== null;
+  const working = state === "working";
 
   return (
     <section
@@ -62,9 +86,9 @@ export function RecordingSuccessCard({
         {recordingCopy.successHeading}
       </h2>
 
-      {showTranscript ? (
+      {working ? (
         <div className="mt-5">
-          <TranscriptCard transcript={transcript} />
+          <FeedbackProcessingCard />
         </div>
       ) : (
         <div className="mt-3 space-y-5">
@@ -80,37 +104,31 @@ export function RecordingSuccessCard({
             </p>
           )}
           <div className="flex justify-center">
-            <GenerateTranscriptButton
-              working={state === "working"}
+            <SubmitForFeedbackButton
+              working={false}
               retry={state === "error"}
-              onGenerate={handleGenerate}
+              onSubmit={handleSubmit}
             />
           </div>
-          {state === "working" && (
-            <p
-              role="status"
-              className="mx-auto max-w-md text-sm leading-6 text-ink/60"
-            >
-              {transcriptCopy.generatingNote}
-            </p>
-          )}
         </div>
       )}
 
-      <div className="mt-6 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
-        <Link
-          href={`/dashboard/speaking/tasks/${taskId}`}
-          className="inline-flex h-12 w-full items-center justify-center rounded-full bg-white px-6 text-sm font-semibold text-brand ring-1 ring-brand/30 transition-colors hover:bg-brand/5 sm:w-auto"
-        >
-          {practiceCopy.backToTask}
-        </Link>
-        <Link
-          href="/dashboard/speaking"
-          className="inline-flex h-12 w-full items-center justify-center rounded-full bg-white px-6 text-sm font-semibold text-brand ring-1 ring-brand/30 transition-colors hover:bg-brand/5 sm:w-auto"
-        >
-          {practiceCopy.practiceAnotherTask}
-        </Link>
-      </div>
+      {!working && (
+        <div className="mt-6 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+          <Link
+            href={`/dashboard/speaking/tasks/${taskId}`}
+            className="inline-flex h-12 w-full items-center justify-center rounded-full bg-white px-6 text-sm font-semibold text-brand ring-1 ring-brand/30 transition-colors hover:bg-brand/5 sm:w-auto"
+          >
+            {practiceCopy.backToTask}
+          </Link>
+          <Link
+            href="/dashboard/speaking"
+            className="inline-flex h-12 w-full items-center justify-center rounded-full bg-white px-6 text-sm font-semibold text-brand ring-1 ring-brand/30 transition-colors hover:bg-brand/5 sm:w-auto"
+          >
+            {practiceCopy.practiceAnotherTask}
+          </Link>
+        </div>
+      )}
     </section>
   );
 }
