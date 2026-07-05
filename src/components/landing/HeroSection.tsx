@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { Container, Eyebrow } from "./primitives";
 
 export function HeroSection() {
@@ -17,17 +18,34 @@ export function HeroSection() {
       <div className="absolute inset-0 bg-gradient-to-t from-ink/90 via-transparent to-ink/40" />
 
       <Container className="relative flex min-h-[92vh] flex-col justify-between py-8 sm:py-10">
-        <div className="flex items-center gap-3">
-          <Image
-            src="/georgo-logo.png"
-            alt="Georgo Academy"
-            width={48}
-            height={48}
-            className="h-11 w-11 rounded-xl object-contain"
-          />
-          <span className="text-lg font-semibold tracking-tight text-cream">
-            Georgo Academy
-          </span>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <Image
+              src="/georgo-logo.png"
+              alt="Georgo Academy"
+              width={48}
+              height={48}
+              className="h-11 w-11 rounded-xl object-contain"
+            />
+            <span className="text-lg font-semibold tracking-tight text-cream">
+              Georgo Academy
+            </span>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <Link
+              href="/login"
+              className="inline-flex h-10 items-center justify-center rounded-full px-4 text-sm font-semibold text-cream transition-colors hover:text-white"
+            >
+              Sign in
+            </Link>
+            <Link
+              href="/signup"
+              className="inline-flex h-10 items-center justify-center rounded-full bg-brand px-5 text-sm font-semibold text-white shadow-lg shadow-brand/20 transition-colors hover:bg-brand-dark"
+            >
+              Get started
+            </Link>
+          </div>
         </div>
 
         <div className="max-w-3xl">
