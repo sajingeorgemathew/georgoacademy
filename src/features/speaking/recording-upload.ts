@@ -6,12 +6,11 @@
 
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import {
+  ATTEMPT_AUDIO_BUCKET,
   buildAttemptAudioPath,
   getBaseMimeType,
 } from "./audio-utils";
 import { recordingCopy } from "./practice-flow";
-
-export const ATTEMPT_AUDIO_BUCKET = "attempt-audio";
 
 export type SubmitRecordingInput = {
   taskId: string;

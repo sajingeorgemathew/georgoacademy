@@ -93,6 +93,42 @@ export const recordingCopy = {
   },
 } as const;
 
+// Student facing copy for the transcription step. Server code reuses
+// the error messages so the API and the UI always say the same thing.
+export const transcriptCopy = {
+  generate: "Generate transcript",
+  generating: "Preparing your transcript",
+  generatingNote:
+    "This usually takes a few seconds. Please keep this page open.",
+  readyHeading: "Transcript ready",
+  readyText:
+    "Your transcript is ready. AI-supported feedback will be added in the next step.",
+  transcriptLabel: "Your transcript",
+  tryAgain: "Try again",
+  errors: {
+    invalidRequest:
+      "We could not read that request. Please refresh the page and try again.",
+    sessionExpired:
+      "Your session has ended. Please sign in again to generate your transcript.",
+    requestFailed:
+      "We could not generate your transcript. Please try again.",
+    attemptNotFound:
+      "We could not find this practice attempt. Please record a new answer.",
+    attemptNotOwned:
+      "This practice attempt does not belong to your account.",
+    audioMissing:
+      "This attempt does not have a saved recording, so it cannot be transcribed. Please record a new answer.",
+    audioDownloadFailed:
+      "We could not load your saved recording. Please try again.",
+    notConfigured:
+      "Transcription is not available right now. Please try again later.",
+    transcriptionFailed:
+      "We could not transcribe your recording. Please try again.",
+    transcriptSaveFailed:
+      "We could not save your transcript. Please try again.",
+  },
+} as const;
+
 // Label and next-step hint shown for each phase.
 export type PracticePhaseInfo = {
   label: string;

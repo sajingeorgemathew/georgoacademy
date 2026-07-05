@@ -39,6 +39,9 @@ export function TimedPracticeShell({ task }: { task: PracticeTask }) {
     (RecordedAudio & { url: string }) | null
   >(null);
   const [recordingError, setRecordingError] = useState<string | null>(null);
+  // Attempt id returned by a successful upload, needed by the success
+  // card so the student can generate a transcript for that attempt.
+  const [attemptId, setAttemptId] = useState<string | null>(null);
 
   // Tracks the playback object URL so it can be revoked on re-record
   // and on unmount without an extra render.
@@ -143,6 +146,7 @@ export function TimedPracticeShell({ task }: { task: PracticeTask }) {
     });
 
     if (result.ok) {
+      setAttemptId(result.attemptId);
       setRecordingState("uploaded");
     } else {
       // Keep the recording so the student can retry the submission.
@@ -169,8 +173,8 @@ export function TimedPracticeShell({ task }: { task: PracticeTask }) {
     recordingState === "recording" || recordingState === "requesting_permission";
 
   const renderCompletePhase = () => {
-    if (recordingState === "uploaded") {
-      return <RecordingSuccessCard taskId={task.id} />;
+    if (recordingState === "uploaded" && attemptId) {
+      return <RecordingSuccessCard taskId={task.id} attemptId={attemptId} />;
     }
 
     if (recorderIsFinishing) {
