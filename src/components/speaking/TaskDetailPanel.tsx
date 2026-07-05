@@ -8,7 +8,7 @@ import {
 import { TaskTimingCard } from "./TaskTimingCard";
 
 // Full detail view for one speaking task: back link, heading, practice
-// prompt, timing, skill focus, and the coming soon practice button.
+// prompt, timing, skill focus, and the start timed practice link.
 export function TaskDetailPanel({ task }: { task: SpeakingTask }) {
   const taskNumber = getTaskNumber(task);
   const scoringFocus = getScoringFocus(task);
@@ -70,13 +70,12 @@ export function TaskDetailPanel({ task }: { task: SpeakingTask }) {
       </section>
 
       <div className="mt-8 border-t border-ink/10 pt-6">
-        <button
-          type="button"
-          disabled
-          className="inline-flex h-11 w-full cursor-not-allowed items-center justify-center rounded-full bg-ink/10 px-6 text-sm font-semibold text-ink/50 sm:w-auto"
+        <Link
+          href={`/dashboard/speaking/practice/${task.id}`}
+          className="inline-flex h-12 w-full items-center justify-center rounded-full bg-brand px-8 text-sm font-semibold text-white shadow-lg shadow-brand/20 transition-colors hover:bg-brand-dark sm:w-auto"
         >
           {speakingCopy.timedPracticeButton}
-        </button>
+        </Link>
         <p className="mt-3 text-xs leading-5 text-ink/50">
           {speakingCopy.comingSoonNote}
         </p>

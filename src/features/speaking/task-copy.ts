@@ -14,9 +14,9 @@ export const speakingCopy = {
   backToDashboard: "Back to dashboard",
   backToTasks: "Back to speaking tasks",
   emptyStateMessage: "No speaking tasks are available yet.",
-  timedPracticeButton: "Timed practice coming next",
+  timedPracticeButton: "Start timed practice",
   comingSoonNote:
-    "In the next step, this page will include the timer, recording, and AI feedback flow.",
+    "Run the timed flow for this task. Recording and AI-supported feedback will be added in the next step.",
   timingCardTitle: "Timing",
   prepTimeLabel: "Preparation time",
   speakingTimeLabel: "Speaking time",
