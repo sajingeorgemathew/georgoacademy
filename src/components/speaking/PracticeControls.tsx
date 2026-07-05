@@ -42,7 +42,7 @@ export function PracticeControls({
           {practiceCopy.startPreparation}
         </button>
         <p className="text-xs leading-5 text-ink/50">
-          {practiceCopy.noRecordingNote}
+          {practiceCopy.introRecordingNote}
         </p>
       </div>
     );

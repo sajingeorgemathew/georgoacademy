@@ -16,6 +16,7 @@ export type PracticePhase = (typeof PRACTICE_PHASES)[number];
 // This is the only task shape client components should receive.
 export type PracticeTask = {
   id: string;
+  moduleId: string;
   title: string;
   prompt: string;
   taskType: string;
@@ -42,13 +43,54 @@ export const practiceCopy = {
   backToTasks: "Back to speaking tasks",
   completionHeading: "Timed practice complete",
   completionText:
-    "Recording and AI-supported feedback will be added in the next step. For now, use this timed flow to get familiar with the pace of the speaking task.",
+    "This session ended without a saved recording. Run the timed practice again and record your answer during speaking time to save a response.",
   prepTimerLabel: "Preparation time",
   speakingTimerLabel: "Speaking time",
   preparationWaitNote:
     "Speaking time will unlock when preparation time ends.",
-  noRecordingNote:
-    "No audio is recorded in this timed practice session.",
+  introRecordingNote:
+    "You can record your speaking answer during speaking time. Your recording stays private in your practice account.",
+} as const;
+
+// Student facing copy for the recording and upload flow.
+export const recordingCopy = {
+  sectionLabel: "Record your speaking answer",
+  privacyNote: "Your recording stays private in your practice account.",
+  startRecording: "Start recording",
+  stopRecording: "Stop recording",
+  tryRecordingAgain: "Try recording again",
+  reRecord: "Re-record answer",
+  submitRecording: "Submit recording",
+  submitting: "Saving your recording",
+  playbackHeading: "Review your recording",
+  playbackNote:
+    "Listen to your answer. You can re-record before you submit.",
+  recordedLengthLabel: "Recorded length",
+  successHeading: "Recording saved",
+  successText:
+    "Your speaking response has been saved. In the next step, this recording will be transcribed and used to generate AI-supported practice feedback.",
+  statusIdle: "Start recording when you are ready to speak your answer.",
+  statusRequesting:
+    "Waiting for microphone access. Please allow microphone use in your browser.",
+  statusRecording: "Recording in progress",
+  statusFinishing: "Finishing your recording.",
+  statusRecorded: "Recording complete. Review your answer below.",
+  statusUploading: "Saving your recording. Please keep this page open.",
+  statusUploaded: "Recording saved.",
+  errors: {
+    notSupported:
+      "Audio recording is not available in this browser. Please open this page in an up to date browser such as Chrome or Safari.",
+    permissionDenied:
+      "Microphone access was blocked. Please allow microphone access in your browser settings and try again.",
+    recordingFailed:
+      "We could not complete your recording. Please try again.",
+    uploadFailed:
+      "We could not upload your recording. Please check your connection and try again.",
+    attemptSaveFailed:
+      "We could not save your practice attempt. Please try again.",
+    sessionExpired:
+      "Your session has ended. Please sign in again to submit your recording.",
+  },
 } as const;
 
 // Label and next-step hint shown for each phase.
@@ -72,7 +114,7 @@ export const practicePhaseInfo: Record<PracticePhase, PracticePhaseInfo> = {
   },
   speaking: {
     label: "Speaking time",
-    hint: "Speak your answer out loud until the timer ends, or finish early.",
+    hint: "Record your answer out loud before the timer ends, or finish early.",
   },
   complete: {
     label: "Practice complete",
