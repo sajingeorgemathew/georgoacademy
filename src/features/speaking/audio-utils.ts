@@ -1,6 +1,10 @@
 // Pure helpers for browser audio recording. Kept free of React and
 // Supabase so they are easy to test and safe to import anywhere.
 
+// Private storage bucket for attempt recordings. Lives here so both
+// the browser upload code and server transcription code can share it.
+export const ATTEMPT_AUDIO_BUCKET = "attempt-audio";
+
 // UI states for the recording flow, from first render to saved upload.
 export const RECORDING_STATES = [
   "idle",
