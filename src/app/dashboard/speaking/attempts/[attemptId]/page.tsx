@@ -26,7 +26,7 @@ import {
 import { isValidTaskId } from "@/features/speaking/task-utils";
 
 export const metadata: Metadata = {
-  title: "Your Speaking Feedback - Toronto Academy CELPIP Practice",
+  title: "Your Speaking Feedback - Toronto Academy of Education",
   description:
     "Review AI-supported practice feedback for your CELPIP speaking attempt.",
 };

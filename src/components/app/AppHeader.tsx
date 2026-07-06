@@ -20,7 +20,7 @@ export function AppHeader({ userEmail }: { userEmail: string }) {
             className="h-8 w-8 shrink-0 rounded-md"
           />
           <span className="min-w-0 leading-tight">
-            Toronto Academy CELPIP Practice
+            Toronto Academy of Education
           </span>
         </Link>
 

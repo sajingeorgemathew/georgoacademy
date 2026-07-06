@@ -17,13 +17,13 @@ export function Footer() {
               className="h-10 w-auto rounded-lg object-contain"
             />
             <span className="text-base font-semibold text-cream">
-              Toronto Academy CELPIP Practice
+              Toronto Academy of Education
             </span>
           </div>
           <p className="max-w-2xl text-sm leading-6 text-cream/60">
-            Toronto Academy CELPIP Practice is a practice tool only. It is not
-            affiliated with CELPIP and does not provide official CELPIP
-            scores.
+            Practice estimates and AI feedback are for preparation only and
+            are not official CELPIP scores. The Toronto Academy CELPIP
+            Preparation Program is not affiliated with CELPIP.
           </p>
           <p className="text-xs text-cream/40">
             {year} Toronto Academy of Education. All rights reserved.

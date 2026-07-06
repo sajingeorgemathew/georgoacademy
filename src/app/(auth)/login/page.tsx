@@ -6,8 +6,9 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { LoginForm } from "@/components/auth/LoginForm";
 
 export const metadata: Metadata = {
-  title: "Sign in - Toronto Academy CELPIP Practice",
-  description: "Sign in to your Toronto Academy CELPIP Practice account.",
+  title: "Sign in - Toronto Academy of Education",
+  description:
+    "Sign in to your Toronto Academy CELPIP Preparation Program account.",
 };
 
 export default async function LoginPage() {
@@ -36,7 +37,7 @@ export default async function LoginPage() {
               height={48}
               className="h-12 w-12 rounded-xl"
             />
-            Toronto Academy CELPIP Practice
+            Toronto Academy of Education
           </Link>
           <h1 className="mt-4 font-serif text-3xl font-semibold tracking-tight text-ink">
             Welcome back
