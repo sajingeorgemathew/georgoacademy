@@ -6,9 +6,9 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { SignupForm } from "@/components/auth/SignupForm";
 
 export const metadata: Metadata = {
-  title: "Create account - Toronto Academy CELPIP Practice",
+  title: "Create account - Toronto Academy of Education",
   description:
-    "Create your Toronto Academy CELPIP Practice account and start practicing.",
+    "Create your Toronto Academy CELPIP Preparation Program account and start practicing.",
 };
 
 export default async function SignupPage() {
@@ -37,7 +37,7 @@ export default async function SignupPage() {
               height={48}
               className="h-12 w-12 rounded-xl"
             />
-            Toronto Academy CELPIP Practice
+            Toronto Academy of Education
           </Link>
           <h1 className="mt-4 font-serif text-3xl font-semibold tracking-tight text-ink">
             Create your account

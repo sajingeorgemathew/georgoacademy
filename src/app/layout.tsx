@@ -21,10 +21,10 @@ const fraunces = Fraunces({
 });
 
 export const metadata: Metadata = {
-  title: "Toronto Academy CELPIP Practice",
+  title: "Toronto Academy of Education - CELPIP Preparation Program",
   description:
-    "Practice CELPIP-style speaking on a timer and get AI feedback with Toronto Academy CELPIP Practice.",
-  applicationName: "Toronto Academy CELPIP Practice",
+    "Practice CELPIP-style speaking on a timer and get AI feedback with the Toronto Academy CELPIP Preparation Program.",
+  applicationName: "Toronto Academy of Education",
 };
 
 export default function RootLayout({

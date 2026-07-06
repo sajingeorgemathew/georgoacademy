@@ -9,7 +9,7 @@ import {
 } from "@/features/speaking/task-utils";
 
 export const metadata: Metadata = {
-  title: "Speaking Task - Toronto Academy CELPIP Practice",
+  title: "Speaking Task - Toronto Academy of Education",
   description: "Practice a CELPIP speaking task with a Toronto Academy prompt.",
 };
 

@@ -28,7 +28,7 @@ export function HeroSection() {
               className="h-10 w-auto shrink-0 rounded-lg object-contain sm:h-12"
             />
             <span className="min-w-0 text-sm font-semibold leading-tight tracking-tight text-cream sm:text-lg">
-              Toronto Academy CELPIP Practice
+              Toronto Academy CELPIP Preparation Program
             </span>
           </Link>
 
