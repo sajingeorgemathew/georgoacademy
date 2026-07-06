@@ -20,6 +20,9 @@ export function Footer() {
               Toronto Academy of Education
             </span>
           </div>
+          <p className="text-sm font-medium text-cream/70">
+            Toronto Academy CELPIP Preparation Program
+          </p>
           <p className="max-w-2xl text-sm leading-6 text-cream/60">
             Practice estimates and AI feedback are for preparation only and
             are not official CELPIP scores. The Toronto Academy CELPIP

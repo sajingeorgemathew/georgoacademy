@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { useState, type FormEvent } from "react";
 import { Eyebrow } from "./primitives";
 import {
@@ -88,28 +87,24 @@ export function EarlyAccessForm() {
 
   return (
     <section
-      id="early-access"
+      id="inquiry"
       className="relative isolate scroll-mt-16 overflow-hidden bg-ink text-cream"
     >
-      {/* City image with a dark overlay, echoing the closing Canva section. */}
-      <Image
-        src="/canada-city-hero.jpg"
-        alt=""
+      {/* Soft brand glow behind the form panel. */}
+      <div
         aria-hidden
-        fill
-        sizes="100vw"
-        className="object-cover opacity-40"
+        className="absolute -left-40 top-1/4 -z-10 h-[28rem] w-[28rem] rounded-full bg-brand/15 blur-3xl"
       />
-      <div className="absolute inset-0 bg-gradient-to-b from-ink via-ink/90 to-ink/95" />
 
       <div className="relative mx-auto grid w-full max-w-6xl gap-12 px-5 py-20 sm:px-8 sm:py-28 lg:grid-cols-2 lg:gap-16">
         <div className="lg:pt-6">
-          <Eyebrow className="text-brand">Early access</Eyebrow>
+          <Eyebrow className="text-brand">Program inquiry</Eyebrow>
           <h2 className="mt-5 font-serif text-4xl font-semibold leading-tight tracking-tight text-cream sm:text-5xl">
-            Tell us your CELPIP speaking goal
+            Get CELPIP program information
           </h2>
           <p className="mt-6 max-w-md text-lg leading-8 text-cream/75">
-            Your answers will help shape the first version of the practice tool.
+            Share your CELPIP goal and our team will use your answers to guide
+            the next step.
           </p>
         </div>
 
@@ -131,11 +126,11 @@ export function EarlyAccessForm() {
                 </svg>
               </div>
               <h3 className="mt-5 font-serif text-2xl font-semibold text-foreground">
-                Thank you. You are on the early access list.
+                Thank you. Your information has been received.
               </h3>
               <p className="mt-3 text-sm text-foreground/60">
-                We will be in touch as the full practice app gets closer to
-                launch.
+                Our team will review your answers and follow up with the next
+                step.
               </p>
             </div>
           ) : (
@@ -242,8 +237,8 @@ export function EarlyAccessForm() {
 
               <fieldset className="mt-6">
                 <legend className={labelClass}>
-                  Would you pay around $20/month for realistic CELPIP speaking
-                  practice with feedback?
+                  Would you consider a monthly practice plan around $20/month
+                  for AI-supported CELPIP speaking practice?
                 </legend>
                 <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:gap-6">
                   {willingnessToPayValues.map((option) => (
@@ -293,11 +288,12 @@ export function EarlyAccessForm() {
               >
                 {status === "submitting"
                   ? "Submitting..."
-                  : "Join the early access list"}
+                  : "Request program information"}
               </button>
 
               <p className="mt-4 text-center text-xs leading-5 text-foreground/50">
-                We will only use your details to contact you about early access.
+                We will only use your details to contact you about the CELPIP
+                Preparation Program.
               </p>
             </form>
           )}
