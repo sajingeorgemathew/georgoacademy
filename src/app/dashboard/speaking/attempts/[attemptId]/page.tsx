@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import {
+  BadgeDisplayCard,
+  type EarnedBadge,
+} from "@/components/speaking/BadgeDisplayCard";
 import { FeedbackProcessingCard } from "@/components/speaking/FeedbackProcessingCard";
 import { FeedbackSection } from "@/components/speaking/FeedbackSection";
 import { NextPracticeActions } from "@/components/speaking/NextPracticeActions";
@@ -182,6 +186,21 @@ export default async function SpeakingAttemptResultPage({
     (score.badge_slug ? getBadgeLabel(score.badge_slug) : null) ??
     getBadgeForLevel(estimatedLevel).label;
 
+  // Badge catalog details for the practice badge section. Readable by
+  // any signed in user under RLS. Falls back to the local label when
+  // the catalog row is missing so the section still renders.
+  let earnedBadge: EarnedBadge | null = null;
+
+  if (score.badge_slug) {
+    const { data: badgeRow } = await supabase
+      .from("badges")
+      .select("title, description")
+      .eq("slug", score.badge_slug)
+      .maybeSingle<{ title: string; description: string | null }>();
+
+    earnedBadge = badgeRow ?? { title: badgeLabel, description: null };
+  }
+
   const skills: SkillScore[] = [
     toSkill(
       "Content and coherence",
@@ -222,6 +241,8 @@ export default async function SpeakingAttemptResultPage({
         badgeLabel={badgeLabel}
         overallSummary={parsedAi?.overall_summary ?? null}
       />
+
+      <BadgeDisplayCard badge={earnedBadge} />
 
       <SkillScoreGrid skills={skills} />
 
