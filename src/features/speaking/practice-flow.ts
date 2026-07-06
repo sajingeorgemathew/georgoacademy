@@ -36,8 +36,8 @@ export const DEFAULT_SPEAKING_SECONDS = 60;
 export const practiceCopy = {
   screenBadge: "Timed practice",
   startPreparation: "Start preparation",
+  skipPreparation: "Skip preparation",
   startSpeaking: "Start speaking time",
-  finishPractice: "Finish practice",
   backToTask: "Back to task",
   practiceAnotherTask: "Practice another task",
   backToTasks: "Back to speaking tasks",
@@ -49,16 +49,17 @@ export const practiceCopy = {
   preparationWaitNote:
     "Speaking time will unlock when preparation time ends.",
   introRecordingNote:
-    "You can record your speaking answer during speaking time. Your recording stays private in your practice account.",
+    "Recording starts automatically when your speaking time begins. Your recording stays private in your practice account.",
+  readyToSpeakNote:
+    "Your microphone turns on and recording starts automatically when speaking time begins.",
 } as const;
 
 // Student facing copy for the recording and upload flow.
 export const recordingCopy = {
   sectionLabel: "Record your speaking answer",
   privacyNote: "Your recording stays private in your practice account.",
-  startRecording: "Start recording",
   stopRecording: "Stop recording",
-  tryRecordingAgain: "Try recording again",
+  tryRecordingAgain: "Try again",
   reRecord: "Re-record answer",
   submitRecording: "Submit recording",
   submitting: "Saving your recording",
@@ -69,7 +70,7 @@ export const recordingCopy = {
   successHeading: "Recording saved",
   successText:
     "Your speaking response has been saved. Submit it for feedback to receive AI-supported practice feedback with an estimated practice level.",
-  statusIdle: "Start recording when you are ready to speak your answer.",
+  statusIdle: "Recording starts automatically when speaking time begins.",
   statusRequesting:
     "Waiting for microphone access. Please allow microphone use in your browser.",
   statusRecording: "Recording in progress",
@@ -211,11 +212,11 @@ export const practicePhaseInfo: Record<PracticePhase, PracticePhaseInfo> = {
   },
   ready_to_speak: {
     label: "Ready to speak",
-    hint: "Preparation is complete. Start your speaking time when you are ready.",
+    hint: "Recording starts automatically when you start your speaking time.",
   },
   speaking: {
     label: "Speaking time",
-    hint: "Record your answer out loud before the timer ends, or finish early.",
+    hint: "Speak your answer out loud. Recording stops when the timer ends, or you can stop early.",
   },
   complete: {
     label: "Practice complete",

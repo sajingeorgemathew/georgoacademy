@@ -1,77 +1,95 @@
 import {
   practiceCopy,
+  recordingCopy,
   type PracticePhase,
 } from "@/features/speaking/practice-flow";
 
 const primaryButtonClasses =
-  "inline-flex h-12 w-full items-center justify-center rounded-full bg-brand px-8 text-sm font-semibold text-white shadow-lg shadow-brand/20 transition-colors hover:bg-brand-dark sm:w-auto";
+  "inline-flex h-12 w-full items-center justify-center rounded-full bg-brand px-8 text-sm font-semibold text-white shadow-lg shadow-brand/20 transition-colors hover:bg-brand-dark disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto";
 
-// The single primary action for the current phase. The complete phase
-// has no button here because PracticeCompletionCard owns its actions.
+const secondaryButtonClasses =
+  "inline-flex h-12 w-full items-center justify-center rounded-full bg-white px-8 text-sm font-semibold text-brand ring-1 ring-brand/30 transition-colors hover:bg-brand/5 sm:w-auto";
+
+// The primary action for the current phase. The speaking phase has no
+// button here because AudioRecorder owns the stop control, and the
+// complete phase renders its own cards in the shell.
 export function PracticeControls({
   phase,
+  micRequesting,
+  micError,
   onStartPreparation,
+  onSkipPreparation,
   onStartSpeaking,
-  onFinishPractice,
 }: {
   phase: PracticePhase;
+  micRequesting: boolean;
+  micError: boolean;
   onStartPreparation: () => void;
+  onSkipPreparation: () => void;
   onStartSpeaking: () => void;
-  onFinishPractice: () => void;
 }) {
-  if (phase === "complete") {
+  if (phase === "speaking" || phase === "complete") {
     return null;
-  }
-
-  if (phase === "preparation") {
-    return (
-      <p className="text-center text-sm leading-6 text-ink/60">
-        {practiceCopy.preparationWaitNote}
-      </p>
-    );
   }
 
   if (phase === "intro") {
     return (
       <div className="flex flex-col items-center gap-3">
-        <button
-          type="button"
-          onClick={onStartPreparation}
-          className={primaryButtonClasses}
-        >
-          {practiceCopy.startPreparation}
-        </button>
-        <p className="text-xs leading-5 text-ink/50">
+        <div className="flex w-full flex-col items-center gap-3 sm:w-auto sm:flex-row sm:justify-center">
+          <button
+            type="button"
+            onClick={onStartPreparation}
+            className={primaryButtonClasses}
+          >
+            {practiceCopy.startPreparation}
+          </button>
+          <button
+            type="button"
+            onClick={onSkipPreparation}
+            className={secondaryButtonClasses}
+          >
+            {practiceCopy.skipPreparation}
+          </button>
+        </div>
+        <p className="text-center text-xs leading-5 text-ink/50">
           {practiceCopy.introRecordingNote}
         </p>
       </div>
     );
   }
 
-  if (phase === "ready_to_speak") {
+  if (phase === "preparation") {
     return (
-      <div className="flex justify-center">
+      <div className="flex flex-col items-center gap-3">
+        <p className="text-center text-sm leading-6 text-ink/60">
+          {practiceCopy.preparationWaitNote}
+        </p>
         <button
           type="button"
-          onClick={onStartSpeaking}
-          className={primaryButtonClasses}
+          onClick={onSkipPreparation}
+          className={secondaryButtonClasses}
         >
-          {practiceCopy.startSpeaking}
+          {practiceCopy.skipPreparation}
         </button>
       </div>
     );
   }
 
-  // speaking: the timer auto-completes, but the student can end early.
+  // ready_to_speak: starting speaking time also starts the recording,
+  // so this button doubles as the retry action after a mic error.
   return (
-    <div className="flex justify-center">
+    <div className="flex flex-col items-center gap-3">
       <button
         type="button"
-        onClick={onFinishPractice}
-        className="inline-flex h-12 w-full items-center justify-center rounded-full bg-white px-8 text-sm font-semibold text-brand ring-1 ring-brand/30 transition-colors hover:bg-brand/5 sm:w-auto"
+        onClick={onStartSpeaking}
+        disabled={micRequesting}
+        className={primaryButtonClasses}
       >
-        {practiceCopy.finishPractice}
+        {micError ? recordingCopy.tryRecordingAgain : practiceCopy.startSpeaking}
       </button>
+      <p className="text-center text-xs leading-5 text-ink/50">
+        {practiceCopy.readyToSpeakNote}
+      </p>
     </div>
   );
 }
