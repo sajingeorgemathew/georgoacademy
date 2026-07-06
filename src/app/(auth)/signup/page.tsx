@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -27,8 +28,15 @@ export default async function SignupPage() {
         <div className="text-center">
           <Link
             href="/"
-            className="text-sm font-semibold uppercase tracking-[0.2em] text-brand"
+            className="inline-flex flex-col items-center gap-3 text-sm font-semibold uppercase tracking-[0.2em] text-brand"
           >
+            <Image
+              src="/favicon.png"
+              alt="Toronto Academy of Education logo"
+              width={48}
+              height={48}
+              className="h-12 w-12 rounded-xl"
+            />
             Toronto Academy CELPIP Practice
           </Link>
           <h1 className="mt-4 font-serif text-3xl font-semibold tracking-tight text-ink">

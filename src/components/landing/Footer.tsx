@@ -10,23 +10,33 @@ export function Footer() {
         <div className="flex flex-col items-center gap-5 text-center">
           <div className="flex items-center gap-3">
             <Image
-              src="/georgo-logo.png"
-              alt="Georgo Academy"
-              width={36}
-              height={36}
-              className="h-9 w-9 rounded-lg object-contain"
+              src="/taelogo.jpg"
+              alt="Toronto Academy of Education logo"
+              width={64}
+              height={48}
+              className="h-10 w-auto rounded-lg object-contain"
             />
             <span className="text-base font-semibold text-cream">
-              Georgo Academy
+              Toronto Academy CELPIP Practice
             </span>
           </div>
           <p className="max-w-2xl text-sm leading-6 text-cream/60">
-            Georgo Academy CELPIP Speaking Practice is a practice tool only. It
-            is not affiliated with CELPIP and does not provide official CELPIP
+            Toronto Academy CELPIP Practice is a practice tool only. It is not
+            affiliated with CELPIP and does not provide official CELPIP
             scores.
           </p>
           <p className="text-xs text-cream/40">
-            {year} Georgo Academy. All rights reserved.
+            {year} Toronto Academy of Education. All rights reserved.
+          </p>
+          <p className="flex items-center gap-2 text-xs text-cream/40">
+            <Image
+              src="/georgo.png"
+              alt=""
+              width={16}
+              height={16}
+              className="h-4 w-4 rounded-sm object-contain opacity-70"
+            />
+            Powered by Georgo Analytics and Automation
           </p>
         </div>
       </Container>

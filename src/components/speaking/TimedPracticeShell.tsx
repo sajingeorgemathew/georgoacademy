@@ -27,10 +27,12 @@ import { PracticeTimer } from "./PracticeTimer";
 import { RecordingStatusCard } from "./RecordingStatusCard";
 import { RecordingSuccessCard } from "./RecordingSuccessCard";
 import { SubmitRecordingButton } from "./SubmitRecordingButton";
+import { useAudioRecorder } from "./useAudioRecorder";
 
 // Client shell for the timed practice flow. Owns the phase state, the
 // countdown, and the recording lifecycle, and receives only safe task
-// data from the server page.
+// data from the server page. Recording starts together with speaking
+// time: the speaking timer does not begin until the microphone is live.
 export function TimedPracticeShell({ task }: { task: PracticeTask }) {
   const [phase, setPhase] = useState<PracticePhase>("intro");
   const [remaining, setRemaining] = useState(task.prepSeconds);
@@ -56,50 +58,8 @@ export function TimedPracticeShell({ task }: { task: PracticeTask }) {
 
   useEffect(() => releasePlaybackUrl, []);
 
-  // Starting a timed phase resets the countdown in the same click, so
-  // the effect below only has to run the interval.
-  const startPreparation = () => {
-    setRemaining(task.prepSeconds);
-    setPhase("preparation");
-  };
-
-  const startSpeaking = () => {
-    setRemaining(task.speakingSeconds);
-    setPhase("speaking");
-  };
-
-  const finishPractice = () => {
-    setPhase("complete");
-  };
-
-  // Runs the countdown for the two timed phases. The deadline is an
-  // absolute timestamp so the timer stays accurate even when interval
-  // ticks are delayed, for example on a backgrounded mobile browser.
-  useEffect(() => {
-    if (phase !== "preparation" && phase !== "speaking") {
-      return;
-    }
-
-    const total =
-      phase === "preparation" ? task.prepSeconds : task.speakingSeconds;
-    const deadline = getDeadline(Date.now(), total);
-
-    const id = window.setInterval(() => {
-      const left = getRemainingSeconds(deadline, Date.now());
-      setRemaining(left);
-      if (left <= 0) {
-        window.clearInterval(id);
-        // Leaving the speaking phase stops an active recording
-        // automatically. It is not submitted until the user submits.
-        setPhase(phase === "preparation" ? "ready_to_speak" : "complete");
-      }
-    }, 250);
-
-    return () => window.clearInterval(id);
-  }, [phase, task.prepSeconds, task.speakingSeconds]);
-
   // Called when the recorder delivers the final audio, whether the
-  // student stopped it or speaking time ran out. Stopping the recording
+  // student stopped it or speaking time ran out. Receiving the audio
   // ends the speaking phase and moves into review.
   const handleRecorded = (
     blob: Blob,
@@ -120,14 +80,88 @@ export function TimedPracticeShell({ task }: { task: PracticeTask }) {
     setRecordingError(message);
   };
 
+  // start and stop have stable identities, so the countdown effect can
+  // depend on stopRecorder without resetting its deadline on re-render.
+  const { start: startRecorder, stop: stopRecorder } = useAudioRecorder({
+    onRecorded: handleRecorded,
+    onError: handleRecordingError,
+  });
+
+  // Starting a timed phase resets the countdown in the same click, so
+  // the countdown effect below only has to run the interval.
+  const startPreparation = () => {
+    setRemaining(task.prepSeconds);
+    setPhase("preparation");
+  };
+
+  const skipPreparation = () => {
+    setPhase("ready_to_speak");
+  };
+
+  // Starts recording first and only then starts the speaking timer, so
+  // no speaking time is lost to the microphone permission prompt. On
+  // failure the student stays in ready_to_speak with a retry action.
+  const startSpeaking = async () => {
+    if (
+      recordingState === "requesting_permission" ||
+      recordingState === "recording"
+    ) {
+      return;
+    }
+    setRecordingError(null);
+    setRecordingState("requesting_permission");
+
+    const started = await startRecorder();
+    if (!started) {
+      return;
+    }
+
+    setRecordingState("recording");
+    setRemaining(task.speakingSeconds);
+    setPhase("speaking");
+  };
+
+  // Runs the countdown for the two timed phases. The deadline is an
+  // absolute timestamp so the timer stays accurate even when interval
+  // ticks are delayed, for example on a backgrounded mobile browser.
+  useEffect(() => {
+    if (phase !== "preparation" && phase !== "speaking") {
+      return;
+    }
+
+    const total =
+      phase === "preparation" ? task.prepSeconds : task.speakingSeconds;
+    const deadline = getDeadline(Date.now(), total);
+
+    const id = window.setInterval(() => {
+      const left = getRemainingSeconds(deadline, Date.now());
+      setRemaining(left);
+      if (left <= 0) {
+        window.clearInterval(id);
+        if (phase === "speaking") {
+          // Speaking time is over: stop the recorder and wait for it
+          // to deliver the final audio. Nothing is auto-submitted.
+          stopRecorder();
+          setPhase("complete");
+        } else {
+          setPhase("ready_to_speak");
+        }
+      }
+    }, 250);
+
+    return () => window.clearInterval(id);
+  }, [phase, task.prepSeconds, task.speakingSeconds, stopRecorder]);
+
   // Re-recording clears the previous take and restarts speaking time,
-  // so the new take happens under the same timed conditions.
+  // so the new take happens under the same timed conditions. It routes
+  // through ready_to_speak so a mic failure lands on the retry screen.
   const handleReRecord = () => {
     releasePlaybackUrl();
     setRecording(null);
     setRecordingState("idle");
     setRecordingError(null);
-    startSpeaking();
+    setPhase("ready_to_speak");
+    void startSpeaking();
   };
 
   const handleSubmit = async () => {
@@ -169,8 +203,13 @@ export function TimedPracticeShell({ task }: { task: PracticeTask }) {
 
   // The recorder is still delivering audio for a brief moment after
   // speaking time ends, so the complete phase waits for it.
-  const recorderIsFinishing =
-    recordingState === "recording" || recordingState === "requesting_permission";
+  const recorderIsFinishing = recordingState === "recording";
+
+  // Mic status shown while the student is getting ready to speak, so
+  // permission progress and errors are visible before the timer runs.
+  const showMicStatus =
+    phase === "ready_to_speak" &&
+    (recordingState === "requesting_permission" || recordingState === "error");
 
   const renderCompletePhase = () => {
     if (recordingState === "uploaded" && attemptId) {
@@ -269,19 +308,26 @@ export function TimedPracticeShell({ task }: { task: PracticeTask }) {
               <PracticePromptCard prompt={task.prompt} />
               {phase === "speaking" && (
                 <AudioRecorder
-                  canRecord
                   recordingState={recordingState}
                   errorMessage={recordingError}
-                  onStateChange={setRecordingState}
-                  onError={handleRecordingError}
-                  onRecorded={handleRecorded}
+                  elapsedSeconds={Math.max(0, task.speakingSeconds - remaining)}
+                  onStop={stopRecorder}
+                />
+              )}
+              {showMicStatus && (
+                <RecordingStatusCard
+                  state={recordingState}
+                  errorMessage={recordingError}
+                  elapsedSeconds={0}
                 />
               )}
               <PracticeControls
                 phase={phase}
+                micRequesting={recordingState === "requesting_permission"}
+                micError={recordingState === "error"}
                 onStartPreparation={startPreparation}
-                onStartSpeaking={startSpeaking}
-                onFinishPractice={finishPractice}
+                onSkipPreparation={skipPreparation}
+                onStartSpeaking={() => void startSpeaking()}
               />
             </>
           )}

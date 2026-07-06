@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { SignOutButton } from "./SignOutButton";
 
@@ -9,9 +10,18 @@ export function AppHeader({ userEmail }: { userEmail: string }) {
       <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-3 px-5 py-4 sm:px-8">
         <Link
           href="/dashboard"
-          className="text-base font-semibold tracking-tight text-ink"
+          className="flex min-w-0 items-center gap-2.5 text-sm font-semibold tracking-tight text-ink sm:text-base"
         >
-          Toronto Academy CELPIP Practice
+          <Image
+            src="/favicon.png"
+            alt="Toronto Academy of Education logo"
+            width={32}
+            height={32}
+            className="h-8 w-8 shrink-0 rounded-md"
+          />
+          <span className="min-w-0 leading-tight">
+            Toronto Academy CELPIP Practice
+          </span>
         </Link>
 
         <div className="flex items-center gap-3">
