@@ -4,9 +4,9 @@
 export const speakingCopy = {
   moduleTitle: "CELPIP Speaking Practice",
   moduleSubtext:
-    "Choose a speaking task type and get familiar with the format before timed recording is added.",
+    "Practice timed CELPIP speaking tasks, record your answers, and review AI-supported feedback reports.",
   progressNote:
-    "Recording and AI feedback will be added in the next build stages.",
+    "Earn practice badges as you complete feedback reports.",
   promptDisclaimer:
     "These are Toronto Academy practice prompts designed to help you prepare for the CELPIP speaking format.",
   practiceBadge: "Practice prompt",

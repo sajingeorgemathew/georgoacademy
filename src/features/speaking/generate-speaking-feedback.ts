@@ -88,6 +88,42 @@ function normalizeEmbed<T>(embed: T | T[] | null): T | null {
   return Array.isArray(embed) ? (embed[0] ?? null) : (embed ?? null);
 }
 
+// Awards the practice badge for a finished feedback report. Runs only
+// after the attempt is feedback_ready. Best effort: the feedback is
+// already saved, so a badge problem is logged and never fails the
+// request. The unique (user_id, badge_id) constraint plus
+// ignoreDuplicates makes a repeat award a no-op instead of an error.
+async function awardPracticeBadge(
+  userId: string,
+  attemptId: string,
+  badgeSlug: string,
+): Promise<void> {
+  const supabase = getSupabaseAdmin();
+
+  const { data: badge, error: badgeError } = await supabase
+    .from("badges")
+    .select("id")
+    .eq("slug", badgeSlug)
+    .maybeSingle<{ id: string }>();
+
+  if (badgeError || !badge) {
+    console.error(
+      `Badge lookup failed for slug ${badgeSlug}:`,
+      badgeError?.message ?? "badge not found",
+    );
+    return;
+  }
+
+  const { error: awardError } = await supabase.from("user_badges").upsert(
+    { user_id: userId, badge_id: badge.id, attempt_id: attemptId },
+    { onConflict: "user_id,badge_id", ignoreDuplicates: true },
+  );
+
+  if (awardError) {
+    console.error("Badge award failed:", awardError.message);
+  }
+}
+
 export async function generateSpeakingFeedback(
   input: GenerateSpeakingFeedbackInput,
 ): Promise<GenerateSpeakingFeedbackResult> {
@@ -305,6 +341,9 @@ export async function generateSpeakingFeedback(
   // 5. Mark the attempt ready. The score is already saved, so the
   // result page can render it even if this status write fails.
   await setAttemptStatus(attempt.id, "feedback_ready");
+
+  // 6. Award the matching practice badge now that feedback is ready.
+  await awardPracticeBadge(input.userId, attempt.id, badge.slug);
 
   return {
     ok: true,

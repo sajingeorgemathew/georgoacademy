@@ -177,6 +177,8 @@ export const resultCopy = {
   strengthsHeading: "What you did well",
   improvementsHeading: "What to improve next",
   nextStepsHeading: "Your next steps",
+  badgeHeading: "Practice badge",
+  badgeEmptyText: "Complete feedback to earn a practice badge.",
   transcriptHeading: "Transcript of your answer",
   transcriptNote:
     "This transcript is generated from your recording and may not be perfect. It is used to support your practice feedback.",
