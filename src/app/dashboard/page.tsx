@@ -40,8 +40,8 @@ export default async function DashboardPage() {
           Welcome to your CELPIP practice dashboard
         </h1>
         <p className="mt-3 max-w-2xl text-sm leading-6 text-ink/70 sm:text-base">
-          Start with CELPIP Speaking Practice. More practice modules are
-          coming soon.
+          Start with CELPIP Speaking Practice or CELPIP Writing Practice.
+          More practice modules are coming soon.
         </p>
       </section>
 

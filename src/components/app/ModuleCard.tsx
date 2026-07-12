@@ -13,6 +13,7 @@ export type Module = {
 // shown as coming soon even if marked active in the database.
 const moduleRoutes: Record<string, string> = {
   "celpip-speaking": "/dashboard/speaking",
+  "celpip-writing": "/dashboard/writing",
 };
 
 // Card for a practice module. Active modules link into the module, coming
