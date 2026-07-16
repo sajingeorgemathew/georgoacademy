@@ -1,9 +1,18 @@
 import Link from "next/link";
 import { writingPracticeCopy } from "@/features/writing/task-copy";
+import { SubmitWritingEvaluationButton } from "./SubmitWritingEvaluationButton";
+import { WritingEvaluationErrorCard } from "./WritingEvaluationErrorCard";
 
-// Success state after a writing response is saved. No score is shown:
-// AI-supported evaluation arrives in a later build stage.
-export function WritingSavedCard() {
+// State after a writing response is saved but evaluation has not
+// finished. Shown when an evaluation run fails: the response is safe,
+// the error is explained, and the student can retry the evaluation.
+export function WritingSavedCard({
+  evaluationError,
+  onSubmitForEvaluation,
+}: {
+  evaluationError: string | null;
+  onSubmitForEvaluation: () => void;
+}) {
   return (
     <section
       aria-label={writingPracticeCopy.savedHeading}
@@ -21,13 +30,17 @@ export function WritingSavedCard() {
       <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-ink/70">
         {writingPracticeCopy.savedBody}
       </p>
+      {evaluationError && (
+        <div className="mt-5 text-left">
+          <WritingEvaluationErrorCard message={evaluationError} />
+        </div>
+      )}
       <div className="mt-6 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
-        <Link
-          href="/dashboard/writing"
-          className="inline-flex h-12 w-full items-center justify-center rounded-full bg-brand px-8 text-sm font-semibold text-white shadow-lg shadow-brand/20 transition-colors hover:bg-brand-dark sm:w-auto"
-        >
-          {writingPracticeCopy.tryAnotherTask}
-        </Link>
+        <SubmitWritingEvaluationButton
+          working={false}
+          retry={evaluationError !== null}
+          onSubmit={onSubmitForEvaluation}
+        />
         <Link
           href="/dashboard/writing"
           className="inline-flex h-12 w-full items-center justify-center rounded-full bg-white px-8 text-sm font-semibold text-brand ring-1 ring-brand/30 transition-colors hover:bg-brand/5 sm:w-auto"

@@ -2,8 +2,10 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { writingPracticeCopy } from "@/features/writing/task-copy";
 import type { WritingPracticeTask } from "@/features/writing/task-types";
+import { evaluateWritingAttempt } from "@/features/writing/evaluate-writing-attempt";
 import { submitWritingAttempt } from "@/features/writing/submit-writing-attempt";
 import {
   getDeadline,
@@ -16,28 +18,38 @@ import {
 } from "@/features/writing/word-count";
 import { WordCountCard } from "./WordCountCard";
 import { WritingEditor } from "./WritingEditor";
+import { WritingEvaluationProcessingCard } from "./WritingEvaluationProcessingCard";
 import { WritingPromptCard } from "./WritingPromptCard";
 import { WritingSavedCard } from "./WritingSavedCard";
 import { WritingStartCard } from "./WritingStartCard";
 import { WritingSubmitButton } from "./WritingSubmitButton";
 import { WritingTimer } from "./WritingTimer";
 
-type WritingPhase = "intro" | "writing" | "saved";
+type WritingPhase = "intro" | "writing" | "evaluating" | "saved";
 
 // Client shell for the timed writing flow. Owns the phase state, the
-// countdown, the response text, and the submit request, and receives
-// only safe task data from the server page. The timer starts when the
-// student clicks Start writing, and reaching zero never auto-submits.
+// countdown, the response text, the save request, and the evaluation
+// request, and receives only safe task data from the server page. The
+// timer starts when the student clicks Start writing, and reaching
+// zero never auto-submits. Submit for evaluation saves the response,
+// starts the AI evaluation, and opens the result page on success. If
+// evaluation fails, the saved state appears with a retry action.
 export function TimedWritingShell({ task }: { task: WritingPracticeTask }) {
+  const router = useRouter();
   const [phase, setPhase] = useState<WritingPhase>("intro");
   const [remaining, setRemaining] = useState(task.timeSeconds);
   const [responseText, setResponseText] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [evaluationError, setEvaluationError] = useState<string | null>(null);
 
   // Wall clock start of the session, used to report time spent on
   // submit even after the countdown has reached zero.
   const startedAtRef = useRef<number | null>(null);
+
+  // Attempt id from a successful save, so a failed evaluation can be
+  // retried without saving the same response again.
+  const attemptIdRef = useRef<string | null>(null);
 
   const startWriting = () => {
     startedAtRef.current = Date.now();
@@ -71,6 +83,24 @@ export function TimedWritingShell({ task }: { task: WritingPracticeTask }) {
   const wordCount = countWords(responseText);
   const timeExpired = phase === "writing" && remaining <= 0;
 
+  // Runs the AI evaluation for a saved attempt and opens the result
+  // page on success. On failure the saved state appears with a retry
+  // action; the response itself is already safe in the database.
+  const runEvaluation = async (attemptId: string) => {
+    setPhase("evaluating");
+    setEvaluationError(null);
+
+    const result = await evaluateWritingAttempt(attemptId);
+
+    if (result.ok) {
+      router.push(result.resultPath);
+      return;
+    }
+
+    setEvaluationError(result.message);
+    setPhase("saved");
+  };
+
   const handleSubmit = async () => {
     if (submitting) {
       return;
@@ -98,9 +128,16 @@ export function TimedWritingShell({ task }: { task: WritingPracticeTask }) {
     setSubmitting(false);
 
     if (result.ok) {
-      setPhase("saved");
+      attemptIdRef.current = result.attemptId;
+      await runEvaluation(result.attemptId);
     } else {
       setSubmitError(result.message);
+    }
+  };
+
+  const handleRetryEvaluation = () => {
+    if (attemptIdRef.current) {
+      void runEvaluation(attemptIdRef.current);
     }
   };
 
@@ -134,8 +171,13 @@ export function TimedWritingShell({ task }: { task: WritingPracticeTask }) {
         </h1>
 
         <div className="mt-6 space-y-5">
-          {phase === "saved" ? (
-            <WritingSavedCard />
+          {phase === "evaluating" ? (
+            <WritingEvaluationProcessingCard />
+          ) : phase === "saved" ? (
+            <WritingSavedCard
+              evaluationError={evaluationError}
+              onSubmitForEvaluation={handleRetryEvaluation}
+            />
           ) : phase === "intro" ? (
             <>
               <WritingPromptCard prompt={task.prompt} />
