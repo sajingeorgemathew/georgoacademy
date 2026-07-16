@@ -62,9 +62,15 @@ export function formatSeconds(totalSeconds: number): string {
 // Formats the word target range as friendly copy, for example
 // "150 to 200 words". Falls back cleanly when only one bound exists.
 export function formatWordTarget(details: WritingTaskDetails | null): string {
-  const min = details?.word_min ?? null;
-  const max = details?.word_max ?? null;
+  return formatWordRange(details?.word_min ?? null, details?.word_max ?? null);
+}
 
+// Same formatting from plain bounds, for callers that do not hold a
+// full details object, like the timed writing screen.
+export function formatWordRange(
+  min: number | null,
+  max: number | null,
+): string {
   if (min !== null && max !== null) {
     return `${min} to ${max} words`;
   }

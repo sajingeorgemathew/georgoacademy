@@ -29,6 +29,19 @@ export type WritingTask = {
   details: WritingTaskDetails | null;
 };
 
+// Safe fields passed from the timed writing server page into the
+// client shell. Never include secrets or admin data here.
+export type WritingPracticeTask = {
+  id: string;
+  title: string;
+  taskNumber: number;
+  prompt: string;
+  timeSeconds: number;
+  wordMin: number | null;
+  wordMax: number | null;
+  evaluationFocus: string[];
+};
+
 // Raw shape returned by the Supabase nested select before normalization.
 // PostgREST returns a one-to-one embed as an object, but we accept an
 // array too so the normalizer never breaks on a schema cache change.
