@@ -70,15 +70,14 @@ export function WritingTaskDetailPanel({ task }: { task: WritingTask }) {
       </section>
 
       <div className="mt-8 border-t border-ink/10 pt-6">
-        <button
-          type="button"
-          disabled
-          className="inline-flex h-12 w-full cursor-not-allowed items-center justify-center rounded-full border border-ink/10 bg-cream-soft px-8 text-sm font-semibold text-ink/50 sm:w-auto"
+        <Link
+          href={`/dashboard/writing/practice/${task.id}`}
+          className="inline-flex h-12 w-full items-center justify-center rounded-full bg-brand px-8 text-sm font-semibold text-white shadow-lg shadow-brand/20 transition-colors hover:bg-brand-dark sm:w-auto"
         >
           {writingCopy.startWritingButton}
-        </button>
+        </Link>
         <p className="mt-3 text-xs leading-5 text-ink/50">
-          {writingCopy.comingSoonNote}
+          {writingCopy.startWritingNote}
         </p>
       </div>
     </article>
