@@ -1,6 +1,12 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { WritingAttemptActions } from "@/components/writing/WritingAttemptActions";
+import {
+  WritingBadgeDisplayCard,
+  type EarnedWritingBadge,
+} from "@/components/writing/WritingBadgeDisplayCard";
 import { WritingEvaluationErrorCard } from "@/components/writing/WritingEvaluationErrorCard";
 import { WritingEvaluationProcessingCard } from "@/components/writing/WritingEvaluationProcessingCard";
 import { WritingFeedbackSection } from "@/components/writing/WritingFeedbackSection";
@@ -13,6 +19,7 @@ import {
 } from "@/components/writing/WritingSkillScoreGrid";
 import { writingResultCopy } from "@/features/writing/task-copy";
 import { isValidTaskId } from "@/features/writing/task-utils";
+import { writingHistoryCopy } from "@/features/writing/writing-attempt-history";
 import {
   getWritingBadgeForLevel,
   getWritingBadgeLabel,
@@ -76,6 +83,31 @@ function toStringArray(value: unknown): string[] {
     return [];
   }
   return value.filter((item): item is string => typeof item === "string");
+}
+
+// Back links shown above the result, in both the ready and the waiting
+// state, so a student can always return to the history or the library.
+function WritingResultNav() {
+  return (
+    <nav
+      aria-label="Writing result navigation"
+      className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 sm:justify-start"
+    >
+      <Link
+        href="/dashboard/writing/attempts"
+        className="inline-flex items-center gap-1.5 text-sm font-semibold text-brand transition-colors hover:text-brand-dark"
+      >
+        <span aria-hidden>&larr;</span>
+        {writingHistoryCopy.backToHistory}
+      </Link>
+      <Link
+        href="/dashboard/writing"
+        className="text-sm font-semibold text-brand transition-colors hover:text-brand-dark"
+      >
+        {writingHistoryCopy.backToWriting}
+      </Link>
+    </nav>
+  );
 }
 
 function toSkill(
@@ -155,6 +187,7 @@ export default async function WritingAttemptResultPage({
     const failed = FAILED_STATUSES.includes(attempt.status);
     return (
       <div className="mx-auto w-full max-w-3xl space-y-5">
+        <WritingResultNav />
         <header className="text-center sm:text-left">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand">
             {writingResultCopy.pageBadge}
@@ -168,6 +201,15 @@ export default async function WritingAttemptResultPage({
             <WritingEvaluationErrorCard
               message={writingResultCopy.failedText}
             />
+            {/* Retry the evaluation without retyping the response, which
+                is already saved on the attempt. */}
+            <div className="mt-5 flex justify-center sm:justify-start">
+              <WritingAttemptActions
+                attemptId={attempt.id}
+                status={attempt.status}
+                variant="button"
+              />
+            </div>
           </section>
         ) : (
           <section className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-ink/5 sm:p-8">
@@ -175,8 +217,16 @@ export default async function WritingAttemptResultPage({
             <p className="mx-auto mt-4 max-w-md text-center text-sm leading-6 text-ink/60">
               {writingResultCopy.notReadyText}
             </p>
+            <div className="mt-5 flex justify-center">
+              <WritingAttemptActions
+                attemptId={attempt.id}
+                status={attempt.status}
+                variant="button"
+              />
+            </div>
           </section>
         )}
+        <WritingBadgeDisplayCard badge={null} />
         <WritingNextPracticeActions taskId={task?.id ?? null} />
       </div>
     );
@@ -188,6 +238,26 @@ export default async function WritingAttemptResultPage({
   const badgeLabel =
     (score.badge_slug ? getWritingBadgeLabel(score.badge_slug) : null) ??
     getWritingBadgeForLevel(estimatedLevel).label;
+
+  // Badge details for the practice badge section. The description comes
+  // from the shared badge catalog, which is readable by any signed in
+  // user under RLS. The title uses the writing label so the wording
+  // stays about written communication, and the section still renders if
+  // the catalog row is missing.
+  let earnedBadge: EarnedWritingBadge | null = null;
+
+  if (score.badge_slug) {
+    const { data: badgeRow } = await supabase
+      .from("badges")
+      .select("title, description")
+      .eq("slug", score.badge_slug)
+      .maybeSingle<{ title: string; description: string | null }>();
+
+    earnedBadge = {
+      title: badgeLabel,
+      description: badgeRow?.description ?? null,
+    };
+  }
 
   const skills: WritingSkillScore[] = [
     toSkill("Task fulfillment", writingFeedback?.task_fulfillment),
@@ -209,6 +279,7 @@ export default async function WritingAttemptResultPage({
 
   return (
     <div className="mx-auto w-full max-w-3xl space-y-5">
+      <WritingResultNav />
       <header className="text-center sm:text-left">
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand">
           {writingResultCopy.pageBadge}
@@ -230,6 +301,8 @@ export default async function WritingAttemptResultPage({
         wordCount={attempt.word_count}
         timeSpentSeconds={attempt.time_spent_seconds}
       />
+
+      <WritingBadgeDisplayCard badge={earnedBadge} />
 
       <WritingSkillScoreGrid skills={skills} />
 

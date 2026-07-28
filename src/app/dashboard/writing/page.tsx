@@ -3,18 +3,30 @@ import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { WritingEmptyState } from "@/components/writing/WritingEmptyState";
 import { WritingHero } from "@/components/writing/WritingHero";
+import { WritingLevelProgressCard } from "@/components/writing/WritingLevelProgressCard";
+import { WritingProgressSummary } from "@/components/writing/WritingProgressSummary";
+import { WritingRecentAttemptsCard } from "@/components/writing/WritingRecentAttemptsCard";
 import { WritingTaskGrid } from "@/components/writing/WritingTaskGrid";
 import type { WritingTaskRow } from "@/features/writing/task-types";
 import { normalizeWritingTask } from "@/features/writing/task-utils";
+import {
+  normalizeWritingAttemptHistoryRow,
+  WRITING_ATTEMPT_HISTORY_SELECT,
+  WRITING_MODULE_SLUG,
+  writingHistoryCopy,
+  type WritingAttemptHistoryRow,
+} from "@/features/writing/writing-attempt-history";
+import { buildWritingProgressSummary } from "@/features/writing/writing-progress-summary";
+import { WRITING_HISTORY_STATUSES } from "@/features/writing/writing-status-labels";
 
 export const metadata: Metadata = {
   title: "CELPIP Writing Practice - Toronto Academy of Education",
   description:
-    "Practice CELPIP writing tasks with Toronto Academy practice prompts, timing, and word targets.",
+    "Practice CELPIP writing tasks, track your writing progress, and review your saved feedback reports.",
 };
 
-// Writing module overview: hero and the task library grouped by the two
-// CELPIP writing task types.
+// Writing module overview: hero, writing progress, recent attempts, and
+// the task library grouped by the two CELPIP writing task types.
 export default async function WritingPage() {
   const supabase = await createSupabaseServerClient();
 
@@ -29,32 +41,91 @@ export default async function WritingPage() {
     redirect("/login");
   }
 
-  const { data: tasks, error } = await supabase
-    .from("tasks")
-    .select(
-      "id, task_type, title, prompt, status, sort_order, modules!inner(slug), writing_task_details(task_number, time_seconds, word_min, word_max, evaluation_focus)",
-    )
-    .eq("modules.slug", "celpip-writing")
-    .eq("status", "active")
-    .order("sort_order", { ascending: true });
+  // The session-scoped client enforces RLS on attempts, so only the
+  // user's own rows come back. The explicit user_id filter is a second
+  // guard, and the module filter keeps speaking attempts out of the
+  // writing progress values.
+  const [tasksResult, attemptsResult] = await Promise.all([
+    supabase
+      .from("tasks")
+      .select(
+        "id, task_type, title, prompt, status, sort_order, modules!inner(slug), writing_task_details(task_number, time_seconds, word_min, word_max, evaluation_focus)",
+      )
+      .eq("modules.slug", WRITING_MODULE_SLUG)
+      .eq("status", "active")
+      .order("sort_order", { ascending: true }),
+    supabase
+      .from("attempts")
+      .select(WRITING_ATTEMPT_HISTORY_SELECT)
+      .eq("user_id", user.id)
+      .eq("tasks.modules.slug", WRITING_MODULE_SLUG)
+      .in("status", [...WRITING_HISTORY_STATUSES])
+      .order("created_at", { ascending: false }),
+  ]);
 
-  if (error) {
+  if (tasksResult.error) {
     throw new Error("Could not load writing tasks. Please try again.");
   }
 
-  const taskList = ((tasks ?? []) as unknown as WritingTaskRow[]).map(
-    normalizeWritingTask,
-  );
+  if (attemptsResult.error) {
+    throw new Error("Could not load your writing progress. Please try again.");
+  }
+
+  const taskList = (
+    (tasksResult.data ?? []) as unknown as WritingTaskRow[]
+  ).map(normalizeWritingTask);
+
+  const attempts = (
+    (attemptsResult.data ?? []) as unknown as WritingAttemptHistoryRow[]
+  ).map(normalizeWritingAttemptHistoryRow);
+
+  // Badges tied to this user's writing attempts, counted from the
+  // attempt ids above so speaking badges never appear here.
+  let badgesEarned = 0;
+
+  if (attempts.length > 0) {
+    const { count } = await supabase
+      .from("user_badges")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", user.id)
+      .in(
+        "attempt_id",
+        attempts.map((attempt) => attempt.id),
+      );
+
+    badgesEarned = count ?? 0;
+  }
+
+  const summary = buildWritingProgressSummary(attempts, badgesEarned);
 
   return (
     <>
       <WritingHero />
 
-      {taskList.length === 0 ? (
-        <WritingEmptyState />
-      ) : (
-        <WritingTaskGrid tasks={taskList} />
-      )}
+      <div className="mt-8 space-y-5">
+        <WritingProgressSummary summary={summary} />
+        <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
+          <WritingLevelProgressCard bestLevel={summary.bestLevel} />
+          <WritingRecentAttemptsCard attempts={attempts} />
+        </div>
+      </div>
+
+      <section
+        className="mt-10"
+        aria-label={writingHistoryCopy.taskLibraryHeading}
+      >
+        <h2 className="font-serif text-xl font-semibold tracking-tight text-ink">
+          {writingHistoryCopy.taskLibraryHeading}
+        </h2>
+
+        {taskList.length === 0 ? (
+          <div className="mt-4">
+            <WritingEmptyState />
+          </div>
+        ) : (
+          <WritingTaskGrid tasks={taskList} />
+        )}
+      </section>
     </>
   );
 }
