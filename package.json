@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "assets:audit": "node scripts/audit-and-optimize-assets.mjs --audit",
-    "assets:optimize": "node scripts/audit-and-optimize-assets.mjs --optimize"
+    "assets:optimize": "node scripts/audit-and-optimize-assets.mjs --optimize",
+    "assets:normalize-badges": "node scripts/normalize-badge-icon-assets.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.0",
