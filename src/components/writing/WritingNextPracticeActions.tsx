@@ -2,8 +2,9 @@ import Link from "next/link";
 import { writingResultCopy } from "@/features/writing/task-copy";
 
 // Actions after reviewing writing feedback: start another task, retry
-// the same task, or return to the task library. taskId can be null if
-// the task was removed, in which case the retry link is hidden.
+// the same task, return to the writing history, or return to the task
+// library. taskId can be null if the task was removed, in which case
+// the retry link is hidden.
 export function WritingNextPracticeActions({
   taskId,
 }: {
@@ -32,6 +33,12 @@ export function WritingNextPracticeActions({
             {writingResultCopy.tryTaskAgain}
           </Link>
         )}
+        <Link
+          href="/dashboard/writing/attempts"
+          className="inline-flex h-12 items-center justify-center px-4 text-sm font-semibold text-brand transition-colors hover:text-brand-dark"
+        >
+          {writingResultCopy.backToHistory}
+        </Link>
         <Link
           href="/dashboard/writing"
           className="inline-flex h-12 items-center justify-center px-4 text-sm font-semibold text-brand transition-colors hover:text-brand-dark"

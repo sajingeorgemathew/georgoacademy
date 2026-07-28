@@ -16,37 +16,39 @@ type WritingLevelBadgeRange = {
 
 // Ranges are inclusive and cover the full practice scale. Slugs match
 // the badge catalog seeded in supabase/migrations/001_academy_foundation.sql,
-// which is shared across practice modules.
+// which is shared across practice modules, so some slugs still use
+// speaker wording. The writing UI labels use communicator wording
+// instead, because writing practice is not a spoken task.
 const WRITING_LEVEL_BADGE_RANGES: WritingLevelBadgeRange[] = [
   {
     min: 1,
     max: 4,
-    badge: { slug: "foundation-speaker", label: "Foundation Speaker" },
+    badge: { slug: "foundation-speaker", label: "Foundation communicator" },
   },
   {
     min: 5,
     max: 6,
     badge: {
       slug: "developing-communicator",
-      label: "Developing Communicator",
+      label: "Developing communicator",
     },
   },
   {
     min: 7,
     max: 7,
-    badge: { slug: "test-ready-builder", label: "Test Ready Builder" },
+    badge: { slug: "test-ready-builder", label: "Test readiness builder" },
   },
   {
     min: 8,
     max: 8,
-    badge: { slug: "confident-speaker", label: "Confident Speaker" },
+    badge: { slug: "confident-speaker", label: "Confident communicator" },
   },
   {
     min: 9,
     max: 12,
     badge: {
       slug: "advanced-communicator",
-      label: "Advanced Communicator",
+      label: "Advanced communicator",
     },
   },
 ];

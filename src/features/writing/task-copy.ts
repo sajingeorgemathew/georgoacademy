@@ -120,10 +120,13 @@ export const writingResultCopy = {
   responseNote: "This is the response you submitted for evaluation.",
   wordCountLabel: "Word count",
   timeUsedLabel: "Time used",
+  badgeHeading: "Practice badge",
+  badgeEmptyText: "Complete feedback to earn a practice badge.",
   actionsLabel: "Keep practicing",
   practiceAnotherTask: "Practice another writing task",
   tryTaskAgain: "Try this task again",
   backToTasks: "Back to writing tasks",
+  backToHistory: "Back to writing history",
 } as const;
 
 // Default evaluation focus areas shown when a task has none stored.
