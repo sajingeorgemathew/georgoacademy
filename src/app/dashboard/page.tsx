@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { ModuleCard, type Module } from "@/components/app/ModuleCard";
+import { UsageAccessCard } from "@/components/usage/UsageAccessCard";
+import { getUsageAccessSummary } from "@/features/usage/get-usage-access-summary";
 
 export const metadata: Metadata = {
   title: "Dashboard - Toronto Academy of Education",
@@ -33,6 +35,11 @@ export default async function DashboardPage() {
 
   const moduleList = (modules ?? []) as Module[];
 
+  // USAGE-01: remaining AI feedback access. Read on the server with the
+  // service role, so no key reaches the browser. A failed read hides the
+  // card rather than blocking the dashboard.
+  const accessResult = await getUsageAccessSummary(user.id);
+
   return (
     <>
       <section className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-ink/5 sm:p-8">
@@ -44,6 +51,12 @@ export default async function DashboardPage() {
           More practice modules are coming soon.
         </p>
       </section>
+
+      {accessResult.ok ? (
+        <div className="mt-6">
+          <UsageAccessCard summary={accessResult.summary} />
+        </div>
+      ) : null}
 
       <section className="mt-8" aria-label="Practice modules">
         <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-ink/50">
