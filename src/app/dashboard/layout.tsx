@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { DashboardShell } from "@/components/app/DashboardShell";
+import { AppShell } from "@/components/app/AppShell";
 
 // Protects every /dashboard route server side and wraps them in the shared
 // app shell. Layouts do not re-render on client navigation, so each page
@@ -22,8 +22,6 @@ export default async function DashboardLayout({
   }
 
   return (
-    <DashboardShell userEmail={user.email ?? "Signed in"}>
-      {children}
-    </DashboardShell>
+    <AppShell userEmail={user.email ?? "Signed in"}>{children}</AppShell>
   );
 }

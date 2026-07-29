@@ -3,14 +3,32 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import type { ButtonSize, ButtonVariant } from "@/features/design/design-tokens";
+import { AppButton } from "./AppButton";
 
 // Signs the user out and returns them to the landing page.
-export function SignOutButton() {
+//
+// The sign out call itself is unchanged. The props only exist so the
+// same control can sit in the desktop account menu and stretch across
+// the mobile drawer.
+export function SignOutButton({
+  variant = "secondary",
+  size = "sm",
+  fullWidth = false,
+  onSignOut,
+}: {
+  variant?: ButtonVariant;
+  size?: ButtonSize;
+  fullWidth?: boolean;
+  // Fires before the redirect, so an open menu can close itself.
+  onSignOut?: () => void;
+} = {}) {
   const router = useRouter();
   const [isSigningOut, setIsSigningOut] = useState(false);
 
   async function handleSignOut() {
     setIsSigningOut(true);
+    onSignOut?.();
 
     const supabase = createSupabaseBrowserClient();
     await supabase.auth.signOut();
@@ -20,13 +38,15 @@ export function SignOutButton() {
   }
 
   return (
-    <button
-      type="button"
+    <AppButton
+      variant={variant}
+      size={size}
+      fullWidth={fullWidth}
+      isLoading={isSigningOut}
+      loadingText="Signing out..."
       onClick={handleSignOut}
-      disabled={isSigningOut}
-      className="inline-flex h-9 items-center justify-center rounded-full border border-ink/15 bg-white px-4 text-sm font-medium text-ink transition-colors hover:bg-cream-soft disabled:cursor-not-allowed disabled:opacity-60"
     >
-      {isSigningOut ? "Signing out..." : "Sign out"}
-    </button>
+      Sign out
+    </AppButton>
   );
 }
