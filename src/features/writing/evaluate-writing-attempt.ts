@@ -7,7 +7,9 @@ import { writingEvaluationCopy } from "./task-copy";
 
 export type EvaluateWritingAttemptResult =
   | { ok: true; attemptId: string; resultPath: string }
-  | { ok: false; message: string };
+  // code is set for failures the UI reacts to differently, currently
+  // only NO_SCORED_ATTEMPTS_REMAINING.
+  | { ok: false; message: string; code?: string };
 
 export async function evaluateWritingAttempt(
   attemptId: string,
@@ -24,6 +26,7 @@ export async function evaluateWritingAttempt(
       attemptId?: string;
       resultPath?: string;
       error?: string;
+      code?: string;
     };
 
     if (!response.ok || !payload.ok || !payload.attemptId || !payload.resultPath) {
@@ -31,6 +34,7 @@ export async function evaluateWritingAttempt(
         ok: false,
         message:
           payload.error ?? writingEvaluationCopy.errors.evaluationFailed,
+        ...(payload.code ? { code: payload.code } : {}),
       };
     }
 

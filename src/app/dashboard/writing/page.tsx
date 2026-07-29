@@ -7,6 +7,8 @@ import { WritingLevelProgressCard } from "@/components/writing/WritingLevelProgr
 import { WritingProgressSummary } from "@/components/writing/WritingProgressSummary";
 import { WritingRecentAttemptsCard } from "@/components/writing/WritingRecentAttemptsCard";
 import { WritingTaskGrid } from "@/components/writing/WritingTaskGrid";
+import { ScoredAttemptBalanceBadge } from "@/components/usage/ScoredAttemptBalanceBadge";
+import { getUsageAccessSummary } from "@/features/usage/get-usage-access-summary";
 import type { WritingTaskRow } from "@/features/writing/task-types";
 import { normalizeWritingTask } from "@/features/writing/task-utils";
 import {
@@ -98,9 +100,19 @@ export default async function WritingPage() {
 
   const summary = buildWritingProgressSummary(attempts, badgesEarned);
 
+  // USAGE-01: remaining AI feedback access, shown as a small badge so
+  // the learner knows before writing whether a report is available.
+  const accessResult = await getUsageAccessSummary(user.id);
+
   return (
     <>
       <WritingHero />
+
+      {accessResult.ok ? (
+        <div className="mt-5">
+          <ScoredAttemptBalanceBadge summary={accessResult.summary} />
+        </div>
+      ) : null}
 
       <div className="mt-8 space-y-5">
         <WritingProgressSummary summary={summary} />

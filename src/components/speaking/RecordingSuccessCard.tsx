@@ -3,6 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { ScoredAttemptLimitMessage } from "@/components/usage/ScoredAttemptLimitMessage";
+import { NO_SCORED_ATTEMPTS_REMAINING } from "@/features/usage/access-types";
 import {
   feedbackCopy,
   practiceCopy,
@@ -11,12 +13,16 @@ import {
 import { FeedbackProcessingCard } from "./FeedbackProcessingCard";
 import { SubmitForFeedbackButton } from "./SubmitForFeedbackButton";
 
-type FeedbackState = "idle" | "working" | "error";
+// "blocked" is the USAGE-01 state: the request was valid but the learner
+// has no scored attempts left, so the retry button is replaced with the
+// access message instead of an error line.
+type FeedbackState = "idle" | "working" | "error" | "blocked";
 
 type FeedbackResponse = {
   ok?: boolean;
   resultPath?: string;
   error?: string;
+  code?: string;
 };
 
 // Success state after the recording has uploaded. From here the student
@@ -61,6 +67,12 @@ export function RecordingSuccessCard({
         return;
       }
 
+      if (payload?.code === NO_SCORED_ATTEMPTS_REMAINING) {
+        setErrorMessage(null);
+        setState("blocked");
+        return;
+      }
+
       setErrorMessage(payload?.error || feedbackCopy.errors.requestFailed);
       setState("error");
     } catch {
@@ -89,6 +101,10 @@ export function RecordingSuccessCard({
       {working ? (
         <div className="mt-5">
           <FeedbackProcessingCard />
+        </div>
+      ) : state === "blocked" ? (
+        <div className="mt-5 text-left">
+          <ScoredAttemptLimitMessage previousFeedbackHref="/dashboard/speaking/attempts" />
         </div>
       ) : (
         <div className="mt-3 space-y-5">

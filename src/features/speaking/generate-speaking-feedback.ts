@@ -20,6 +20,13 @@ import {
   type AiUsageTokenCounts,
 } from "@/features/usage/ai-usage-types";
 import { recordAiUsageEvent } from "@/features/usage/record-ai-usage-event";
+import {
+  NO_SCORED_ATTEMPTS_ERROR,
+  NO_SCORED_ATTEMPTS_REMAINING,
+  NO_SCORED_ATTEMPTS_STATUS,
+} from "@/features/usage/access-types";
+import { checkScoredAttemptAccess } from "@/features/usage/check-scored-attempt-access";
+import { consumeScoredAttemptCredit } from "@/features/usage/consume-scored-attempt-credit";
 import { getBadgeForLevel } from "./level-badges";
 import {
   DEFAULT_PREP_SECONDS,
@@ -64,7 +71,9 @@ export type GenerateSpeakingFeedbackInput = {
 
 export type GenerateSpeakingFeedbackResult =
   | { ok: true; attemptId: string; resultPath: string }
-  | { ok: false; status: number; message: string };
+  // code is set for failures the UI reacts to differently, currently
+  // only NO_SCORED_ATTEMPTS_REMAINING.
+  | { ok: false; status: number; message: string; code?: string };
 
 // Result route for one attempt, shared by the pipeline and the API
 // response so the redirect target is defined in one place.
@@ -209,6 +218,24 @@ export async function generateSpeakingFeedback(
         resultPath: getAttemptResultPath(attempt.id),
       };
     }
+  }
+
+  // USAGE-01: the learner must have a scored attempt available before
+  // any OpenAI work starts. The branch above already returned a saved
+  // report, so an attempt that is finished never reaches this check.
+  // Nothing is charged here; the charge happens once the score is saved.
+  const access = await checkScoredAttemptAccess({
+    attemptId: attempt.id,
+    userId: input.userId,
+  });
+
+  if (!access.allowed) {
+    return {
+      ok: false,
+      status: NO_SCORED_ATTEMPTS_STATUS,
+      message: NO_SCORED_ATTEMPTS_ERROR,
+      code: NO_SCORED_ATTEMPTS_REMAINING,
+    };
   }
 
   const task = normalizeEmbed(attempt.tasks);
@@ -392,7 +419,19 @@ export async function generateSpeakingFeedback(
   // result page can render it even if this status write fails.
   await setAttemptStatus(attempt.id, "feedback_ready");
 
-  // 6. Award the matching practice badge now that feedback is ready.
+  // 6. USAGE-01: charge one scored attempt, now that a report exists and
+  // not a moment earlier. A failed OpenAI call returned above, so it
+  // never reaches this point, and attempt_id is unique in
+  // scored_attempt_consumptions, so a retry cannot charge twice.
+  await consumeScoredAttemptCredit({
+    userId: attempt.user_id,
+    attemptId: attempt.id,
+    moduleSlug: SPEAKING_MODULE_SLUG,
+    taskId: task.id,
+    metadata: { estimated_level: validated.estimated_level },
+  });
+
+  // 7. Award the matching practice badge now that feedback is ready.
   await awardPracticeBadge(input.userId, attempt.id, badge.slug);
 
   return {

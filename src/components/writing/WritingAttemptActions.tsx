@@ -3,6 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { NO_SCORED_ATTEMPTS_REMAINING } from "@/features/usage/access-types";
+import { scoredAttemptLimitCopy } from "@/features/usage/usage-copy";
 import { evaluateWritingAttempt } from "@/features/writing/evaluate-writing-attempt";
 import {
   getWritingAttemptPath,
@@ -73,7 +75,13 @@ export function WritingAttemptActions({
     }
 
     setWorking(false);
-    setError(result.message);
+    // A blocked attempt is not a fault the learner can retry away, so it
+    // reads as the access message rather than as an error.
+    setError(
+      result.code === NO_SCORED_ATTEMPTS_REMAINING
+        ? scoredAttemptLimitCopy.message
+        : result.message,
+    );
     // Pull fresh status values in case the failed run changed the
     // attempt status behind this row.
     router.refresh();

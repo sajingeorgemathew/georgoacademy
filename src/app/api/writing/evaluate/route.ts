@@ -55,8 +55,10 @@ export async function POST(request: Request) {
     });
 
     if (!result.ok) {
+      // code is present only for a blocked scored attempt, where the
+      // status is 402 and the client shows the access message.
       return NextResponse.json(
-        { ok: false, error: result.message },
+        { ok: false, error: result.message, ...(result.code ? { code: result.code } : {}) },
         { status: result.status },
       );
     }

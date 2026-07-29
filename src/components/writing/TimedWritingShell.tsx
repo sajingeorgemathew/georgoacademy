@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { ScoredAttemptLimitMessage } from "@/components/usage/ScoredAttemptLimitMessage";
+import { NO_SCORED_ATTEMPTS_REMAINING } from "@/features/usage/access-types";
 import { writingPracticeCopy } from "@/features/writing/task-copy";
 import type { WritingPracticeTask } from "@/features/writing/task-types";
 import { evaluateWritingAttempt } from "@/features/writing/evaluate-writing-attempt";
@@ -42,6 +44,10 @@ export function TimedWritingShell({ task }: { task: WritingPracticeTask }) {
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [evaluationError, setEvaluationError] = useState<string | null>(null);
+  // USAGE-01: set when the learner has no scored attempts left. The
+  // response is still saved, so the access message replaces the retry
+  // action rather than the whole saved state being treated as a failure.
+  const [evaluationBlocked, setEvaluationBlocked] = useState(false);
 
   // Wall clock start of the session, used to report time spent on
   // submit even after the countdown has reached zero.
@@ -89,11 +95,18 @@ export function TimedWritingShell({ task }: { task: WritingPracticeTask }) {
   const runEvaluation = async (attemptId: string) => {
     setPhase("evaluating");
     setEvaluationError(null);
+    setEvaluationBlocked(false);
 
     const result = await evaluateWritingAttempt(attemptId);
 
     if (result.ok) {
       router.push(result.resultPath);
+      return;
+    }
+
+    if (result.code === NO_SCORED_ATTEMPTS_REMAINING) {
+      setEvaluationBlocked(true);
+      setPhase("saved");
       return;
     }
 
@@ -173,6 +186,8 @@ export function TimedWritingShell({ task }: { task: WritingPracticeTask }) {
         <div className="mt-6 space-y-5">
           {phase === "evaluating" ? (
             <WritingEvaluationProcessingCard />
+          ) : phase === "saved" && evaluationBlocked ? (
+            <ScoredAttemptLimitMessage previousFeedbackHref="/dashboard/writing/attempts" />
           ) : phase === "saved" ? (
             <WritingSavedCard
               evaluationError={evaluationError}

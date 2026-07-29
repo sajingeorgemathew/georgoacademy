@@ -19,6 +19,12 @@ import {
   SPEAKING_MODULE_SLUG,
 } from "@/features/usage/ai-usage-types";
 import { recordAiUsageEvent } from "@/features/usage/record-ai-usage-event";
+import {
+  NO_SCORED_ATTEMPTS_ERROR,
+  NO_SCORED_ATTEMPTS_REMAINING,
+  NO_SCORED_ATTEMPTS_STATUS,
+} from "@/features/usage/access-types";
+import { checkScoredAttemptAccess } from "@/features/usage/check-scored-attempt-access";
 import { ATTEMPT_AUDIO_BUCKET } from "./audio-utils";
 import { transcriptCopy } from "./practice-flow";
 
@@ -47,7 +53,9 @@ export type TranscribeAttemptInput = {
 
 export type TranscribeAttemptResult =
   | { ok: true; attemptId: string; transcript: string }
-  | { ok: false; status: number; message: string };
+  // code is set for failures the UI reacts to differently, currently
+  // only NO_SCORED_ATTEMPTS_REMAINING.
+  | { ok: false; status: number; message: string; code?: string };
 
 // Best effort failure marker so the attempt is retryable and never
 // stuck in "transcribing". Keeps audio_path untouched.
@@ -122,6 +130,26 @@ export async function transcribeAttempt(
       ok: false,
       status: 409,
       message: transcriptCopy.errors.audioMissing,
+    };
+  }
+
+  // USAGE-01: transcription is a paid OpenAI call and /api/speaking/
+  // transcribe can be reached on its own, so it is gated by the same
+  // access rule as feedback. Transcription is never charged separately:
+  // the scored attempt is consumed only after a feedback report is
+  // saved. The saved transcript branch above returns first, so a repeat
+  // request for finished audio is not gated.
+  const access = await checkScoredAttemptAccess({
+    attemptId: attempt.id,
+    userId: input.userId,
+  });
+
+  if (!access.allowed) {
+    return {
+      ok: false,
+      status: NO_SCORED_ATTEMPTS_STATUS,
+      message: NO_SCORED_ATTEMPTS_ERROR,
+      code: NO_SCORED_ATTEMPTS_REMAINING,
     };
   }
 
