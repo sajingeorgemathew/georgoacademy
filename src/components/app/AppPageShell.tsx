@@ -3,7 +3,7 @@ import { cx, layout, text } from "@/features/design/design-tokens";
 
 // Standard layout for a protected page body.
 //
-// DashboardShell still owns the frame around the page: header, main
+// AppShell still owns the frame around the page: navigation, main
 // element and footer. This component owns what sits inside it, so every
 // screen gets the same title block, the same max width and the same
 // vertical rhythm on mobile and desktop.
