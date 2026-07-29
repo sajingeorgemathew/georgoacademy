@@ -1,24 +1,22 @@
-import Link from "next/link";
+import { AppButtonLink } from "@/components/app/AppButtonLink";
+import { AppEmptyState } from "@/components/app/AppEmptyState";
+import { emptyStateAssets } from "@/features/assets/asset-registry";
 import { historyCopy } from "@/features/speaking/attempt-history";
 
 // Shown on the attempt history page when the user has no attempts yet.
+// Copy and destination are unchanged, the panel now comes from the
+// shared empty state and shows the optimized speaking history artwork.
 export function EmptyAttemptsState() {
   return (
-    <section className="rounded-3xl bg-white p-8 text-center shadow-sm ring-1 ring-ink/5">
-      <h2 className="font-serif text-xl font-semibold tracking-tight text-ink">
-        {historyCopy.emptyHeading}
-      </h2>
-      <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-ink/70">
-        {historyCopy.emptyText}
-      </p>
-      <div className="mt-6">
-        <Link
-          href="/dashboard/speaking"
-          className="inline-flex h-11 items-center justify-center rounded-full bg-brand px-6 text-sm font-semibold text-white shadow-lg shadow-brand/20 transition-colors hover:bg-brand-dark"
-        >
+    <AppEmptyState
+      title={historyCopy.emptyHeading}
+      description={historyCopy.emptyText}
+      imageSrc={emptyStateAssets.speakingHistory}
+      action={
+        <AppButtonLink href="/dashboard/speaking">
           {historyCopy.emptyButton}
-        </Link>
-      </div>
-    </section>
+        </AppButtonLink>
+      }
+    />
   );
 }

@@ -14,6 +14,20 @@
   --cream-soft: #efe7d3;
   --ink: #17140f;
   --ink-soft: #221d16;
+
+  /* Academy palette for the signed in app. Deep navy leads, soft blue
+     supports, and a controlled Canadian red is used only as an accent.
+     The landing page keeps the warm editorial palette above. */
+  --academy-navy: #12294a;
+  --academy-navy-dark: #0b1b33;
+  --academy-navy-soft: #e9eef6;
+  --academy-blue: #2c6bab;
+  --academy-blue-soft: #eef4fb;
+  --academy-red: #c8102e;
+  --academy-red-soft: #fdeef0;
+  --academy-paper: #ffffff;
+  --academy-paper-warm: #faf8f4;
+  --academy-line: #e4e7ee;
 }
 
 @theme inline {
@@ -25,6 +39,16 @@
   --color-cream-soft: var(--cream-soft);
   --color-ink: var(--ink);
   --color-ink-soft: var(--ink-soft);
+  --color-academy-navy: var(--academy-navy);
+  --color-academy-navy-dark: var(--academy-navy-dark);
+  --color-academy-navy-soft: var(--academy-navy-soft);
+  --color-academy-blue: var(--academy-blue);
+  --color-academy-blue-soft: var(--academy-blue-soft);
+  --color-academy-red: var(--academy-red);
+  --color-academy-red-soft: var(--academy-red-soft);
+  --color-academy-paper: var(--academy-paper);
+  --color-academy-paper-warm: var(--academy-paper-warm);
+  --color-academy-line: var(--academy-line);
   --font-sans: var(--font-geist-sans);
   --font-serif: var(--font-fraunces);
   --font-mono: var(--font-geist-mono);

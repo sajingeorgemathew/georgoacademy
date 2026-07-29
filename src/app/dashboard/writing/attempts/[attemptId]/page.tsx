@@ -256,6 +256,8 @@ export default async function WritingAttemptResultPage({
     earnedBadge = {
       title: badgeLabel,
       description: badgeRow?.description ?? null,
+      // Selects the badge artwork only, the stored slug is unchanged.
+      slug: score.badge_slug,
     };
   }
 

@@ -198,7 +198,12 @@ export default async function SpeakingAttemptResultPage({
       .eq("slug", score.badge_slug)
       .maybeSingle<{ title: string; description: string | null }>();
 
-    earnedBadge = badgeRow ?? { title: badgeLabel, description: null };
+    earnedBadge = {
+      title: badgeRow?.title ?? badgeLabel,
+      description: badgeRow?.description ?? null,
+      // Selects the badge artwork only, the stored slug is unchanged.
+      slug: score.badge_slug,
+    };
   }
 
   const skills: SkillScore[] = [
