@@ -1,21 +1,72 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { ModuleCard, type Module } from "@/components/app/ModuleCard";
-import { UsageAccessCard } from "@/components/usage/UsageAccessCard";
+import { DashboardAccessSummary } from "@/components/dashboard/DashboardAccessSummary";
+import { DashboardBadgePreview } from "@/components/dashboard/DashboardBadgePreview";
+import { DashboardHero } from "@/components/dashboard/DashboardHero";
+import { DashboardModuleGrid } from "@/components/dashboard/DashboardModuleGrid";
+import { DashboardProgressOverview } from "@/components/dashboard/DashboardProgressOverview";
+import { DashboardRecentFeedback } from "@/components/dashboard/DashboardRecentFeedback";
+import { DashboardRecommendedPractice } from "@/components/dashboard/DashboardRecommendedPractice";
+import { DASHBOARD_MODULE_SLUGS } from "@/features/dashboard/dashboard-copy";
+import { getDashboardRecommendation } from "@/features/dashboard/dashboard-recommendations";
+import {
+  buildDashboardSummaryFromRows,
+  DASHBOARD_ATTEMPT_LIMIT,
+  DASHBOARD_ATTEMPT_SELECT,
+  DASHBOARD_HISTORY_STATUSES,
+  type DashboardAttemptRow,
+} from "@/features/dashboard/dashboard-summary";
+import type { DashboardBadgeItem } from "@/features/dashboard/dashboard-types";
 import { getUsageAccessSummary } from "@/features/usage/get-usage-access-summary";
 
 export const metadata: Metadata = {
   title: "Dashboard - Toronto Academy of Education",
-  description: "Your CELPIP practice dashboard.",
+  description:
+    "Your CELPIP practice home: recommended practice, progress, recent feedback, and practice badges.",
 };
 
+// How many earned badges the preview shows before it stops. The badge
+// catalog is small, so this is a display cap rather than paging.
+const BADGE_PREVIEW_LIMIT = 8;
+
+type BadgeEmbed = {
+  slug: string;
+  title: string;
+  description: string | null;
+};
+
+type UserBadgeRow = {
+  id: string;
+  earned_at: string | null;
+  badges: BadgeEmbed | BadgeEmbed[] | null;
+};
+
+type ModuleRow = {
+  id: string;
+  slug: string;
+  title: string;
+  description: string | null;
+  status: string;
+  sort_order: number;
+};
+
+// PostgREST returns embeds as an object or an array depending on the
+// relationship and schema cache. Normalize both to a single object.
+function firstEmbed<T>(embed: T | T[] | null): T | null {
+  return Array.isArray(embed) ? (embed[0] ?? null) : (embed ?? null);
+}
+
+// CELPIP-UX-03: the learner home screen. Everything on this page is
+// derived from stored attempts, scores and badges. There is no AI call
+// here, no write, and no live class or payment feature.
 export default async function DashboardPage() {
   const supabase = await createSupabaseServerClient();
 
   // The dashboard layout already checks the session, but layouts do not
-  // re-render on client navigation, so the page verifies it again close to
-  // the data. getUser validates against Supabase instead of trusting cookies.
+  // re-render on client navigation, so the page verifies it again close
+  // to the data. getUser validates against Supabase instead of trusting
+  // cookies.
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -24,57 +75,108 @@ export default async function DashboardPage() {
     redirect("/login");
   }
 
-  const { data: modules, error } = await supabase
-    .from("modules")
-    .select("id, slug, title, description, status, sort_order")
-    .order("sort_order", { ascending: true });
+  // The session-scoped client enforces RLS on attempts and user_badges,
+  // so only this learner's rows come back. The explicit user_id filters
+  // are a second guard.
+  const [modulesResult, attemptsResult, badgesResult] = await Promise.all([
+    supabase
+      .from("modules")
+      .select("id, slug, title, description, status, sort_order")
+      .in("slug", [...DASHBOARD_MODULE_SLUGS])
+      .order("sort_order", { ascending: true }),
+    supabase
+      .from("attempts")
+      .select(DASHBOARD_ATTEMPT_SELECT)
+      .eq("user_id", user.id)
+      .in("status", [...DASHBOARD_HISTORY_STATUSES])
+      .order("created_at", { ascending: false })
+      .limit(DASHBOARD_ATTEMPT_LIMIT),
+    supabase
+      .from("user_badges")
+      .select("id, earned_at, badges(slug, title, description)")
+      .eq("user_id", user.id)
+      .order("earned_at", { ascending: false })
+      .limit(BADGE_PREVIEW_LIMIT),
+  ]);
 
-  if (error) {
+  if (modulesResult.error) {
     throw new Error("Could not load practice modules. Please try again.");
   }
 
-  const moduleList = (modules ?? []) as Module[];
+  if (attemptsResult.error) {
+    throw new Error("Could not load your practice progress. Please try again.");
+  }
+
+  const moduleList = (modulesResult.data ?? []) as ModuleRow[];
+
+  const summary = buildDashboardSummaryFromRows(
+    (attemptsResult.data ?? []) as unknown as DashboardAttemptRow[],
+  );
+
+  const recommendation = getDashboardRecommendation(summary);
+
+  // A failed badge read hides the badges rather than blocking the page,
+  // so the rest of the dashboard still renders.
+  const badges: DashboardBadgeItem[] = (
+    (badgesResult.data ?? []) as unknown as UserBadgeRow[]
+  ).map((row) => {
+    const badge = firstEmbed(row.badges);
+
+    return {
+      id: row.id,
+      slug: badge?.slug ?? null,
+      title: badge?.title ?? "Practice badge",
+      description: badge?.description ?? null,
+      earnedAt: row.earned_at,
+    };
+  });
 
   // USAGE-01: remaining AI feedback access. Read on the server with the
-  // service role, so no key reaches the browser. A failed read hides the
-  // card rather than blocking the dashboard.
+  // service role, so no key reaches the browser. When the read fails the
+  // access card falls back to its safe placeholder.
   const accessResult = await getUsageAccessSummary(user.id);
 
   return (
     <>
-      <section className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-ink/5 sm:p-8">
-        <h1 className="font-serif text-2xl font-semibold tracking-tight text-ink sm:text-3xl">
-          Welcome to your CELPIP practice dashboard
-        </h1>
-        <p className="mt-3 max-w-2xl text-sm leading-6 text-ink/70 sm:text-base">
-          Start with CELPIP Speaking Practice or CELPIP Writing Practice.
-          More practice modules are coming soon.
-        </p>
-      </section>
+      <DashboardHero
+        userEmail={user.email ?? null}
+        hasPractice={summary.hasAnyPractice}
+        continueHref={recommendation.href}
+        continueLabel={recommendation.ctaLabel}
+      />
 
-      {accessResult.ok ? (
-        <div className="mt-6">
-          <UsageAccessCard summary={accessResult.summary} />
-        </div>
-      ) : null}
+      <div className="mt-8 grid grid-cols-1 gap-5 lg:grid-cols-2">
+        <DashboardAccessSummary
+          summary={accessResult.ok ? accessResult.summary : null}
+        />
+        <DashboardRecommendedPractice recommendation={recommendation} />
+      </div>
 
-      <section className="mt-8" aria-label="Practice modules">
-        <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-ink/50">
-          Practice modules
-        </h2>
+      <div className="mt-10">
+        <DashboardProgressOverview
+          speaking={summary.speaking}
+          writing={summary.writing}
+          totalFeedbackReports={summary.totalFeedbackReports}
+        />
+      </div>
 
-        {moduleList.length === 0 ? (
-          <p className="mt-4 text-sm text-ink/70">
-            No modules are available yet. Please check back soon.
-          </p>
-        ) : (
-          <div className="mt-4 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {moduleList.map((module) => (
-              <ModuleCard key={module.id} module={module} />
-            ))}
-          </div>
-        )}
-      </section>
+      <div className="mt-10">
+        <DashboardRecentFeedback items={summary.recentFeedback} />
+      </div>
+
+      <div className="mt-10">
+        <DashboardBadgePreview badges={badges} />
+      </div>
+
+      <div className="mt-10">
+        <DashboardModuleGrid
+          modules={moduleList}
+          reportCounts={{
+            speaking: summary.speaking.feedbackReports,
+            writing: summary.writing.feedbackReports,
+          }}
+        />
+      </div>
     </>
   );
 }
