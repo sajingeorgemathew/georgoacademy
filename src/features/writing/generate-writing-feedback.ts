@@ -10,6 +10,16 @@
 
 import OpenAI from "openai";
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
+import {
+  describeAiError,
+  readOpenAiTokenUsage,
+} from "@/features/usage/ai-usage-metadata";
+import {
+  AI_USAGE_ENDPOINTS,
+  WRITING_MODULE_SLUG,
+  type AiUsageTokenCounts,
+} from "@/features/usage/ai-usage-types";
+import { recordAiUsageEvent } from "@/features/usage/record-ai-usage-event";
 import { writingEvaluationCopy } from "./task-copy";
 import { countWords } from "./word-count";
 import { getWritingBadgeForLevel } from "./writing-level-badges";
@@ -249,10 +259,17 @@ export async function generateWritingFeedback(
 
   let scoring: WritingScoringResponse;
 
+  // USAGE-00: one usage event per paid OpenAI call.
+  const model = process.env.OPENAI_WRITING_MODEL || DEFAULT_WRITING_MODEL;
+  const startedAt = Date.now();
+  // Captured as soon as the provider responds so a validation failure
+  // still records the tokens the call consumed.
+  let tokens: AiUsageTokenCounts = {};
+
   try {
     const openai = new OpenAI({ apiKey });
     const completion = await openai.chat.completions.create({
-      model: process.env.OPENAI_WRITING_MODEL || DEFAULT_WRITING_MODEL,
+      model,
       response_format: { type: "json_object" },
       messages: [
         { role: "system", content: buildWritingScoringSystemPrompt() },
@@ -273,6 +290,8 @@ export async function generateWritingFeedback(
       ],
     });
 
+    tokens = readOpenAiTokenUsage(completion);
+
     const raw = completion.choices[0]?.message?.content;
 
     if (!raw) {
@@ -280,8 +299,39 @@ export async function generateWritingFeedback(
     }
 
     scoring = writingScoringResponseSchema.parse(JSON.parse(raw));
+
+    await recordAiUsageEvent({
+      userId: attempt.user_id,
+      eventType: "writing_feedback",
+      status: "succeeded",
+      moduleSlug: WRITING_MODULE_SLUG,
+      attemptId: attempt.id,
+      taskId: task.id,
+      model,
+      endpoint: AI_USAGE_ENDPOINTS.chatCompletions,
+      tokens,
+      inputSizeBytes: Buffer.byteLength(responseText, "utf8"),
+      latencyMs: Date.now() - startedAt,
+      metadata: { response_characters: responseText.length },
+    });
   } catch (err) {
     console.error("AI writing evaluation failed:", err);
+    // Tokens are still recorded when the call returned and only the
+    // validation failed, so the cost of a bad response stays visible.
+    await recordAiUsageEvent({
+      userId: attempt.user_id,
+      eventType: "writing_feedback",
+      status: "failed",
+      moduleSlug: WRITING_MODULE_SLUG,
+      attemptId: attempt.id,
+      taskId: task.id,
+      model,
+      endpoint: AI_USAGE_ENDPOINTS.chatCompletions,
+      tokens,
+      inputSizeBytes: Buffer.byteLength(responseText, "utf8"),
+      latencyMs: Date.now() - startedAt,
+      ...describeAiError(err),
+    });
     await setAttemptStatus(attempt.id, "writing_evaluation_failed");
     return {
       ok: false,

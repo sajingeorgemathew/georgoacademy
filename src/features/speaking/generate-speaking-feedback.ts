@@ -10,6 +10,16 @@
 
 import OpenAI from "openai";
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
+import {
+  describeAiError,
+  readOpenAiTokenUsage,
+} from "@/features/usage/ai-usage-metadata";
+import {
+  AI_USAGE_ENDPOINTS,
+  SPEAKING_MODULE_SLUG,
+  type AiUsageTokenCounts,
+} from "@/features/usage/ai-usage-types";
+import { recordAiUsageEvent } from "@/features/usage/record-ai-usage-event";
 import { getBadgeForLevel } from "./level-badges";
 import {
   DEFAULT_PREP_SECONDS,
@@ -241,10 +251,19 @@ export async function generateSpeakingFeedback(
 
   let scoring: ScoringResponse;
 
+  // USAGE-00: one usage event per paid OpenAI call. The transcription
+  // call above records its own speaking_transcription event, so it is
+  // not counted again here.
+  const model = process.env.OPENAI_SCORING_MODEL || DEFAULT_SCORING_MODEL;
+  const startedAt = Date.now();
+  // Captured as soon as the provider responds so a validation failure
+  // still records the tokens the call consumed.
+  let tokens: AiUsageTokenCounts = {};
+
   try {
     const openai = new OpenAI({ apiKey });
     const completion = await openai.chat.completions.create({
-      model: process.env.OPENAI_SCORING_MODEL || DEFAULT_SCORING_MODEL,
+      model,
       response_format: { type: "json_object" },
       messages: [
         { role: "system", content: buildScoringSystemPrompt() },
@@ -263,6 +282,8 @@ export async function generateSpeakingFeedback(
       ],
     });
 
+    tokens = readOpenAiTokenUsage(completion);
+
     const raw = completion.choices[0]?.message?.content;
 
     if (!raw) {
@@ -270,8 +291,37 @@ export async function generateSpeakingFeedback(
     }
 
     scoring = scoringResponseSchema.parse(JSON.parse(raw));
+
+    await recordAiUsageEvent({
+      userId: attempt.user_id,
+      eventType: "speaking_feedback",
+      status: "succeeded",
+      moduleSlug: SPEAKING_MODULE_SLUG,
+      attemptId: attempt.id,
+      taskId: task.id,
+      model,
+      endpoint: AI_USAGE_ENDPOINTS.chatCompletions,
+      tokens,
+      latencyMs: Date.now() - startedAt,
+      metadata: { transcript_characters: transcript.length },
+    });
   } catch (err) {
     console.error("AI scoring failed:", err);
+    // Tokens are still recorded when the call returned and only the
+    // validation failed, so the cost of a bad response stays visible.
+    await recordAiUsageEvent({
+      userId: attempt.user_id,
+      eventType: "speaking_feedback",
+      status: "failed",
+      moduleSlug: SPEAKING_MODULE_SLUG,
+      attemptId: attempt.id,
+      taskId: task.id,
+      model,
+      endpoint: AI_USAGE_ENDPOINTS.chatCompletions,
+      tokens,
+      latencyMs: Date.now() - startedAt,
+      ...describeAiError(err),
+    });
     await setAttemptStatus(attempt.id, "scoring_failed");
     return {
       ok: false,

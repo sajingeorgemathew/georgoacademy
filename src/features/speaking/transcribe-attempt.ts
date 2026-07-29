@@ -9,6 +9,16 @@
 
 import OpenAI, { toFile } from "openai";
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
+import {
+  describeAiError,
+  readOpenAiAudioDuration,
+  readOpenAiTokenUsage,
+} from "@/features/usage/ai-usage-metadata";
+import {
+  AI_USAGE_ENDPOINTS,
+  SPEAKING_MODULE_SLUG,
+} from "@/features/usage/ai-usage-types";
+import { recordAiUsageEvent } from "@/features/usage/record-ai-usage-event";
 import { ATTEMPT_AUDIO_BUCKET } from "./audio-utils";
 import { transcriptCopy } from "./practice-flow";
 
@@ -25,6 +35,7 @@ type AttemptRow = {
   id: string;
   user_id: string;
   status: string;
+  task_id: string | null;
   audio_path: string | null;
   transcript: string | null;
 };
@@ -71,7 +82,7 @@ export async function transcribeAttempt(
   // 1. Fetch the attempt and verify ownership before touching storage.
   const { data: attempt, error: attemptError } = await supabase
     .from("attempts")
-    .select("id, user_id, status, audio_path, transcript")
+    .select("id, user_id, status, task_id, audio_path, transcript")
     .eq("id", input.attemptId)
     .maybeSingle<AttemptRow>();
 
@@ -136,6 +147,21 @@ export async function transcribeAttempt(
       "Audio download failed:",
       downloadError?.message ?? "empty file",
     );
+    // Recorded even though OpenAI was never called, so a spike in
+    // failed transcriptions is visible whether or not it cost money.
+    // reached_provider tells the two cases apart in a report.
+    await recordAiUsageEvent({
+      userId: attempt.user_id,
+      eventType: "speaking_transcription",
+      status: "failed",
+      moduleSlug: SPEAKING_MODULE_SLUG,
+      attemptId: attempt.id,
+      taskId: attempt.task_id,
+      endpoint: AI_USAGE_ENDPOINTS.transcriptions,
+      errorCode: "storage_error",
+      errorMessage: downloadError?.message ?? "empty audio file",
+      metadata: { reached_provider: false },
+    });
     await markTranscriptionFailed(attempt.id);
     return {
       ok: false,
@@ -147,21 +173,51 @@ export async function transcribeAttempt(
   // 4. Send the audio to OpenAI. The blob is wrapped as a named file so
   // the API can detect the container format, for example webm or mp4.
   const fileName = attempt.audio_path.split("/").pop() || "answer.webm";
+  const model =
+    process.env.OPENAI_TRANSCRIPTION_MODEL || DEFAULT_TRANSCRIPTION_MODEL;
+  const inputSizeBytes = audio.size;
   let transcript = "";
+
+  // USAGE-00: one usage event per paid OpenAI call. Latency is measured
+  // across exactly the provider call.
+  const startedAt = Date.now();
+  // Usage reported by the call that just ran, so the empty transcript
+  // branch below can record the same tokens and cost as a success would.
+  let callUsage: Pick<
+    Parameters<typeof recordAiUsageEvent>[0],
+    "tokens" | "audioDurationSeconds"
+  > = {};
 
   try {
     const openai = new OpenAI({ apiKey });
     const result = await openai.audio.transcriptions.create({
       file: await toFile(audio, fileName),
-      model:
-        process.env.OPENAI_TRANSCRIPTION_MODEL || DEFAULT_TRANSCRIPTION_MODEL,
+      model,
       language: "en",
       response_format: "json",
       prompt: TRANSCRIPTION_PROMPT,
     });
     transcript = result.text?.trim() ?? "";
+    callUsage = {
+      tokens: readOpenAiTokenUsage(result),
+      audioDurationSeconds: readOpenAiAudioDuration(result),
+    };
   } catch (err) {
     console.error("OpenAI transcription failed:", err);
+    await recordAiUsageEvent({
+      userId: attempt.user_id,
+      eventType: "speaking_transcription",
+      status: "failed",
+      moduleSlug: SPEAKING_MODULE_SLUG,
+      attemptId: attempt.id,
+      taskId: attempt.task_id,
+      model,
+      endpoint: AI_USAGE_ENDPOINTS.transcriptions,
+      inputSizeBytes,
+      latencyMs: Date.now() - startedAt,
+      ...describeAiError(err),
+      metadata: { reached_provider: true },
+    });
     await markTranscriptionFailed(attempt.id);
     return {
       ok: false,
@@ -170,9 +226,29 @@ export async function transcribeAttempt(
     };
   }
 
+  const latencyMs = Date.now() - startedAt;
+
   // An empty transcript usually means silence or an unreadable file.
   // Treat it as a failure so the student knows to retry or re-record.
   if (!transcript) {
+    // The call still cost money, so its usage figures are recorded even
+    // though the outcome is a failure.
+    await recordAiUsageEvent({
+      userId: attempt.user_id,
+      eventType: "speaking_transcription",
+      status: "failed",
+      moduleSlug: SPEAKING_MODULE_SLUG,
+      attemptId: attempt.id,
+      taskId: attempt.task_id,
+      model,
+      endpoint: AI_USAGE_ENDPOINTS.transcriptions,
+      ...callUsage,
+      inputSizeBytes,
+      latencyMs,
+      errorCode: "empty_response",
+      errorMessage: "Transcription returned an empty transcript",
+      metadata: { reached_provider: true },
+    });
     await markTranscriptionFailed(attempt.id);
     return {
       ok: false,
@@ -180,6 +256,21 @@ export async function transcribeAttempt(
       message: transcriptCopy.errors.transcriptionFailed,
     };
   }
+
+  await recordAiUsageEvent({
+    userId: attempt.user_id,
+    eventType: "speaking_transcription",
+    status: "succeeded",
+    moduleSlug: SPEAKING_MODULE_SLUG,
+    attemptId: attempt.id,
+    taskId: attempt.task_id,
+    model,
+    endpoint: AI_USAGE_ENDPOINTS.transcriptions,
+    ...callUsage,
+    inputSizeBytes,
+    latencyMs,
+    metadata: { transcript_characters: transcript.length },
+  });
 
   // 5. Save the transcript and finish. audio_path stays untouched.
   const { error: saveError } = await supabase
