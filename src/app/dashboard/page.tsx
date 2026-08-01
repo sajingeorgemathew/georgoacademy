@@ -8,6 +8,7 @@ import { DashboardModuleGrid } from "@/components/dashboard/DashboardModuleGrid"
 import { DashboardProgressOverview } from "@/components/dashboard/DashboardProgressOverview";
 import { DashboardRecentFeedback } from "@/components/dashboard/DashboardRecentFeedback";
 import { DashboardRecommendedPractice } from "@/components/dashboard/DashboardRecommendedPractice";
+import { ExamShellPreviewLink } from "@/components/exam/ExamShellPreviewLink";
 import { DASHBOARD_MODULE_SLUGS } from "@/features/dashboard/dashboard-copy";
 import { getDashboardRecommendation } from "@/features/dashboard/dashboard-recommendations";
 import {
@@ -176,6 +177,12 @@ export default async function DashboardPage() {
             writing: summary.writing.feedbackReports,
           }}
         />
+      </div>
+
+      {/* EXAM-01: temporary internal link to the exam shell preview.
+          Remove this block once the practice test entry points ship. */}
+      <div className="mt-10">
+        <ExamShellPreviewLink />
       </div>
     </>
   );
