@@ -201,6 +201,62 @@ export const examMedia = {
   time: "shrink-0 text-[10px] leading-4 tabular-nums text-academy-navy/55",
 } as const;
 
+// Real video player, added by EXAM-02 for the instructional video
+// screens.
+//
+// The clip sits in a clean bordered area: a dark stage holding the video
+// itself, and a thin caption strip under it carrying the clip title and
+// its running time when one is known. The stage is aspect-video and the
+// element fills it, so the box keeps its shape on any width and the
+// screen never scrolls sideways.
+//
+// This is the same slot the grey ExamMediaPlaceholder reserves. A screen
+// swaps one for the other without changing the layout around it.
+export const examVideo = {
+  wrap: "min-w-0 overflow-hidden rounded-sm border border-academy-line bg-academy-paper",
+  stage: "relative aspect-video w-full min-w-0 bg-academy-navy-dark",
+  element: "absolute inset-0 block h-full w-full",
+  caption:
+    "flex min-w-0 flex-wrap items-center justify-between gap-x-3 gap-y-0.5 border-t border-academy-line px-3 py-1.5",
+  captionTitle:
+    "min-w-0 truncate text-[11px] font-semibold uppercase tracking-[0.06em] text-academy-navy/70",
+  captionMeta: "shrink-0 text-[11px] leading-4 tabular-nums text-academy-navy/55",
+  // Shown in place of the stage when the clip cannot load.
+  fallback:
+    "flex min-w-0 flex-col items-center justify-center gap-1 bg-academy-navy-soft px-4 py-8 text-center",
+  fallbackTitle: "text-[13px] font-semibold leading-5 text-academy-navy",
+  fallbackText: "max-w-md text-[11px] leading-4 text-academy-navy/60",
+} as const;
+
+// Section intro block at the top of an instruction screen.
+//
+// A quiet bordered strip, not a dashboard card: no shadow, no artwork, no
+// pill. It states which section the learner is about to start and, when
+// they are known, a few facts about it such as the number of parts.
+export const examIntroCard = {
+  card: "flex min-w-0 flex-col gap-1 rounded-sm border border-academy-line bg-academy-navy-soft/40 px-3 py-2.5",
+  label: "text-[11px] font-semibold uppercase tracking-[0.06em] text-academy-navy/55",
+  title: "text-sm font-semibold leading-5 text-academy-navy",
+  summary: "text-[13px] leading-5 text-academy-navy/80",
+  detailList: "mt-1 flex min-w-0 flex-wrap gap-x-4 gap-y-1",
+  detailItem: "flex min-w-0 items-baseline gap-1 text-[11px] leading-4",
+  detailLabel: "font-semibold uppercase tracking-[0.06em] text-academy-navy/50",
+  detailValue: "tabular-nums text-academy-navy/75",
+} as const;
+
+// Shared body scaffolding for the instruction and video screens.
+export const examScreenBody = {
+  stack: "flex min-w-0 flex-col gap-4",
+  // The player column is capped, so a wide screen does not stretch the
+  // clip across the full canvas.
+  videoStack: "mx-auto flex w-full min-w-0 max-w-3xl flex-col gap-3",
+  actions: "flex min-w-0 flex-wrap items-center gap-3",
+  // Quiet note under the list or the player.
+  notice:
+    "rounded-sm border border-academy-line bg-academy-navy-soft/35 px-3 py-2 text-[11px] leading-4 text-academy-navy/70",
+  hint: "text-[11px] leading-4 text-academy-navy/60",
+} as const;
+
 // Question progress line, for example Question 3 of 8.
 export const examProgress = {
   wrap: "flex min-w-0 flex-col gap-1.5",
