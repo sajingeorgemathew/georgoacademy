@@ -31,6 +31,18 @@
 // EXAM-03 completion placeholder, which announced an answer review that
 // did not exist yet.
 //
+// EXAM-05 added the ending option. Listening Part 2 has no review and no
+// score yet, so it closes on a single completion screen instead, and its
+// nine screen flow is:
+//
+//   1  part intro
+//   2  scenario
+//   3  conversation
+//   4  question 1
+//   ...
+//   8  question 5
+//   9  part complete
+//
 // House style: normal hyphens only, no long hyphens or em dashes.
 
 import type {
@@ -41,13 +53,31 @@ import type {
   ListeningScreen,
 } from "./listening-types";
 
+// How a part closes.
+//
+// "review" is the EXAM-04 ending: answer review, practice score, end of
+// part. "complete" is the EXAM-05 ending for a part whose review is not
+// built yet: one completion screen and nothing else.
+export type ListeningFlowEnding = "review" | "complete";
+
+export type ListeningFlowOptions = {
+  ending?: ListeningFlowEnding;
+};
+
 // Build the screen order for a part.
 //
 // A break screen is inserted before every section except the first, which
-// is what the source document does between the conversation sections.
+// is what the source document does between the conversation sections. A
+// one section part therefore gets no break screens at all.
+//
+// ending defaults to "review", so Listening Part 1 keeps its eighteen
+// screen flow without passing anything.
 export function buildListeningFlow(
   content: ListeningPartContent,
+  options: ListeningFlowOptions = {},
 ): ListeningScreen[] {
+  const { ending = "review" } = options;
+
   const screens: ListeningScreen[] = [
     { kind: "part-intro", id: `${content.sectionId}-intro` },
     { kind: "scenario", id: `${content.sectionId}-scenario` },
@@ -85,13 +115,53 @@ export function buildListeningFlow(
     });
   });
 
-  screens.push(
-    { kind: "answer-review", id: `${content.sectionId}-review` },
-    { kind: "score", id: `${content.sectionId}-score` },
-    { kind: "part-end", id: `${content.sectionId}-end` },
-  );
+  if (ending === "complete") {
+    screens.push({ kind: "part-complete", id: `${content.sectionId}-complete` });
+  } else {
+    screens.push(
+      { kind: "answer-review", id: `${content.sectionId}-review` },
+      { kind: "score", id: `${content.sectionId}-score` },
+      { kind: "part-end", id: `${content.sectionId}-end` },
+    );
+  }
 
   return screens;
+}
+
+// The same content with the answer key removed (EXAM-05).
+//
+// A complete answer key is fine on the server and wrong in the browser: a
+// client component receives its props as serialized data, so a key handed
+// down that way is readable by anyone who opens the network panel. Mock
+// Test 1 Listening Part 2 has a complete key, so its route strips it here
+// before rendering the prototype.
+//
+// Everything else is passed through untouched, including the answer sheet
+// image reference, which is a URL rather than a transcribed answer and is
+// not rendered anywhere in this ticket.
+//
+// This is not a substitute for scoring on the server. It keeps the
+// answers off the page for a prototype that does no marking. A screen
+// that marks answers has to do the comparison where the key lives.
+export function withoutListeningAnswerKey(
+  content: ListeningPartContent,
+): ListeningPartContent {
+  const stripped: ListeningPartContent = {
+    ...content,
+    // A per question key would leak the same way, so it goes too.
+    sections: content.sections.map((section) => ({
+      ...section,
+      questions: section.questions.map((question) => {
+        const copy = { ...question };
+        delete copy.correctOptionId;
+        return copy;
+      }),
+    })),
+  };
+
+  delete stripped.answerKey;
+
+  return stripped;
 }
 
 // Every question in the part, in order.
