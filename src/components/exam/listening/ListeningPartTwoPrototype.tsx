@@ -204,13 +204,13 @@ export function ListeningPartTwoPrototype({
           <ExamInstructionRow
             heading={
               failed
-                ? listeningCopy.part2MarkingFailedHeading
-                : listeningCopy.part2MarkingHeading
+                ? listeningCopy.markingFailedHeading
+                : listeningCopy.markingHeading
             }
             text={
               failed
-                ? listeningCopy.part2MarkingFailedText
-                : listeningCopy.part2MarkingText
+                ? listeningCopy.markingFailedText
+                : listeningCopy.markingText
             }
           />
 
@@ -221,7 +221,7 @@ export function ListeningPartTwoPrototype({
                 size="md"
                 onClick={() => void requestMarking(answers)}
               >
-                {listeningCopy.part2MarkingRetryLabel}
+                {listeningCopy.markingRetryLabel}
               </ExamButton>
             </div>
           ) : null}

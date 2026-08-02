@@ -125,40 +125,47 @@ export const listeningCopy = {
     "Prototype of Mock Test 1 Listening Part 2, with the telephone conversation audio, the five question screens, local answer selection, and the answer review and practice score screens.",
 
   // Marking screen, shown between the last question and the answer
-  // review while Listening Part 2 answers are checked (EXAM-06).
+  // review while a part's answers are checked (EXAM-06, renamed from the
+  // part2 prefix by EXAM-08).
   //
-  // Part 2 keeps its answer key on the server, so the review rows and
-  // the practice score are fetched rather than calculated in the
-  // browser. That is normally too fast to read, but it can fail, and a
-  // failure needs a screen that says so and offers another go.
+  // A part that keeps its answer key on the server has its review rows
+  // and its practice score fetched rather than calculated in the browser.
+  // That is normally too fast to read, but it can fail, and a failure
+  // needs a screen that says so and offers another go.
+  //
+  // Not one of these strings ever named a part, so EXAM-08 dropped the
+  // part2 prefix rather than adding an identical part3 copy of each.
+  // Listening Parts 2 and 3 both read them.
   //
   // The wording is about the check, never about the answers. Nothing
   // here implies a result before one exists.
-  part2MarkingHeading: "Checking your answers",
-  part2MarkingText:
+  markingHeading: "Checking your answers",
+  markingText:
     "Your answers are being checked. This takes a moment, and nothing is saved.",
-  part2MarkingFailedHeading: "Your answers could not be checked",
-  part2MarkingFailedText:
+  markingFailedHeading: "Your answers could not be checked",
+  markingFailedText:
     "The answer review could not be loaded. Check your connection, confirm you are still signed in, and try again. Your answers are still held on this page.",
-  part2MarkingRetryLabel: "Try again",
+  markingRetryLabel: "Try again",
 
-  // Listening Part 3 (EXAM-07).
+  // Listening Part 3 (EXAM-07, closing screens added by EXAM-08).
   //
   // Same reason Part 2 has its own block: "Listening Part 3" is not any
   // field on the content object. partTitle is the section name,
   // "Listening for Information", and title is the full practice test
   // heading.
   //
-  // Part 3 closes on the completion screen, the way Part 2 did before its
-  // review and score were built, so it borrows partCompletePendingReview
-  // above rather than declaring its own.
-  part3CompleteHeading: "Listening Part 3 complete",
-  part3RestartLabel: "Restart Listening Part 3",
+  // part3CompleteHeading and part3RestartLabel are gone. Part 3 closed on
+  // the EXAM-05 completion screen for one ticket, and now ends on the
+  // answer review, the practice score and the end of part screen, whose
+  // wording is built by listening-review-copy.ts. Retiring the pair was
+  // follow up item 6 in docs/product/listening-part-3-prototype.md. The
+  // part2 pair above is left in place as the template for the first cut
+  // of a part that has no review yet.
   part3PreviewTitle: "Mock Test 1 Listening Part 3 Prototype",
   part3PreviewSummary:
     "Internal preview of Listening Part 3, Listening for Information, built from Mock Test 1 content. Answers are held on the page only and nothing is saved.",
   part3PreviewDescription:
-    "Prototype of Mock Test 1 Listening Part 3, with the university workplace conversation audio, the six question screens, and local answer selection.",
+    "Prototype of Mock Test 1 Listening Part 3, with the university workplace conversation audio, the six question screens, local answer selection, and the answer review and practice score screens.",
 } as const;
 
 // Answered line on the completion screen, for example

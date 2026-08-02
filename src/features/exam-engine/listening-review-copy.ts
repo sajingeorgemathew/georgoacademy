@@ -154,6 +154,15 @@ export const listeningPartTwoReviewCopy = buildListeningReviewCopy({
   nextPartLabel: "Listening Part 3",
 });
 
+// Listening Part 3 (EXAM-08).
+//
+// Three lines of configuration and no component change, which is what
+// buildListeningReviewCopy was factored out for in EXAM-06.
+export const listeningPartThreeReviewCopy = buildListeningReviewCopy({
+  partLabel: "Listening Part 3",
+  nextPartLabel: "Listening Part 4",
+});
+
 // Status labels for the review table. Short, plain, and not a badge.
 export const listeningReviewStatusLabels: Record<
   ListeningReviewStatus,

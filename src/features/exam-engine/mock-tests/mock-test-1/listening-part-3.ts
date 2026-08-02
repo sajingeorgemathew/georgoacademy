@@ -47,10 +47,16 @@ import type { ListeningAnswerKeyEntry } from "@/features/exam-engine/listening-r
 //
 // The key is complete, so shipping it to the browser would hand a learner
 // the answers. The Part 3 route strips it with withoutListeningAnswerKey
-// before rendering, the same way the Part 2 route does, and the ticket
-// that builds Part 3 review and scoring has to keep the comparison on the
-// server for the same reason. See
-// docs/product/listening-part-3-prototype.md section 6.
+// before rendering, the same way the Part 2 route does. EXAM-08 kept that
+// and marked answers where the key lives: markListeningPartThree in
+// src/app/dashboard/mock-tests/mock-test-1/listening/part-3/actions.ts
+// compares on the server and returns only the finished review rows and
+// score summary. Nothing here is rendered on a question screen. See
+// docs/product/listening-part-3-review-score.md section 3.
+//
+// EXAM-08 re-checked all six entries against the answer texts in the
+// ticket and changed none of them. Every id below is the option whose
+// text matches the confirmed answer exactly.
 const ANSWER_KEY: ListeningAnswerKeyEntry[] = [
   // He wants her to add a new task to her duties.
   { questionId: "listening-part-3-q1", correctOptionId: "listening-part-3-q1-d", source: "answer-image" },
