@@ -41,12 +41,31 @@ export const examCopy = {
   // player behind them.
   mediaPlaceholderTime: "0:00",
 
-  // Internal preview route. This wording marks the shell preview as a
-  // staff facing page, so nobody mistakes it for a practice test.
+  // Instruction and instructional video screens (EXAM-02).
+  instructionalVideoLabel: "Instructional video",
+  continueWhenReadyLabel: "Continue when you are ready",
+  skipVideoLabel: "Skip video",
+  // Accessible name for the player, so a screen reader announces the clip
+  // rather than an unlabelled media element.
+  videoPlayerLabel: "Instructional video player",
+  // Shown in the player area when the clip cannot load, for example a
+  // missing file or a dropped connection.
+  videoFallbackHeading: "This video cannot be played right now",
+  videoFallbackText:
+    "Check your connection and reload the page to try again. You can continue when you are ready.",
+  // Shown by a browser that cannot play video at all.
+  videoUnsupportedText:
+    "Your browser cannot play this instructional video. You can continue when you are ready.",
+
+  // Internal preview routes. This wording marks the previews as staff
+  // facing pages, so nobody mistakes one for a practice test.
   previewBadge: "Internal preview",
   previewTitle: "Practice test shell preview",
   previewSummary:
     "Internal preview of the practice test screen shell. Layout only, with placeholder text in every sample. No practice test content, no official screenshot, and no CELPIP branding appears here.",
+  instructionPreviewTitle: "Practice test instruction screens preview",
+  instructionPreviewSummary:
+    "Internal preview of the instruction and instructional video screens. Layout only, with placeholder instruction text. The Toronto Academy instructional videos are real, and no practice test content, official screenshot, or CELPIP branding appears here.",
 
   // The one estimate disclaimer used across the app. Reused, not
   // rewritten, so the exam engine and the dashboard cannot drift.

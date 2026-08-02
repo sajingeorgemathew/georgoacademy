@@ -179,8 +179,9 @@ export default async function DashboardPage() {
         />
       </div>
 
-      {/* EXAM-01: temporary internal link to the exam shell preview.
-          Remove this block once the practice test entry points ship. */}
+      {/* EXAM-01 and EXAM-02: temporary internal links to the exam shell
+          preview and the instruction screens preview. Remove this block
+          once the practice test entry points ship. */}
       <div className="mt-10">
         <ExamShellPreviewLink />
       </div>
