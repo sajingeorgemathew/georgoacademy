@@ -1,12 +1,17 @@
 import Link from "next/link";
 import { cx, focus } from "@/features/design/design-tokens";
 import { examCopy } from "@/features/exam-engine/exam-copy";
+import { listeningCopy } from "@/features/exam-engine/listening-copy";
 
 // Temporary dashboard entry point for the exam engine previews.
 //
 // EXAM-01 added the shell preview link. EXAM-02 added the instruction
-// screens preview beside it, so both internal routes are reachable from
-// one place.
+// screens preview beside it, and EXAM-03 added the Listening Part 1
+// prototype, so all three internal routes are reachable from one place.
+//
+// The Listening Part 1 entry is a prototype built on real Mock Test 1
+// content, not placeholder text, which is why its description says so. It
+// is still an internal preview and not a student facing mock test entry.
 //
 // The preview routes are not in navigation and never should be, so
 // without these cards the only way to reach them is by typing the URL.
@@ -30,6 +35,11 @@ const PREVIEW_LINKS = [
     title: examCopy.instructionPreviewTitle,
     description:
       "Layout preview of the instruction and instructional video screens, using placeholder instruction text.",
+  },
+  {
+    href: "/dashboard/mock-tests/mock-test-1/listening/part-1",
+    title: listeningCopy.previewTitle,
+    description: listeningCopy.previewDescription,
   },
 ];
 

@@ -32,6 +32,7 @@ import type {
   ExamPanelTone,
   ExamTimerState,
 } from "./exam-shell-types";
+import type { ListeningReviewStatus } from "./listening-review-types";
 
 // Outer page, centred container, and the framed test window.
 //
@@ -263,6 +264,131 @@ export const examProgress = {
   label: "text-[11px] font-semibold uppercase tracking-[0.06em] text-academy-navy/70",
   track: "h-1 w-full overflow-hidden rounded-full bg-academy-navy/12",
   fill: "h-full rounded-full bg-academy-blue transition-[width] duration-300",
+} as const;
+
+// Native audio player, added by EXAM-03 for the Listening screens.
+//
+// Same idea as examVideo above: a bordered box holding the player, and a
+// thin caption strip under it carrying the clip name and its running time
+// when one is known. There is no dark stage, because an audio element has
+// no picture, so the control bar sits on the paper background and gets a
+// little breathing room around it.
+export const examAudio = {
+  wrap: "min-w-0 overflow-hidden rounded-sm border border-academy-line bg-academy-paper",
+  stage: "min-w-0 bg-academy-navy-soft/35 px-3 py-3",
+  element: "block h-10 w-full min-w-0",
+  caption:
+    "flex min-w-0 flex-wrap items-center justify-between gap-x-3 gap-y-0.5 border-t border-academy-line px-3 py-1.5",
+  captionTitle:
+    "min-w-0 truncate text-[11px] font-semibold uppercase tracking-[0.06em] text-academy-navy/70",
+  captionMeta:
+    "shrink-0 text-[11px] leading-4 tabular-nums text-academy-navy/55",
+  // Shown in place of the control bar when the clip cannot load.
+  fallback:
+    "flex min-w-0 flex-col items-center justify-center gap-1 bg-academy-navy-soft px-4 py-6 text-center",
+  fallbackTitle: "text-[13px] font-semibold leading-5 text-academy-navy",
+  fallbackText: "max-w-md text-[11px] leading-4 text-academy-navy/60",
+} as const;
+
+// Listening screens (EXAM-03).
+//
+// The answer side of a question screen is a compact radio list with a
+// horizontal rule between rows, matching the reference layout: no card
+// per option, no pill, and no icon. The whole row is the click target, so
+// a learner never has to hit the small circle itself.
+//
+// The scenario picture is capped and centred rather than stretched, so a
+// wide canvas does not blow the illustration up past its natural size.
+export const examListening = {
+  optionList: "flex min-w-0 flex-col",
+  optionRow:
+    "flex min-w-0 cursor-pointer items-start gap-2.5 border-b border-academy-line/70 py-2 last:border-b-0 hover:bg-academy-paper/60",
+  optionRowSelected: "bg-academy-paper/80",
+  optionInput:
+    "mt-0.5 h-3.5 w-3.5 shrink-0 accent-academy-blue focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-academy-blue",
+  optionText: "min-w-0 text-[13px] leading-5 text-academy-navy",
+  // Question number line at the top of the answer panel.
+  answerHeader:
+    "flex min-w-0 flex-col gap-1 border-b border-academy-line/70 pb-2",
+  scenarioFigure: "mx-auto flex w-full min-w-0 max-w-xl flex-col gap-1.5",
+  scenarioImage:
+    "block h-auto w-full min-w-0 rounded-sm border border-academy-line bg-academy-navy-soft/35",
+  scenarioCaption: "text-[11px] leading-4 text-academy-navy/60",
+  // Column stack on the audio and question screens.
+  mediaStack: "mx-auto flex w-full min-w-0 max-w-2xl flex-col gap-3",
+  columnStack: "flex min-w-0 flex-col gap-3",
+} as const;
+
+// Listening answer review and practice score screens (EXAM-04).
+//
+// The review table is result table chrome, not a dashboard list: hairline
+// rules, a grey header row, tight rows, and tabular figures in the
+// question column. Status is a word in its own column, coloured and
+// weighted, with no pill, no dot and no badge, so a long table of them
+// stays readable.
+//
+// The table scrolls inside its own wrapper on a narrow screen, so the
+// exam frame never scrolls sideways.
+export const examReview = {
+  wrap: "min-w-0 overflow-x-auto rounded-sm border border-academy-line",
+  table: "w-full min-w-[36rem] border-collapse text-left",
+  caption: "sr-only",
+  headRow: "bg-academy-navy-soft/55",
+  headCell:
+    "border-b border-academy-line px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-academy-navy/65",
+  row: "border-b border-academy-line/70 last:border-b-0 align-top",
+  cell: "px-3 py-2 text-[13px] leading-5 text-academy-navy/85",
+  numberCell:
+    "px-3 py-2 text-[13px] leading-5 font-semibold tabular-nums whitespace-nowrap text-academy-navy",
+  // Used for a cell with nothing in it yet, for example a correct answer
+  // that has not been transcribed.
+  emptyCell: "px-3 py-2 text-[13px] leading-5 text-academy-navy/45",
+  statusCell: "px-3 py-2 text-[13px] leading-5 font-semibold whitespace-nowrap",
+  // Explanation line under a row, when the source gives one.
+  explanation: "mt-0.5 block text-[11px] leading-4 text-academy-navy/60",
+  // Reference panel holding the answer and explanation sheet.
+  referenceStack: "flex min-w-0 flex-col gap-2",
+  referenceToggle:
+    "cursor-pointer text-[13px] font-semibold leading-5 text-academy-blue underline underline-offset-2",
+  referenceFigure: "mt-2 flex w-full min-w-0 flex-col gap-1.5",
+  referenceImage:
+    "block h-auto w-full min-w-0 rounded-sm border border-academy-line bg-academy-navy-soft/35",
+  referenceCaption: "text-[11px] leading-4 text-academy-navy/60",
+} as const;
+
+// Status colours for the review table.
+//
+// pending is deliberately the same quiet navy as an unanswered row. It is
+// a statement about the answer key, not about the learner, so it must not
+// read as a red mark.
+export const examReviewStatusTones: Record<ListeningReviewStatus, string> = {
+  correct: "text-academy-blue",
+  incorrect: "text-academy-red",
+  unanswered: "text-academy-navy/55",
+  "answer-key-pending": "text-academy-navy/55",
+};
+
+// Practice score summary.
+//
+// A bordered strip of readings on the white canvas, not a dashboard card:
+// no shadow, no artwork, no rounded pill. The headline reading is larger
+// than the rest, and every reading is tabular so the row does not shift
+// as numbers change.
+export const examScore = {
+  card: "flex min-w-0 flex-col gap-3 rounded-sm border border-academy-line bg-academy-navy-soft/35 px-4 py-3.5",
+  grid: "grid min-w-0 grid-cols-2 gap-x-4 gap-y-3 sm:grid-cols-4",
+  item: "flex min-w-0 flex-col gap-0.5",
+  label: "text-[11px] font-semibold uppercase tracking-[0.06em] text-academy-navy/55",
+  value: "text-sm font-semibold leading-5 tabular-nums text-academy-navy",
+  headlineValue: "text-xl font-semibold leading-7 tabular-nums text-academy-navy",
+  pendingValue: "text-sm font-semibold leading-5 text-academy-navy/45",
+  // Pending block shown in place of a score.
+  pending:
+    "flex min-w-0 flex-col gap-1 rounded-sm border border-academy-line bg-academy-paper px-3 py-2.5",
+  pendingHeading: "text-[13px] font-semibold leading-5 text-academy-navy",
+  pendingText: "text-[11px] leading-4 text-academy-navy/70",
+  // Practice result disclaimer under the readings.
+  note: "text-[11px] leading-4 text-academy-navy/60",
 } as const;
 
 // Shared body text tones inside the canvas. Exam copy runs tighter than
