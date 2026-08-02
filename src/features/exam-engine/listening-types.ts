@@ -150,7 +150,12 @@ export type ListeningScreen =
   // had nowhere to send the learner.
   | { kind: "answer-review"; id: string }
   | { kind: "score"; id: string }
-  | { kind: "part-end"; id: string };
+  | { kind: "part-end"; id: string }
+  // Closing screen for a part whose review and score are not built yet,
+  // added by EXAM-05. It ends the run with a count of what was answered
+  // and a plain sentence about what is coming, so a part can ship before
+  // its review does. Listening Part 2 uses this; Part 1 does not.
+  | { kind: "part-complete"; id: string };
 
 // Narrowed screen kinds, for a component that only handles one of them.
 export type ListeningQuestionScreenRef = Extract<

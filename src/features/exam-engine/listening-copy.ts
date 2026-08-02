@@ -72,6 +72,18 @@ export const listeningCopy = {
   // and the end of part screen in their place, and their wording lives in
   // listening-review-copy.ts.
 
+  // Completion screen for a part whose review and score are not built yet
+  // (EXAM-05). Listening Part 2 closes on this.
+  //
+  // The review line is a plain sentence, not a greyed out button, for the
+  // same reason ListeningPartEndScreen gives: there is nothing to press,
+  // and a disabled control implies there will be in a moment.
+  partCompletePendingReview:
+    "The answer review and the practice score for this part are added in the next ticket.",
+  partCompleteNotice:
+    "Nothing from this run has been saved. Restarting clears the answers held on this page.",
+  partCompleteBackToDashboardLabel: "Back to dashboard",
+
   // Audio player.
   audioPlayerLabel: "Practice test audio player",
   audioFallbackHeading: "This audio cannot be played right now",
@@ -86,7 +98,32 @@ export const listeningCopy = {
     "Internal preview of the first Listening part built from Mock Test 1 content. Answers are held on the page only, nothing is saved, and the practice score waits on the answer key.",
   previewDescription:
     "Prototype of Mock Test 1 Listening Part 1, with the conversation audio, the eight question screens, local answer selection, and the answer review and practice score screens.",
+
+  // Listening Part 2 (EXAM-05).
+  //
+  // Part specific wording lives here rather than being derived from the
+  // content object, because "Listening Part 2" is not any field on it:
+  // partTitle is the section name, "Listening to a Daily Life
+  // Conversation", and title is the full practice test heading.
+  part2CompleteHeading: "Listening Part 2 complete",
+  part2RestartLabel: "Restart Listening Part 2",
+  part2PreviewTitle: "Mock Test 1 Listening Part 2 Prototype",
+  part2PreviewSummary:
+    "Internal preview of Listening Part 2, Listening to a Daily Life Conversation, built from Mock Test 1 content. Answers are held on the page only and nothing is saved.",
+  part2PreviewDescription:
+    "Prototype of Mock Test 1 Listening Part 2, with the telephone conversation audio, the five question screens, and local answer selection. The answer review and the practice score are not built yet.",
 } as const;
+
+// Answered line on the completion screen, for example
+// "You answered 5 of 5 questions."
+export function formatListeningAnsweredMessage(
+  answered: number,
+  total: number,
+): string {
+  return `You answered ${answered} of ${total} question${
+    total === 1 ? "" : "s"
+  }.`;
+}
 
 // Ordinal words for the section labels and the break lines. Part 1 has
 // three sections and no Listening part has more, so the list is short on
