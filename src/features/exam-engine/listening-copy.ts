@@ -111,7 +111,25 @@ export const listeningCopy = {
   part2PreviewSummary:
     "Internal preview of Listening Part 2, Listening to a Daily Life Conversation, built from Mock Test 1 content. Answers are held on the page only and nothing is saved.",
   part2PreviewDescription:
-    "Prototype of Mock Test 1 Listening Part 2, with the telephone conversation audio, the five question screens, and local answer selection. The answer review and the practice score are not built yet.",
+    "Prototype of Mock Test 1 Listening Part 2, with the telephone conversation audio, the five question screens, local answer selection, and the answer review and practice score screens.",
+
+  // Marking screen, shown between the last question and the answer
+  // review while Listening Part 2 answers are checked (EXAM-06).
+  //
+  // Part 2 keeps its answer key on the server, so the review rows and
+  // the practice score are fetched rather than calculated in the
+  // browser. That is normally too fast to read, but it can fail, and a
+  // failure needs a screen that says so and offers another go.
+  //
+  // The wording is about the check, never about the answers. Nothing
+  // here implies a result before one exists.
+  part2MarkingHeading: "Checking your answers",
+  part2MarkingText:
+    "Your answers are being checked. This takes a moment, and nothing is saved.",
+  part2MarkingFailedHeading: "Your answers could not be checked",
+  part2MarkingFailedText:
+    "The answer review could not be loaded. Check your connection, confirm you are still signed in, and try again. Your answers are still held on this page.",
+  part2MarkingRetryLabel: "Try again",
 } as const;
 
 // Answered line on the completion screen, for example

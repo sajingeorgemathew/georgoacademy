@@ -7,6 +7,7 @@ import {
   listeningReviewCopy,
   listeningReviewStatusLabels,
 } from "@/features/exam-engine/listening-review-copy";
+import type { ListeningReviewCopy } from "@/features/exam-engine/listening-review-copy";
 import type { ListeningReviewRow } from "@/features/exam-engine/listening-review-types";
 
 // Answer review table for a Listening part (EXAM-04).
@@ -23,34 +24,39 @@ import type { ListeningReviewRow } from "@/features/exam-engine/listening-review
 //
 // Presentational only. It receives rows already built by
 // buildListeningReviewRows and looks nothing up itself.
+//
+// EXAM-06 added the copy prop. Only the table caption is part specific,
+// but the caption names the part out loud to a screen reader, so it has
+// to say the right one.
 
 export type ListeningAnswerReviewTableProps = {
   rows: ListeningReviewRow[];
+  // Wording for the part. Defaults to Listening Part 1.
+  copy?: ListeningReviewCopy;
 };
 
 export function ListeningAnswerReviewTable({
   rows,
+  copy = listeningReviewCopy,
 }: ListeningAnswerReviewTableProps) {
   return (
     <div className={examReview.wrap}>
       <table className={examReview.table}>
-        <caption className={examReview.caption}>
-          {listeningReviewCopy.tableCaption}
-        </caption>
+        <caption className={examReview.caption}>{copy.tableCaption}</caption>
 
         <thead>
           <tr className={examReview.headRow}>
             <th scope="col" className={examReview.headCell}>
-              {listeningReviewCopy.columnQuestion}
+              {copy.columnQuestion}
             </th>
             <th scope="col" className={examReview.headCell}>
-              {listeningReviewCopy.columnSelected}
+              {copy.columnSelected}
             </th>
             <th scope="col" className={examReview.headCell}>
-              {listeningReviewCopy.columnCorrect}
+              {copy.columnCorrect}
             </th>
             <th scope="col" className={examReview.headCell}>
-              {listeningReviewCopy.columnStatus}
+              {copy.columnStatus}
             </th>
           </tr>
         </thead>
@@ -72,7 +78,7 @@ export function ListeningAnswerReviewTable({
                       : examReview.emptyCell
                   }
                 >
-                  {row.selectedOptionText ?? listeningReviewCopy.noAnswerText}
+                  {row.selectedOptionText ?? copy.noAnswerText}
                 </td>
 
                 <td
@@ -80,8 +86,7 @@ export function ListeningAnswerReviewTable({
                     hasCorrectAnswer ? examReview.cell : examReview.emptyCell
                   }
                 >
-                  {row.correctOptionText ??
-                    listeningReviewCopy.pendingAnswerText}
+                  {row.correctOptionText ?? copy.pendingAnswerText}
 
                   {row.explanation ? (
                     <span className={examReview.explanation}>

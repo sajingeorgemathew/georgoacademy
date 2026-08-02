@@ -4,6 +4,7 @@ import { ExamShell } from "../ExamShell";
 import { ListeningAnswerReviewTable } from "./ListeningAnswerReviewTable";
 import { examReview, examScreenBody } from "@/features/exam-engine/exam-theme";
 import { listeningReviewCopy } from "@/features/exam-engine/listening-review-copy";
+import type { ListeningReviewCopy } from "@/features/exam-engine/listening-review-copy";
 import type { ListeningReviewRow } from "@/features/exam-engine/listening-review-types";
 
 // Answer review screen for a Listening part (EXAM-04).
@@ -17,15 +18,17 @@ import type { ListeningReviewRow } from "@/features/exam-engine/listening-review
 // prototype behaviour, kept for the same reason Back is enabled on every
 // EXAM-03 screen: the sequence has to be walkable during review.
 //
-// The answer and explanation sheet is optional and collapsed. For Mock
-// Test 1 the Listening answer key exists only as that image, so a learner
-// can check by hand while the key is untranscribed, but it is behind a
-// disclosure so opening the review does not put the answers on screen
-// unasked. The image is referenced from Cloudinary and never downloaded,
-// and it is a plain img rather than next/image for the reason recorded in
+// The answer and explanation sheet is optional and collapsed. It is the
+// source the transcribed key was read off, so a learner can check the
+// correct answer column against it, but it is behind a disclosure so
+// opening the review does not put the sheet on screen unasked. The image
+// is referenced from Cloudinary and never downloaded, and it is a plain
+// img rather than next/image for the reason recorded in
 // ListeningScenarioScreen.
 //
-// No state of its own. The rows arrive already built.
+// No state of its own. The rows arrive already built, from wherever the
+// answer key happens to live: Part 1 builds them in the browser, Part 2
+// builds them on the server and sends the finished rows down.
 
 export type ListeningAnswerReviewScreenProps = {
   // Exam frame title, normally the part title from the content object.
@@ -34,6 +37,8 @@ export type ListeningAnswerReviewScreenProps = {
   // Answer and explanation sheet, when the source publishes one.
   explanationImageUrl?: string;
   explanationImageAlt?: string;
+  // Wording for the part. Defaults to Listening Part 1.
+  copy?: ListeningReviewCopy;
   metaText?: string;
   onNext?: () => void;
   onBack?: () => void;
@@ -45,6 +50,7 @@ export function ListeningAnswerReviewScreen({
   rows,
   explanationImageUrl,
   explanationImageAlt,
+  copy = listeningReviewCopy,
   metaText,
   onNext,
   onBack,
@@ -54,31 +60,28 @@ export function ListeningAnswerReviewScreen({
     <ExamShell
       title={title}
       metaText={metaText}
-      nextLabel={listeningReviewCopy.viewScoreLabel}
+      nextLabel={copy.viewScoreLabel}
       onNext={onNext}
       onBack={onBack}
       showBack={showBack}
-      backLabel={listeningReviewCopy.backToQuestionsLabel}
+      backLabel={copy.backToQuestionsLabel}
     >
       <div className={examScreenBody.stack}>
         <ExamInstructionRow
-          heading={listeningReviewCopy.reviewTitle}
-          text={listeningReviewCopy.reviewSubtitle}
+          heading={copy.reviewTitle}
+          text={copy.reviewSubtitle}
         />
 
-        <ListeningAnswerReviewTable rows={rows} />
+        <ListeningAnswerReviewTable rows={rows} copy={copy} />
 
         {explanationImageUrl ? (
-          <ExamPanel
-            title={listeningReviewCopy.explanationPanelTitle}
-            tone="muted"
-          >
+          <ExamPanel title={copy.explanationPanelTitle} tone="muted">
             <div className={examReview.referenceStack}>
-              <p>{listeningReviewCopy.explanationPanelIntro}</p>
+              <p>{copy.explanationPanelIntro}</p>
 
               <details>
                 <summary className={examReview.referenceToggle}>
-                  {listeningReviewCopy.explanationToggleLabel}
+                  {copy.explanationToggleLabel}
                 </summary>
 
                 <figure className={examReview.referenceFigure}>
@@ -87,16 +90,13 @@ export function ListeningAnswerReviewScreen({
                       downloaded. See ListeningScenarioScreen. */}
                   <img
                     src={explanationImageUrl}
-                    alt={
-                      explanationImageAlt ??
-                      listeningReviewCopy.explanationImageCaption
-                    }
+                    alt={explanationImageAlt ?? copy.explanationImageCaption}
                     className={examReview.referenceImage}
                     loading="lazy"
                     decoding="async"
                   />
                   <figcaption className={examReview.referenceCaption}>
-                    {listeningReviewCopy.explanationImageCaption}
+                    {copy.explanationImageCaption}
                   </figcaption>
                 </figure>
               </details>
@@ -104,9 +104,7 @@ export function ListeningAnswerReviewScreen({
           </ExamPanel>
         ) : null}
 
-        <p className={examScreenBody.notice}>
-          {listeningReviewCopy.reviewNotice}
-        </p>
+        <p className={examScreenBody.notice}>{copy.reviewNotice}</p>
       </div>
     </ExamShell>
   );

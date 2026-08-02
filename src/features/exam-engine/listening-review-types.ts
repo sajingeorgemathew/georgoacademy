@@ -74,3 +74,17 @@ export type ListeningScoreSummary = {
   // How many questions have no usable correct option yet.
   missingKeyCount: number;
 };
+
+// A marked part: everything the review and score screens need, and
+// nothing else (EXAM-06).
+//
+// This exists so a part whose answer key stays on the server can be
+// marked there and hand back only the result. The rows carry the correct
+// option text for the questions the learner has now finished, which is
+// the point at which showing it is fair, and the summary carries the
+// counts. Neither carries the key itself, so nothing here lets a caller
+// work out an answer it was not given.
+export type ListeningMarkedPart = {
+  rows: ListeningReviewRow[];
+  summary: ListeningScoreSummary;
+};
