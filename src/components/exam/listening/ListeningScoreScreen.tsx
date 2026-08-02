@@ -4,6 +4,7 @@ import { ExamShell } from "../ExamShell";
 import { ListeningScoreSummaryCard } from "./ListeningScoreSummaryCard";
 import { examListening, examScreenBody } from "@/features/exam-engine/exam-theme";
 import { listeningReviewCopy } from "@/features/exam-engine/listening-review-copy";
+import type { ListeningReviewCopy } from "@/features/exam-engine/listening-review-copy";
 import type { ListeningScoreSummary } from "@/features/exam-engine/listening-review-types";
 
 // Practice score screen for a Listening part (EXAM-04).
@@ -23,6 +24,8 @@ export type ListeningScoreScreenProps = {
   // Exam frame title, normally the part title from the content object.
   title: string;
   summary: ListeningScoreSummary;
+  // Wording for the part. Defaults to Listening Part 1.
+  copy?: ListeningReviewCopy;
   onEndPart?: () => void;
   onReviewAnswers?: () => void;
   metaText?: string;
@@ -33,6 +36,7 @@ export type ListeningScoreScreenProps = {
 export function ListeningScoreScreen({
   title,
   summary,
+  copy = listeningReviewCopy,
   onEndPart,
   onReviewAnswers,
   metaText,
@@ -46,20 +50,17 @@ export function ListeningScoreScreen({
       showNext={false}
       onBack={onBack}
       showBack={showBack}
-      backLabel={listeningReviewCopy.reviewAnswersLabel}
+      backLabel={copy.reviewAnswersLabel}
     >
       <div className={examScreenBody.stack}>
-        <ExamInstructionRow
-          heading={listeningReviewCopy.scoreTitle}
-          text={listeningReviewCopy.scoreSubtitle}
-        />
+        <ExamInstructionRow heading={copy.scoreTitle} text={copy.scoreSubtitle} />
 
         <div className={examListening.mediaStack}>
-          <ListeningScoreSummaryCard summary={summary} />
+          <ListeningScoreSummaryCard summary={summary} copy={copy} />
 
           <div className={examScreenBody.actions}>
             <ExamButton variant="primary" size="md" onClick={onEndPart}>
-              {listeningReviewCopy.endPartLabel}
+              {copy.endPartLabel}
             </ExamButton>
 
             <ExamButton
@@ -68,7 +69,7 @@ export function ListeningScoreScreen({
               onClick={onReviewAnswers}
               uppercase={false}
             >
-              {listeningReviewCopy.reviewAnswersLabel}
+              {copy.reviewAnswersLabel}
             </ExamButton>
           </div>
         </div>

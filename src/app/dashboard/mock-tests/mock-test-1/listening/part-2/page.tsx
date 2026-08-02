@@ -7,6 +7,7 @@ import { examCopy } from "@/features/exam-engine/exam-copy";
 import { withoutListeningAnswerKey } from "@/features/exam-engine/listening-flow";
 import { listeningCopy } from "@/features/exam-engine/listening-copy";
 import { listeningPart2 } from "@/features/exam-engine/mock-tests/mock-test-1/listening-part-2";
+import { markListeningPartTwo } from "./actions";
 
 export const metadata: Metadata = {
   title: "Mock Test 1 Listening Part 2 prototype - Toronto Academy of Education",
@@ -15,12 +16,12 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-// Mock Test 1 Listening Part 2 prototype (EXAM-05).
+// Mock Test 1 Listening Part 2 prototype (EXAM-05, closing screens added
+// by EXAM-06).
 //
-// The nine screen sequence for Listening Part 2: the part intro, the
+// The eleven screen sequence for Listening Part 2: the part intro, the
 // scenario, one telephone conversation clip, five question screens, then
-// a completion screen. There is no answer review and no practice score in
-// this ticket; EXAM-06 adds both.
+// the answer review, the practice score and the end of part screen.
 //
 // This is an internal preview. Answers are held in the browser for the
 // length of the visit and nothing is saved. The standing notice above the
@@ -36,13 +37,20 @@ export const metadata: Metadata = {
 // client component, so handing it the content object whole would ship the
 // answers to the browser where anyone could read them out of the flight
 // data. withoutListeningAnswerKey strips the key here, on the server,
-// before the content crosses the boundary. Part 1 does not do this
-// because every entry in its key is still pending, and its own route file
-// records that the day the key lands is the day it has to change.
+// before the content crosses the boundary.
 //
-// The consequence for EXAM-06: the answer review and the score cannot be
-// computed inside the prototype component. They need the key, and the key
-// stays on this side of the boundary.
+// EXAM-06 kept that. The answer review and the practice score need the
+// key, so they are worked out where the key is: markListeningPartTwo in
+// ./actions.ts runs the EXAM-04 scoring helpers on the server and returns
+// the finished rows and summary. The prototype still holds the answers in
+// local React state and still saves nothing. The key is the only thing
+// that stays behind, and it stays behind in both directions.
+//
+// Part 1 does not do any of this. Its key is now transcribed too, so the
+// same reasoning applies to it and it still ships the key to the browser.
+// Moving Part 1 across is recorded as follow up work in
+// docs/product/listening-part-2-review-score.md section 7, and was left
+// out of this ticket because it is a Part 1 change.
 
 export default async function ListeningPartTwoPrototypePage() {
   const supabase = await createSupabaseServerClient();
@@ -74,11 +82,15 @@ export default async function ListeningPartTwoPrototypePage() {
           </span>{" "}
           this is a Toronto Academy practice prototype, not the official CELPIP
           test. Your answers stay on this page and nothing is saved. The answer
-          review and the practice score for this part are not built yet. Audio
-          can be replayed and the timer does not count down yet.
+          review and the practice score run for this visit only and are not an
+          official CELPIP score. Audio can be replayed and the timer does not
+          count down yet.
         </p>
 
-        <ListeningPartTwoPrototype content={learnerContent} />
+        <ListeningPartTwoPrototype
+          content={learnerContent}
+          markAnswers={markListeningPartTwo}
+        />
       </div>
     </AppPageShell>
   );

@@ -5,6 +5,7 @@ import {
   formatListeningScorePercent,
   listeningReviewCopy,
 } from "@/features/exam-engine/listening-review-copy";
+import type { ListeningReviewCopy } from "@/features/exam-engine/listening-review-copy";
 import type { ListeningScoreSummary } from "@/features/exam-engine/listening-review-types";
 
 // Practice score summary for a Listening part (EXAM-04).
@@ -25,10 +26,15 @@ import type { ListeningScoreSummary } from "@/features/exam-engine/listening-rev
 
 export type ListeningScoreSummaryCardProps = {
   summary: ListeningScoreSummary;
+  // Wording for the part. Every reading on this card happens to be part
+  // neutral today, so the prop exists to keep one copy object flowing
+  // through the whole score screen rather than two.
+  copy?: ListeningReviewCopy;
 };
 
 export function ListeningScoreSummaryCard({
   summary,
+  copy = listeningReviewCopy,
 }: ListeningScoreSummaryCardProps) {
   const {
     totalQuestions,
@@ -44,14 +50,14 @@ export function ListeningScoreSummaryCard({
       <div className={examScore.grid}>
         <div className={examScore.item}>
           <span className={examScore.label}>
-            {listeningReviewCopy.totalQuestionsLabel}
+            {copy.totalQuestionsLabel}
           </span>
           <span className={examScore.value}>{totalQuestions}</span>
         </div>
 
         <div className={examScore.item}>
           <span className={examScore.label}>
-            {listeningReviewCopy.answeredLabel}
+            {copy.answeredLabel}
           </span>
           <span className={examScore.value}>
             {formatListeningCountOfTotal(answeredCount, totalQuestions)}
@@ -60,11 +66,11 @@ export function ListeningScoreSummaryCard({
 
         <div className={examScore.item}>
           <span className={examScore.label}>
-            {listeningReviewCopy.correctLabel}
+            {copy.correctLabel}
           </span>
           {correctCount === null ? (
             <span className={examScore.pendingValue}>
-              {listeningReviewCopy.pendingValue}
+              {copy.pendingValue}
             </span>
           ) : (
             <span className={examScore.value}>
@@ -75,11 +81,11 @@ export function ListeningScoreSummaryCard({
 
         <div className={examScore.item}>
           <span className={examScore.label}>
-            {listeningReviewCopy.scoreLabel}
+            {copy.scoreLabel}
           </span>
           {scorePercent === null ? (
             <span className={examScore.pendingValue}>
-              {listeningReviewCopy.pendingValue}
+              {copy.pendingValue}
             </span>
           ) : (
             <span className={examScore.headlineValue}>
@@ -92,10 +98,10 @@ export function ListeningScoreSummaryCard({
       {hasCompleteAnswerKey ? null : (
         <div className={examScore.pending}>
           <p className={examScore.pendingHeading}>
-            {listeningReviewCopy.pendingScoreHeading}
+            {copy.pendingScoreHeading}
           </p>
           <p className={examScore.pendingText}>
-            {listeningReviewCopy.pendingScoreText}
+            {copy.pendingScoreText}
           </p>
           <p className={examScore.pendingText}>
             {formatListeningMissingKeyCount(missingKeyCount, totalQuestions)}
@@ -104,7 +110,7 @@ export function ListeningScoreSummaryCard({
       )}
 
       <p className={examScore.note}>
-        {listeningReviewCopy.practiceResultNote}
+        {copy.practiceResultNote}
       </p>
     </div>
   );

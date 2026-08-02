@@ -1,5 +1,5 @@
 // Learner facing wording for the Listening review, score and end screens
-// (EXAM-04).
+// (EXAM-04, made part agnostic by EXAM-06).
 //
 // Same rule as listening-copy.ts: the closing screens share one wording
 // file, so a change lands in one place rather than in five components.
@@ -12,6 +12,13 @@
 // - Nothing here says an answer is wrong when the answer key is missing.
 //   The pending wording is about the key, never about the learner.
 //
+// EXAM-04 wrote "Listening Part 1" into eight of these strings, which is
+// what docs/product/listening-part-1-review-score.md section 9 flagged as
+// the one thing standing between the closing screens and a second part.
+// buildListeningReviewCopy takes the part label instead, and the Part 1
+// export below is that builder called with the Part 1 labels, so every
+// Part 1 string is character for character what it was.
+//
 // Strings and pure helpers only, no side effects, so this file is safe to
 // import from a client component.
 //
@@ -19,62 +26,133 @@
 
 import type { ListeningReviewStatus } from "./listening-review-types";
 
-export const listeningReviewCopy = {
-  // Answer review screen.
-  reviewTitle: "Listening Part 1 Answer Review",
-  reviewSubtitle: "Review your answers before viewing the score.",
-  viewScoreLabel: "View score",
-  backToQuestionsLabel: "Back",
-  // Sits under the table, explaining what the review is and is not.
-  reviewNotice:
-    "This review is held on this screen only. Nothing is saved and this is not an official CELPIP result.",
+export type ListeningReviewCopyOptions = {
+  // The part as a learner names it, for example "Listening Part 2". Not
+  // taken from the content object: partTitle there is the section name,
+  // "Listening to a Daily Life Conversation", and title is the full
+  // practice test heading. Neither is the label wanted here.
+  partLabel: string;
+  // The part after this one, for the end screen placeholder line. Leave
+  // unset for the last part built, which drops the line entirely.
+  nextPartLabel?: string;
+};
 
-  // Review table headers.
-  tableCaption: "Your answers for Listening Part 1",
-  columnQuestion: "Question",
-  columnSelected: "Your answer",
-  columnCorrect: "Correct answer",
-  columnStatus: "Status",
+export type ListeningReviewCopy = {
+  reviewTitle: string;
+  reviewSubtitle: string;
+  viewScoreLabel: string;
+  backToQuestionsLabel: string;
+  reviewNotice: string;
+  tableCaption: string;
+  columnQuestion: string;
+  columnSelected: string;
+  columnCorrect: string;
+  columnStatus: string;
+  noAnswerText: string;
+  pendingAnswerText: string;
+  explanationPanelTitle: string;
+  explanationPanelIntro: string;
+  explanationToggleLabel: string;
+  explanationImageCaption: string;
+  scoreTitle: string;
+  scoreSubtitle: string;
+  totalQuestionsLabel: string;
+  answeredLabel: string;
+  correctLabel: string;
+  scoreLabel: string;
+  pendingValue: string;
+  pendingScoreHeading: string;
+  pendingScoreText: string;
+  practiceResultNote: string;
+  endPartLabel: string;
+  reviewAnswersLabel: string;
+  endTitle: string;
+  endMessage: string;
+  backToDashboardLabel: string;
+  restartLabel: string;
+  // Empty when nextPartLabel is unset, which the end screen reads as
+  // "print no placeholder line".
+  nextPartPlaceholder: string;
+  endNotice: string;
+};
 
-  // Cell fallbacks.
-  noAnswerText: "No answer selected",
-  pendingAnswerText: "Answer key pending",
+// Wording for one Listening part's closing screens.
+export function buildListeningReviewCopy({
+  partLabel,
+  nextPartLabel,
+}: ListeningReviewCopyOptions): ListeningReviewCopy {
+  return {
+    // Answer review screen.
+    reviewTitle: `${partLabel} Answer Review`,
+    reviewSubtitle: "Review your answers before viewing the score.",
+    viewScoreLabel: "View score",
+    backToQuestionsLabel: "Back",
+    // Sits under the table, explaining what the review is and is not.
+    reviewNotice:
+      "This review is held on this screen only. Nothing is saved and this is not an official CELPIP result.",
 
-  // Answer explanation reference panel.
-  explanationPanelTitle: "Answer key reference",
-  explanationPanelIntro:
-    "The answers and explanations for this part are published as an image. Open it to check your answers by hand while the answer key is being transcribed.",
-  explanationToggleLabel: "Show the answer and explanation sheet",
-  explanationImageCaption:
-    "Answer and explanation sheet for Listening Part 1, from the practice test source material.",
+    // Review table headers.
+    tableCaption: `Your answers for ${partLabel}`,
+    columnQuestion: "Question",
+    columnSelected: "Your answer",
+    columnCorrect: "Correct answer",
+    columnStatus: "Status",
 
-  // Score screen.
-  scoreTitle: "Listening Part 1 Score",
-  scoreSubtitle: "Your practice result for this part.",
-  totalQuestionsLabel: "Total questions",
-  answeredLabel: "Answered",
-  correctLabel: "Correct",
-  scoreLabel: "Practice score",
-  pendingValue: "Pending",
-  // Shown in place of a score when the key is incomplete.
-  pendingScoreHeading: "Answer key pending",
-  pendingScoreText:
-    "The answer key for this part is not available yet, so no practice score is calculated. Your answers are shown in the review table, and none of them are marked wrong.",
-  practiceResultNote:
-    "This is a Toronto Academy practice result, not an official CELPIP score.",
-  endPartLabel: "End Listening Part 1",
-  reviewAnswersLabel: "Review answers",
+    // Cell fallbacks.
+    noAnswerText: "No answer selected",
+    pendingAnswerText: "Answer key pending",
 
-  // End of part screen.
-  endTitle: "End of Listening Part 1",
-  endMessage: "You have completed Listening Part 1 of Mock Test 1.",
-  backToDashboardLabel: "Back to dashboard",
-  restartLabel: "Restart Listening Part 1",
-  nextPartPlaceholder: "Listening Part 2 will be added in the next ticket.",
-  // Standing reminder on the last screen of a prototype run.
-  endNotice:
-    "Nothing from this run has been saved. Restarting clears the answers held on this page.",
-} as const;
+    // Answer explanation reference panel.
+    explanationPanelTitle: "Answer key reference",
+    explanationPanelIntro:
+      "The answers and explanations for this part are published as an image. Open it to check the correct answers above against the source sheet.",
+    explanationToggleLabel: "Show the answer and explanation sheet",
+    explanationImageCaption: `Answer and explanation sheet for ${partLabel}, from the practice test source material.`,
+
+    // Score screen.
+    scoreTitle: `${partLabel} Score`,
+    scoreSubtitle: "Your practice result for this part.",
+    totalQuestionsLabel: "Total questions",
+    answeredLabel: "Answered",
+    correctLabel: "Correct",
+    scoreLabel: "Practice score",
+    pendingValue: "Pending",
+    // Shown in place of a score when the key is incomplete.
+    pendingScoreHeading: "Answer key pending",
+    pendingScoreText:
+      "The answer key for this part is not available yet, so no practice score is calculated. Your answers are shown in the review table, and none of them are marked wrong.",
+    practiceResultNote:
+      "This is a Toronto Academy practice result, not an official CELPIP score.",
+    endPartLabel: `End ${partLabel}`,
+    reviewAnswersLabel: "Review answers",
+
+    // End of part screen.
+    endTitle: `End of ${partLabel}`,
+    endMessage: `You have completed ${partLabel} of Mock Test 1.`,
+    backToDashboardLabel: "Back to dashboard",
+    restartLabel: `Restart ${partLabel}`,
+    nextPartPlaceholder: nextPartLabel
+      ? `${nextPartLabel} will be added in the next ticket.`
+      : "",
+    // Standing reminder on the last screen of a prototype run.
+    endNotice:
+      "Nothing from this run has been saved. Restarting clears the answers held on this page.",
+  };
+}
+
+// Listening Part 1 (EXAM-04). Also the default every closing screen falls
+// back to when no copy is passed, which is how Part 1 keeps working
+// without being edited.
+export const listeningReviewCopy = buildListeningReviewCopy({
+  partLabel: "Listening Part 1",
+  nextPartLabel: "Listening Part 2",
+});
+
+// Listening Part 2 (EXAM-06).
+export const listeningPartTwoReviewCopy = buildListeningReviewCopy({
+  partLabel: "Listening Part 2",
+  nextPartLabel: "Listening Part 3",
+});
 
 // Status labels for the review table. Short, plain, and not a badge.
 export const listeningReviewStatusLabels: Record<
