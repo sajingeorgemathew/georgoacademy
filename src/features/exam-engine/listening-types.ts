@@ -37,7 +37,14 @@ export type ListeningQuestion = {
   // work it out.
   number: number;
   // Clip that reads the question aloud.
-  audioUrl: string;
+  //
+  // Optional since EXAM-07, and only because Mock Test 1 Listening Part 3
+  // Question 1 has no clip in the source document. That is a gap in the
+  // source material, not a shape a part is expected to have: every other
+  // question in Parts 1 to 3 sets this. A question screen with no clip
+  // says so rather than falling back to another recording. See the note
+  // on that question in mock-tests/mock-test-1/listening-part-3.ts.
+  audioUrl?: string;
   // On screen question stem, for a part that prints its questions.
   prompt?: string;
   options: ListeningOption[];

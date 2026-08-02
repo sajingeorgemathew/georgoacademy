@@ -59,6 +59,17 @@ export const listeningCopy = {
   // Next is not available yet.
   selectAnswerHint: "Select an answer to continue.",
 
+  // Shown in the player's place when a question has no clip (EXAM-07).
+  //
+  // Different from audioFallbackHeading, which covers a clip that exists
+  // and would not load. This one covers a clip that is not in the source
+  // material at all, so there is nothing to reload and no point telling
+  // anyone to check their connection. Mock Test 1 Listening Part 3
+  // Question 1 is the only place it appears.
+  questionAudioMissingHeading: "This question has no audio yet",
+  questionAudioMissingText:
+    "The recording for this question is missing from the source practice test and is added once it is supplied. The answer options below are the ones from the practice test.",
+
   // Static timer on the question screens. Nothing counts down in this
   // ticket, so the reading is shown in the muted state that the shell
   // reserves for a fixed label rather than a live value.
@@ -130,6 +141,24 @@ export const listeningCopy = {
   part2MarkingFailedText:
     "The answer review could not be loaded. Check your connection, confirm you are still signed in, and try again. Your answers are still held on this page.",
   part2MarkingRetryLabel: "Try again",
+
+  // Listening Part 3 (EXAM-07).
+  //
+  // Same reason Part 2 has its own block: "Listening Part 3" is not any
+  // field on the content object. partTitle is the section name,
+  // "Listening for Information", and title is the full practice test
+  // heading.
+  //
+  // Part 3 closes on the completion screen, the way Part 2 did before its
+  // review and score were built, so it borrows partCompletePendingReview
+  // above rather than declaring its own.
+  part3CompleteHeading: "Listening Part 3 complete",
+  part3RestartLabel: "Restart Listening Part 3",
+  part3PreviewTitle: "Mock Test 1 Listening Part 3 Prototype",
+  part3PreviewSummary:
+    "Internal preview of Listening Part 3, Listening for Information, built from Mock Test 1 content. Answers are held on the page only and nothing is saved.",
+  part3PreviewDescription:
+    "Prototype of Mock Test 1 Listening Part 3, with the university workplace conversation audio, the six question screens, and local answer selection.",
 } as const;
 
 // Answered line on the completion screen, for example

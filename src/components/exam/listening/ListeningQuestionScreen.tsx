@@ -6,7 +6,11 @@ import { ExamShell } from "../ExamShell";
 import { ExamTwoColumnLayout } from "../ExamTwoColumnLayout";
 import { ListeningAudioPlayer } from "./ListeningAudioPlayer";
 import { cx } from "@/features/design/design-tokens";
-import { examListening, examText } from "@/features/exam-engine/exam-theme";
+import {
+  examAudio,
+  examListening,
+  examText,
+} from "@/features/exam-engine/exam-theme";
 import { listeningCopy } from "@/features/exam-engine/listening-copy";
 import type { ListeningQuestion } from "@/features/exam-engine/listening-types";
 
@@ -32,6 +36,10 @@ import type { ListeningQuestion } from "@/features/exam-engine/listening-types";
 //
 // The question stem is spoken, not printed, in this part. prompt is
 // rendered when a part has one, which is what Parts 4 to 6 will need.
+//
+// A question with no clip at all shows a notice in the player's place
+// (EXAM-07). That is not a normal state: it exists because Mock Test 1
+// Listening Part 3 Question 1 has no recording in the source document.
 
 export type ListeningQuestionScreenProps = {
   title: string;
@@ -92,10 +100,28 @@ export function ListeningQuestionScreen({
           <div className={examListening.columnStack}>
             <ExamInstructionRow text={listeningCopy.questionInstruction} />
 
-            <ListeningAudioPlayer
-              src={question.audioUrl}
-              title={`${listeningCopy.questionPlayerTitle} ${questionNumber}`}
-            />
+            {question.audioUrl ? (
+              <ListeningAudioPlayer
+                src={question.audioUrl}
+                title={`${listeningCopy.questionPlayerTitle} ${questionNumber}`}
+              />
+            ) : (
+              // No clip for this question in the source material. The
+              // notice says so plainly instead of playing something else,
+              // because the alternative on hand is the conversation
+              // recording, which is not the question. See the missing
+              // clip note in listening-part-3.ts.
+              <div className={examAudio.wrap}>
+                <div className={examAudio.fallback} role="status">
+                  <p className={examAudio.fallbackTitle}>
+                    {listeningCopy.questionAudioMissingHeading}
+                  </p>
+                  <p className={examAudio.fallbackText}>
+                    {listeningCopy.questionAudioMissingText}
+                  </p>
+                </div>
+              </div>
+            )}
 
             {question.prompt ? (
               <p className={examText.body}>{question.prompt}</p>
