@@ -352,6 +352,37 @@ export const examListeningDropdown = {
   progressNote: "text-[11px] leading-4 text-academy-navy/60",
 } as const;
 
+// Listening multiple-choice question list on one screen (EXAM-11).
+//
+// Screen type 7 again, but for a part whose questions are whole questions
+// answered from radio options rather than statements completed from a
+// dropdown. Listening Part 5 uses it.
+//
+// Same list chrome as examListeningDropdown above, deliberately: each
+// question is a row separated by a hairline rule, and the number is a
+// small tabular label at the head of the question. What changes is what
+// sits under the question. A dropdown part puts one select there, and
+// this puts the four options as a radio group, reusing the option row
+// recipes from examListening so an option here and an option on the Parts
+// 1 to 3 question screen are the same control.
+//
+// No panel per question, no shadow and no pill, so eight questions read
+// as one form rather than as eight widgets.
+export const examListeningChoice = {
+  list: "flex min-w-0 flex-col",
+  item: "flex min-w-0 flex-col border-b border-academy-line/70 py-3 first:pt-0 last:border-b-0 last:pb-0",
+  // The question itself, and the radio group's legend. A legend is not a
+  // flex container in every browser, so the number is an inline span with
+  // its own right margin rather than a gap.
+  prompt: "min-w-0 text-[13px] font-semibold leading-5 text-academy-navy",
+  number: "mr-1.5 font-semibold tabular-nums text-academy-navy/60",
+  // Indented so the options read as belonging to the question above
+  // them. The column itself is examListening.optionList.
+  options: "mt-1.5 flex min-w-0 flex-col sm:pl-6",
+  // Answered count under the list, beside Next being unavailable.
+  progressNote: "text-[11px] leading-4 text-academy-navy/60",
+} as const;
+
 // Listening answer review and practice score screens (EXAM-04).
 //
 // The review table is result table chrome, not a dashboard list: hairline

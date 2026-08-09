@@ -22,6 +22,16 @@
 //
 // House style: normal hyphens only, no long hyphens or em dashes.
 
+// Shown under a one screen question list while questions are
+// outstanding, explaining why Next is not available yet.
+//
+// Held as a module constant because two entries below read it: the
+// dropdown parts and the video discussion part say the same sentence, and
+// two literals would be two things to keep in step. Named per screen kind
+// rather than shared under one key so a later wording change can be made
+// for one and not the other without a rename.
+const ANSWER_ALL_QUESTIONS_HINT = "Answer every question to continue.";
+
 export const listeningCopy = {
   // Part intro screen.
   partIntroSubtitle:
@@ -188,7 +198,7 @@ export const listeningCopy = {
   dropdownBlankLabel: "blank",
   // Shown under the list while questions are outstanding, explaining why
   // Next is not available yet.
-  dropdownAnswerAllHint: "Answer every question to continue.",
+  dropdownAnswerAllHint: ANSWER_ALL_QUESTIONS_HINT,
 
   // News item screens (EXAM-09).
   newsItemInstruction: "Listen to the following news item.",
@@ -212,6 +222,53 @@ export const listeningCopy = {
     "Internal preview of Listening Part 4, Listening to a News Item, built from Mock Test 1 content. Answers are held on the page only and nothing is saved.",
   part4PreviewDescription:
     "Prototype of Mock Test 1 Listening Part 4, with the news item audio and the five dropdown completion questions on one screen, local answer selection, and the answer review and practice score screens.",
+
+  // Video discussion screens (EXAM-11).
+  //
+  // Screen type 5 followed by screen type 7, used by Listening Part 5,
+  // which is the only Listening part with a video. None of these strings
+  // names a part.
+  discussionInstruction: "Watch the discussion.",
+  discussionVideoTitle: "Discussion video",
+  discussionVideoHint:
+    "Play the video when you are ready, then continue to the questions.",
+  // Accessible name for the Part 5 player. The shell default names an
+  // instructional video, which this is not: it is practice test material,
+  // so a screen reader should not announce it as a walkthrough.
+  discussionVideoPlayerLabel: "Practice test video player",
+  discussionVideoUnsupportedText:
+    "Your browser cannot play this video. You can continue when you are ready.",
+
+  // One screen multiple-choice question list (EXAM-11).
+  //
+  // Separate from chooseAnswerInstruction above, which reads "Choose the
+  // best answer to each question." and belongs to the Parts 1 to 3
+  // question screens. This is the source document's own wording for Part
+  // 5, kept as written.
+  chooseBestWayInstruction: "Choose the best way to answer each question.",
+  // Same sentence the dropdown list shows, and the same reason. See
+  // ANSWER_ALL_QUESTIONS_HINT above.
+  choiceAnswerAllHint: ANSWER_ALL_QUESTIONS_HINT,
+
+  // Listening Part 5 (EXAM-11).
+  //
+  // Same reason Parts 2, 3 and 4 have their own blocks: "Listening Part
+  // 5" is not any field on the content object. partTitle is the section
+  // name, "Listening to a Discussion", and title is the full practice
+  // test heading.
+  //
+  // The complete heading and the restart label follow the Part 2 pattern,
+  // which is the template for the first cut of a part that has no review
+  // yet. They are retired when the Part 5 review and practice score
+  // replace the completion screen, the way the Part 3 and Part 4 pairs
+  // were retired.
+  part5CompleteHeading: "Listening Part 5 complete",
+  part5RestartLabel: "Restart Listening Part 5",
+  part5PreviewTitle: "Mock Test 1 Listening Part 5 Prototype",
+  part5PreviewSummary:
+    "Internal preview of Listening Part 5, Listening to a Discussion, built from Mock Test 1 content. Answers are held on the page only and nothing is saved.",
+  part5PreviewDescription:
+    "Prototype of Mock Test 1 Listening Part 5, with the workplace discussion video and the eight multiple-choice questions on one screen, and local answer selection.",
 } as const;
 
 // Answered count under a dropdown question list, for example
