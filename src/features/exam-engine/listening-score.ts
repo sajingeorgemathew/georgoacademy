@@ -1,5 +1,6 @@
 // Answer review rows and practice scoring for a Listening part (EXAM-04,
-// extended to dropdown completion parts by EXAM-10).
+// extended to dropdown completion parts by EXAM-10 and to video
+// discussion parts by EXAM-12).
 //
 // Pure functions over the part content and the local answer map. No
 // React, no side effects, no storage, so the same helpers work on the
@@ -40,6 +41,13 @@
 // behaviour exactly. Nothing about them was widened to fit Part 4, which
 // is what keeps a dropdown part from being able to break them.
 //
+// EXAM-12 note. Listening Part 5 is a video discussion part, so its
+// content is ListeningVideoPartContent: one flat question list again, and
+// a printed question answered from a radio group. That is the third
+// content shape and it needed no new marking rule either, so it is a
+// third thin adapter over the same core, added the same way and with the
+// same guarantee. The Parts 1 to 4 functions are untouched by it.
+//
 // House style: normal hyphens only, no long hyphens or em dashes.
 
 import { listListeningQuestions } from "./listening-flow";
@@ -57,6 +65,11 @@ import type {
   ListeningPartContent,
   ListeningQuestion,
 } from "./listening-types";
+import type {
+  ListeningVideoAnswerMap,
+  ListeningVideoPartContent,
+  ListeningVideoQuestion,
+} from "./listening-video-types";
 import type {
   ListeningAnswerKeyEntry,
   ListeningReviewRow,
@@ -454,6 +467,52 @@ export function buildListeningDropdownReviewRows(
 export function buildListeningDropdownScoreSummary(
   content: ListeningDropdownPartContent,
   answers: ListeningDropdownAnswerMap,
+): ListeningScoreSummary {
+  return buildSummary(content.questions, content.answerKey, answers);
+}
+
+// Listening Part 5 and the other video discussion parts (EXAM-12).
+//
+// The question is printed on screen in full, so the row carries it under
+// the number, the way a dropdown row carries its incomplete statement.
+// The number is kept as the label rather than replaced by the question:
+// the answer columns are read against a numbered list, and a row headed
+// by a whole sentence loses the one thing that ties it back to the
+// question screen.
+//
+// The prompt is required on ListeningVideoQuestion, so there is no
+// fallback here. A part that somehow has an empty prompt prints the
+// number alone, which is what leaving statement empty does.
+const describeVideoQuestion: DescribeQuestion<ListeningVideoQuestion> = (
+  question,
+  questionNumber,
+) => ({
+  label: formatListeningQuestionLabel(questionNumber),
+  statement: question.prompt || undefined,
+});
+
+// One review row per multiple-choice question, in part order.
+export function buildListeningVideoReviewRows(
+  content: ListeningVideoPartContent,
+  answers: ListeningVideoAnswerMap,
+): ListeningReviewRow[] {
+  return buildRows(
+    content.questions,
+    content.answerKey,
+    answers,
+    describeVideoQuestion,
+  );
+}
+
+// Everything the video part's score screen needs, in one pass.
+//
+// Only these two adapters are exported for the video shape. The dropdown
+// block above also exports its counts individually, which nothing outside
+// this file reads, so they are not copied a third time. Both screens read
+// the summary.
+export function buildListeningVideoScoreSummary(
+  content: ListeningVideoPartContent,
+  answers: ListeningVideoAnswerMap,
 ): ListeningScoreSummary {
   return buildSummary(content.questions, content.answerKey, answers);
 }

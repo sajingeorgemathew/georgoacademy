@@ -174,6 +174,21 @@ export const listeningPartFourReviewCopy = buildListeningReviewCopy({
   nextPartLabel: "Listening Part 5",
 });
 
+// Listening Part 5 (EXAM-12).
+//
+// The first video discussion part to reach the closing screens, and it
+// still needs no component change. What differs about Part 5 is the shape
+// of its content, which is handled in listening-score.ts, not here.
+//
+// nextPartLabel is set, so the end screen carries the Listening Part 6
+// placeholder line. Part 6 is not built in this ticket, and the line is a
+// plain sentence rather than a control, which is the whole reason
+// ListeningPartEndScreen prints it as text.
+export const listeningPartFiveReviewCopy = buildListeningReviewCopy({
+  partLabel: "Listening Part 5",
+  nextPartLabel: "Listening Part 6",
+});
+
 // Status labels for the review table. Short, plain, and not a badge.
 export const listeningReviewStatusLabels: Record<
   ListeningReviewStatus,

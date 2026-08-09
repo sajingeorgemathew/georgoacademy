@@ -7,6 +7,7 @@ import { examCopy } from "@/features/exam-engine/exam-copy";
 import { listeningCopy } from "@/features/exam-engine/listening-copy";
 import { withoutListeningVideoAnswerKey } from "@/features/exam-engine/listening-video-flow";
 import { listeningPart5 } from "@/features/exam-engine/mock-tests/mock-test-1/listening-part-5";
+import { markListeningPartFive } from "./actions";
 
 export const metadata: Metadata = {
   title: "Mock Test 1 Listening Part 5 prototype - Toronto Academy of Education",
@@ -15,11 +16,13 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-// Mock Test 1 Listening Part 5 prototype (EXAM-11).
+// Mock Test 1 Listening Part 5 prototype (EXAM-11, closing screens added
+// by EXAM-12).
 //
-// The five screen sequence for Listening Part 5: the part intro, the
+// The seven screen sequence for Listening Part 5: the part intro, the
 // scenario, the discussion video, one screen holding all eight
-// multiple-choice questions, and the completion screen.
+// multiple-choice questions, the answer review, the practice score, and
+// the end of part screen.
 //
 // This is an internal preview. Answers are held in the browser for the
 // length of the visit and nothing is saved. The standing notice above the
@@ -37,9 +40,10 @@ export const metadata: Metadata = {
 // browser where anyone could read them out of the flight data. The key is
 // stripped here, on the server, before the content crosses the boundary.
 //
-// There is no actions.ts beside this file. The Part 5 answer review and
-// practice score are the next ticket's work, so nothing marks anything
-// yet and this page passes no action down.
+// The marking that goes with that stripping lives in actions.ts beside
+// this file, next to the key, the way markListeningPartFour does for Part
+// 4. The learner's answers stay in local React state in the browser and
+// only the finished review rows and practice score come back.
 
 export default async function ListeningPartFivePrototypePage() {
   const supabase = await createSupabaseServerClient();
@@ -70,13 +74,16 @@ export default async function ListeningPartFivePrototypePage() {
             {examCopy.previewBadge}:
           </span>{" "}
           this is a Toronto Academy practice prototype, not the official CELPIP
-          test. Your answers stay on this page and nothing is saved. The
-          discussion video can be replayed and Next does not wait for it to
-          finish, the timer does not count down yet, and the answer review and
-          the practice score for this part are not built yet.
+          test. Your answers stay on this page and nothing is saved. The answer
+          review and the practice score run for this visit only and are not an
+          official CELPIP score. The discussion video can be replayed and Next
+          does not wait for it to finish, and the timer does not count down yet.
         </p>
 
-        <ListeningPartFivePrototype content={learnerContent} />
+        <ListeningPartFivePrototype
+          content={learnerContent}
+          markAnswers={markListeningPartFive}
+        />
       </div>
     </AppPageShell>
   );

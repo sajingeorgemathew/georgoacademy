@@ -141,11 +141,11 @@ export type ListeningVideoAnswerMap = Readonly<Record<string, string>>;
 // There is one media screen and one question screen, neither of which
 // needs an index, so no screen here points back into the content.
 //
-// The answer review, the practice score and the end of part screen are
-// not listed. They are the next ticket's work, and a kind that nothing
-// can build and nothing can render would only be a claim that they
-// already exist. Part 5 closes on part-complete, which is the ending a
-// part gets before its review is built. See the ending note in
+// EXAM-12 added the three closing screens. A part built this way now
+// ends on the answer review, the practice score and the end of part
+// screen, which is what buildListeningVideoFlow returns by default.
+// part-complete is kept for a video part shipped before its review
+// exists, which is the ending EXAM-11 had. See the ending note in
 // listening-video-flow.ts.
 export type ListeningVideoScreen =
   | { kind: "part-intro"; id: string }
@@ -154,4 +154,11 @@ export type ListeningVideoScreen =
   // Every question in the part, on one screen.
   | { kind: "questions"; id: string }
   // Closing screen for a part whose review and score are not built yet.
-  | { kind: "part-complete"; id: string };
+  | { kind: "part-complete"; id: string }
+  // Every question with the chosen option, the correct option and a
+  // status word.
+  | { kind: "answer-review"; id: string }
+  // Practice result for the part. Never an official CELPIP score.
+  | { kind: "score"; id: string }
+  // Last screen of the run: back to the dashboard, or restart.
+  | { kind: "part-end"; id: string };

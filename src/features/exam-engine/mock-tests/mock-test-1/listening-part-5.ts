@@ -54,11 +54,13 @@ import type { ListeningVideoPartContent } from "@/features/exam-engine/listening
 // the answers. The Part 5 route strips it with
 // withoutListeningVideoAnswerKey before rendering, the same way the Part
 // 2, Part 3 and Part 4 routes strip theirs. Nothing here is rendered on
-// the question screen, and nothing in EXAM-11 reads it.
+// the question screen.
 //
-// The next ticket is what reads it, from a server action beside the Part
-// 5 route, the way markListeningPartFour reads the Part 4 key. The key
-// itself must never cross to the browser in either direction.
+// EXAM-12 confirmed every entry below against the options and changed
+// none of them. What reads the key is markListeningPartFive, the server
+// action beside the Part 5 route, the way markListeningPartFour reads the
+// Part 4 key. The key itself never crosses to the browser in either
+// direction: only the finished review rows and the practice score do.
 const ANSWER_KEY: ListeningAnswerKeyEntry[] = [
   // the format of the event
   { questionId: "listening-part-5-q1", correctOptionId: "listening-part-5-q1-b", source: "answer-image" },
@@ -115,9 +117,10 @@ export const listeningPart5: ListeningVideoPartContent = {
   // Answer sheet for Part 5, from
   // mock-tests/mock-test-1/extracted-links.md. Referenced from Cloudinary
   // and never downloaded. The key above covers the answers, so this is
-  // the source a reviewer can check the key against. It is rendered
-  // nowhere in EXAM-11 and is held for the review ticket, which shows it
-  // collapsed behind a disclosure the way Parts 1 to 4 do.
+  // the source a reviewer can check the key against. EXAM-12 puts it on
+  // the answer review screen, collapsed behind a disclosure the way Parts
+  // 1 to 4 show theirs, so opening the review does not put the sheet on
+  // screen unasked.
   answerExplanationImageUrl: `${IMAGE_BASE}/v1785339197/Listening_Test_1_zAnswers_-_Part_5_n3arah_kzgfkh.png`,
   answerExplanationImageAlt:
     "Answer sheet for Listening Part 5, listing the correct answer for each of the eight questions.",
