@@ -250,25 +250,24 @@ export const listeningCopy = {
   // ANSWER_ALL_QUESTIONS_HINT above.
   choiceAnswerAllHint: ANSWER_ALL_QUESTIONS_HINT,
 
-  // Listening Part 5 (EXAM-11).
+  // Listening Part 5 (EXAM-11, closing screens added by EXAM-12).
   //
   // Same reason Parts 2, 3 and 4 have their own blocks: "Listening Part
   // 5" is not any field on the content object. partTitle is the section
   // name, "Listening to a Discussion", and title is the full practice
   // test heading.
   //
-  // The complete heading and the restart label follow the Part 2 pattern,
-  // which is the template for the first cut of a part that has no review
-  // yet. They are retired when the Part 5 review and practice score
-  // replace the completion screen, the way the Part 3 and Part 4 pairs
-  // were retired.
-  part5CompleteHeading: "Listening Part 5 complete",
-  part5RestartLabel: "Restart Listening Part 5",
+  // part5CompleteHeading and part5RestartLabel are gone, for the same
+  // reason the part3 and part4 pairs went. Part 5 closed on the EXAM-11
+  // completion screen for one ticket, and now ends on the answer review,
+  // the practice score and the end of part screen, whose wording is built
+  // by listening-review-copy.ts. The part2 pair above is still the
+  // template for the first cut of a part that has no review yet.
   part5PreviewTitle: "Mock Test 1 Listening Part 5 Prototype",
   part5PreviewSummary:
     "Internal preview of Listening Part 5, Listening to a Discussion, built from Mock Test 1 content. Answers are held on the page only and nothing is saved.",
   part5PreviewDescription:
-    "Prototype of Mock Test 1 Listening Part 5, with the workplace discussion video and the eight multiple-choice questions on one screen, and local answer selection.",
+    "Prototype of Mock Test 1 Listening Part 5, with the workplace discussion video and the eight multiple-choice questions on one screen, local answer selection, and the answer review and practice score screens.",
 } as const;
 
 // Answered count under a dropdown question list, for example
