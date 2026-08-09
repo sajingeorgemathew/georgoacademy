@@ -246,6 +246,7 @@ export function ListeningPartThreePrototype({
       <ListeningPartIntroScreen
         content={content}
         questionCount={questionCount}
+        sectionCount={content.sections.length}
         metaText={metaText}
         onNext={goNext}
         onBack={goBack}

@@ -7,11 +7,11 @@ import { listeningCopy } from "@/features/exam-engine/listening-copy";
 //
 // EXAM-01 added the shell preview link. EXAM-02 added the instruction
 // screens preview beside it, EXAM-03 added the Listening Part 1
-// prototype, EXAM-05 added the Listening Part 2 prototype, and EXAM-07
-// added the Listening Part 3 prototype, so all five internal routes are
-// reachable from one place.
+// prototype, EXAM-05 added the Listening Part 2 prototype, EXAM-07 added
+// the Listening Part 3 prototype, and EXAM-09 added the Listening Part 4
+// prototype, so all six internal routes are reachable from one place.
 //
-// The three Listening entries are prototypes built on real Mock Test 1
+// The four Listening entries are prototypes built on real Mock Test 1
 // content, not placeholder text, which is why their descriptions say so.
 // They are still internal previews and not student facing mock test
 // entries.
@@ -53,6 +53,11 @@ const PREVIEW_LINKS = [
     href: "/dashboard/mock-tests/mock-test-1/listening/part-3",
     title: listeningCopy.part3PreviewTitle,
     description: listeningCopy.part3PreviewDescription,
+  },
+  {
+    href: "/dashboard/mock-tests/mock-test-1/listening/part-4",
+    title: listeningCopy.part4PreviewTitle,
+    description: listeningCopy.part4PreviewDescription,
   },
 ];
 

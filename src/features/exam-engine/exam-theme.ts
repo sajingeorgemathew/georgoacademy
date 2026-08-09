@@ -319,6 +319,39 @@ export const examListening = {
   columnStack: "flex min-w-0 flex-col gap-3",
 } as const;
 
+// Listening dropdown completion question screen (EXAM-09).
+//
+// Screen type 7: every question in the part on one screen, each an
+// incomplete statement with a dropdown where the blank falls. Listening
+// Part 4 uses it.
+//
+// This is a list, not a set of cards. Each question is a row separated by
+// a hairline rule, the number is a small tabular label at the head of the
+// statement, and the control is a plain select. No panel per question, no
+// shadow and no pill, so five questions read as one form rather than as
+// five widgets.
+//
+// The select is capped rather than full width. Option text here is a
+// sentence fragment, so a control stretched across a wide canvas would
+// put its value a long way from the statement it completes.
+export const examListeningDropdown = {
+  list: "flex min-w-0 flex-col",
+  item: "flex min-w-0 flex-col gap-2 border-b border-academy-line/70 py-3 first:pt-0 last:border-b-0 last:pb-0",
+  statement: "block min-w-0 text-[13px] leading-6 text-academy-navy",
+  number:
+    "mr-1.5 font-semibold tabular-nums text-academy-navy/60",
+  // The blank in the statement. Underscores come from the source
+  // document, so they are drawn rather than replaced, just quieted.
+  blank: "px-0.5 tracking-tight text-academy-navy/45",
+  // Indented so the control reads as belonging to the statement above it.
+  control: "min-w-0 sm:pl-6",
+  select: `h-8 w-full min-w-0 max-w-lg rounded-sm border border-academy-line bg-academy-paper px-2 text-[13px] leading-5 text-academy-navy ${focus.ring}`,
+  // Shown while the question has no answer.
+  selectEmpty: "text-academy-navy/55",
+  // Answered count under the list, beside Next being unavailable.
+  progressNote: "text-[11px] leading-4 text-academy-navy/60",
+} as const;
+
 // Listening answer review and practice score screens (EXAM-04).
 //
 // The review table is result table chrome, not a dashboard list: hairline

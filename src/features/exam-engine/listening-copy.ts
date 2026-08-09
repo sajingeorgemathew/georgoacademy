@@ -166,7 +166,59 @@ export const listeningCopy = {
     "Internal preview of Listening Part 3, Listening for Information, built from Mock Test 1 content. Answers are held on the page only and nothing is saved.",
   part3PreviewDescription:
     "Prototype of Mock Test 1 Listening Part 3, with the university workplace conversation audio, the six question screens, local answer selection, and the answer review and practice score screens.",
+
+  // Dropdown completion screens (EXAM-09).
+  //
+  // Screen type 7, used by Listening Parts 4, 5 and 6: one media item,
+  // then every question in the part on a single screen. None of these
+  // strings names a part, so Parts 5 and 6 read the same ones.
+  //
+  // dropdownInstruction is the fallback for a part whose content object
+  // does not carry its own question instruction. Mock Test 1 Part 4 does
+  // carry one, taken from the source document, so this is the default
+  // rather than the value in use.
+  dropdownInstruction:
+    "Choose the best way to complete each statement from the drop-down menu.",
+  // Placeholder option, selected until the learner chooses. It is a real
+  // option in the list with an empty value, so a select that has not been
+  // answered shows something rather than defaulting to the first choice.
+  dropdownPlaceholder: "Select answer",
+  // Read in place of the underscores by a screen reader, so the statement
+  // announces as a sentence with a gap rather than as punctuation.
+  dropdownBlankLabel: "blank",
+  // Shown under the list while questions are outstanding, explaining why
+  // Next is not available yet.
+  dropdownAnswerAllHint: "Answer every question to continue.",
+
+  // News item screens (EXAM-09).
+  newsItemInstruction: "Listen to the following news item.",
+  newsItemPlayerTitle: "News item audio",
+
+  // Listening Part 4 (EXAM-09).
+  //
+  // Same reason Parts 2 and 3 have their own blocks: "Listening Part 4"
+  // is not any field on the content object. partTitle is the section
+  // name, "Listening to a News Item", and title is the full practice test
+  // heading.
+  part4CompleteHeading: "Listening Part 4 complete",
+  part4RestartLabel: "Restart Listening Part 4",
+  part4PreviewTitle: "Mock Test 1 Listening Part 4 Prototype",
+  part4PreviewSummary:
+    "Internal preview of Listening Part 4, Listening to a News Item, built from Mock Test 1 content. Answers are held on the page only and nothing is saved.",
+  part4PreviewDescription:
+    "Prototype of Mock Test 1 Listening Part 4, with the news item audio and the five dropdown completion questions on one screen, and local answer selection.",
 } as const;
+
+// Answered count under a dropdown question list, for example
+// "3 of 5 questions answered."
+export function formatListeningAnsweredCount(
+  answered: number,
+  total: number,
+): string {
+  return `${answered} of ${total} question${
+    total === 1 ? "" : "s"
+  } answered.`;
+}
 
 // Answered line on the completion screen, for example
 // "You answered 5 of 5 questions."
