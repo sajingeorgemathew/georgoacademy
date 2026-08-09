@@ -314,6 +314,21 @@ export const listeningCopy = {
     "Internal preview of Listening Part 6, Listening for Viewpoints, built from Mock Test 1 content. Answers are held on the page only and nothing is saved.",
   part6PreviewDescription:
     "Prototype of Mock Test 1 Listening Part 6, with the community development report audio and the six viewpoints questions on one screen, local answer selection, and the answer review and practice score screens.",
+
+  // Full Listening section (EXAM-15).
+  //
+  // The dashboard card for the route that runs all six parts in one go.
+  // The wording says what the part cards do not: no score appears between
+  // the parts, and the one result is at the end over all 38 questions.
+  // Screen wording for that route lives in listening-section-copy.ts,
+  // which is where the section owned screens read from. These three
+  // strings sit here because this file is what the dashboard preview card
+  // already reads.
+  fullSectionPreviewTitle: "Mock Test 1 Full Listening Section",
+  fullSectionPreviewSummary:
+    "Internal preview of the complete Listening section, Parts 1 to 6 in one run. Answers are held on the page only, nothing is saved, and the practice score at the end is not an official CELPIP score.",
+  fullSectionPreviewDescription:
+    "The full Listening section: the section instructions, the Listening instructional video, Parts 1 to 6 back to back with no score between them, then one answer review over all 38 questions and one practice score with a part breakdown.",
 } as const;
 
 // Answered count under a dropdown question list, for example
