@@ -127,6 +127,7 @@ export function ListeningPartOnePrototype({
       <ListeningPartIntroScreen
         content={content}
         questionCount={questionCount}
+        sectionCount={content.sections.length}
         metaText={metaText}
         onNext={goNext}
         onBack={goBack}
