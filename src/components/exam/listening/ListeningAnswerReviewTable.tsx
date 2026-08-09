@@ -28,6 +28,12 @@ import type { ListeningReviewRow } from "@/features/exam-engine/listening-review
 // EXAM-06 added the copy prop. Only the table caption is part specific,
 // but the caption names the part out loud to a screen reader, so it has
 // to say the right one.
+//
+// EXAM-10 added the printed question under the question number, for the
+// dropdown completion parts. A row there is a sentence fragment in the
+// answer columns, so the number alone would not say what was asked. The
+// field is optional and Listening Parts 1 to 3 leave it unset, so their
+// rows render exactly as they did.
 
 export type ListeningAnswerReviewTableProps = {
   rows: ListeningReviewRow[];
@@ -69,6 +75,16 @@ export function ListeningAnswerReviewTable({
               <tr key={row.questionId} className={examReview.row}>
                 <th scope="row" className={examReview.numberCell}>
                   {row.label}
+
+                  {/* Printed question, for a part that prints its
+                      questions. Listening Parts 1 to 3 set no statement
+                      and this renders nothing, so their rows are
+                      unchanged. */}
+                  {row.statement ? (
+                    <span className={examReview.statement}>
+                      {row.statement}
+                    </span>
+                  ) : null}
                 </th>
 
                 <td

@@ -377,6 +377,12 @@ export const examReview = {
   // that has not been transcribed.
   emptyCell: "px-3 py-2 text-[13px] leading-5 text-academy-navy/45",
   statusCell: "px-3 py-2 text-[13px] leading-5 font-semibold whitespace-nowrap",
+  // Printed question under the question number, for a part that prints
+  // its questions (EXAM-10). The number cell is nowrap and tabular, so
+  // this resets both and caps its width, otherwise a five word statement
+  // would stretch the column across the table.
+  statement:
+    "mt-0.5 block max-w-[16rem] text-[11px] font-normal leading-4 whitespace-normal normal-nums text-academy-navy/60",
   // Explanation line under a row, when the source gives one.
   explanation: "mt-0.5 block text-[11px] leading-4 text-academy-navy/60",
   // Reference panel holding the answer and explanation sheet.

@@ -148,6 +148,14 @@ export type ListeningDropdownScreen =
   | { kind: "media"; id: string }
   // Every question in the part, on one screen.
   | { kind: "questions"; id: string }
+  // Closing screens, added by EXAM-10. Same three kinds ListeningScreen
+  // names, and deliberately the same names: the screens themselves are
+  // shared components, so a dropdown part and a section part reach the
+  // end of a run the same way.
+  | { kind: "answer-review"; id: string }
+  | { kind: "score"; id: string }
+  | { kind: "part-end"; id: string }
   // Closing screen for a part whose review and score are not built yet.
-  // Part 4 ends here until the review ticket lands.
+  // Part 4 ended here through EXAM-09. Kept for the dropdown parts that
+  // are not built, which can ship before their review does.
   | { kind: "part-complete"; id: string };
