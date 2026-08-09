@@ -194,19 +194,24 @@ export const listeningCopy = {
   newsItemInstruction: "Listen to the following news item.",
   newsItemPlayerTitle: "News item audio",
 
-  // Listening Part 4 (EXAM-09).
+  // Listening Part 4 (EXAM-09, closing screens added by EXAM-10).
   //
   // Same reason Parts 2 and 3 have their own blocks: "Listening Part 4"
   // is not any field on the content object. partTitle is the section
   // name, "Listening to a News Item", and title is the full practice test
   // heading.
-  part4CompleteHeading: "Listening Part 4 complete",
-  part4RestartLabel: "Restart Listening Part 4",
+  //
+  // part4CompleteHeading and part4RestartLabel are gone, for the same
+  // reason the part3 pair went in EXAM-08. Part 4 closed on the EXAM-09
+  // completion screen for one ticket, and now ends on the answer review,
+  // the practice score and the end of part screen, whose wording is built
+  // by listening-review-copy.ts. The part2 pair above is still the
+  // template for the first cut of a part that has no review yet.
   part4PreviewTitle: "Mock Test 1 Listening Part 4 Prototype",
   part4PreviewSummary:
     "Internal preview of Listening Part 4, Listening to a News Item, built from Mock Test 1 content. Answers are held on the page only and nothing is saved.",
   part4PreviewDescription:
-    "Prototype of Mock Test 1 Listening Part 4, with the news item audio and the five dropdown completion questions on one screen, and local answer selection.",
+    "Prototype of Mock Test 1 Listening Part 4, with the news item audio and the five dropdown completion questions on one screen, local answer selection, and the answer review and practice score screens.",
 } as const;
 
 // Answered count under a dropdown question list, for example

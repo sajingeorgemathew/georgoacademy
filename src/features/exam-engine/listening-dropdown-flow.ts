@@ -9,21 +9,25 @@
 //
 // The flow is short and fixed, because the shape of a dropdown part is
 // fixed: one clip and one question screen, however many questions the
-// part has. For Mock Test 1 Listening Part 4 it produces five screens:
+// part has. For Mock Test 1 Listening Part 4 it produces seven screens:
 //
 //   1  part intro
 //   2  scenario
 //   3  news item audio
 //   4  all five completion questions
-//   5  part complete
+//   5  answer review
+//   6  practice score
+//   7  end of part
 //
 // It is still built rather than typed out inline, so the ids come from
 // the content object and the prototype cannot drift from the flow.
 //
-// The answer review and the practice score are not built for Part 4 yet,
-// so there is no ending option here. When the review ticket lands, add
-// one the way listening-flow.ts did rather than changing what this
-// returns.
+// EXAM-09 stopped at screen 5, a single completion screen, because the
+// Part 4 review and practice score were not built. EXAM-10 added them and
+// added the ending option, the way listening-flow.ts did in EXAM-05,
+// rather than changing what the default call returns for a part that has
+// no review yet. Listening Parts 5 and 6 will want "complete" first and
+// "review" a ticket later.
 //
 // House style: normal hyphens only, no long hyphens or em dashes.
 
@@ -33,17 +37,48 @@ import type {
   ListeningDropdownScreen,
 } from "./listening-dropdown-types";
 
+// How a dropdown part closes.
+//
+// "review" is the EXAM-10 ending: answer review, practice score, end of
+// part. "complete" is the EXAM-09 ending for a part whose review is not
+// built yet: one completion screen and nothing else.
+export type ListeningDropdownFlowEnding = "review" | "complete";
+
+export type ListeningDropdownFlowOptions = {
+  ending?: ListeningDropdownFlowEnding;
+};
+
 // Build the screen order for a dropdown part.
+//
+// ending defaults to "review", so Listening Part 4 gets its seven screen
+// flow without passing anything.
 export function buildListeningDropdownFlow(
   content: ListeningDropdownPartContent,
+  options: ListeningDropdownFlowOptions = {},
 ): ListeningDropdownScreen[] {
-  return [
+  const { ending = "review" } = options;
+
+  const screens: ListeningDropdownScreen[] = [
     { kind: "part-intro", id: `${content.sectionId}-intro` },
     { kind: "scenario", id: `${content.sectionId}-scenario` },
     { kind: "media", id: `${content.sectionId}-audio` },
     { kind: "questions", id: `${content.sectionId}-questions` },
-    { kind: "part-complete", id: `${content.sectionId}-complete` },
   ];
+
+  if (ending === "complete") {
+    screens.push({
+      kind: "part-complete",
+      id: `${content.sectionId}-complete`,
+    });
+  } else {
+    screens.push(
+      { kind: "answer-review", id: `${content.sectionId}-review` },
+      { kind: "score", id: `${content.sectionId}-score` },
+      { kind: "part-end", id: `${content.sectionId}-end` },
+    );
+  }
+
+  return screens;
 }
 
 // The same content with the answer key removed.

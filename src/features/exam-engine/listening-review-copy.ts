@@ -163,6 +163,17 @@ export const listeningPartThreeReviewCopy = buildListeningReviewCopy({
   nextPartLabel: "Listening Part 4",
 });
 
+// Listening Part 4 (EXAM-10).
+//
+// The first dropdown completion part to reach the closing screens, and it
+// still needs no component change: the wording is built the same way
+// Parts 2 and 3 build theirs. What differs about Part 4 is the shape of
+// its content, which is handled in listening-score.ts, not here.
+export const listeningPartFourReviewCopy = buildListeningReviewCopy({
+  partLabel: "Listening Part 4",
+  nextPartLabel: "Listening Part 5",
+});
+
 // Status labels for the review table. Short, plain, and not a badge.
 export const listeningReviewStatusLabels: Record<
   ListeningReviewStatus,
@@ -178,6 +189,28 @@ export const listeningReviewStatusLabels: Record<
 // example "Question 3".
 export function formatListeningQuestionLabel(questionNumber: number): string {
   return `Question ${questionNumber}`;
+}
+
+// The incomplete statement of a dropdown completion question, as the
+// review table prints it (EXAM-10).
+//
+// For example "The magician was in trouble because he ..." The blank is
+// three dots rather than the row of underscores the question screen
+// draws. On the question screen the underscores mark where the control
+// goes and are read out as "blank"; in the review the answer is already
+// in the next column, so the same row of underscores would only be
+// noise.
+//
+// A blank that ends the statement gets no trailing text, which is every
+// question in Mock Test 1 Part 4. Parts 5 and 6 have blanks mid sentence
+// and will print the tail after the dots.
+export function formatListeningStatementLabel(
+  textBefore: string,
+  textAfter?: string,
+): string {
+  const head = `${textBefore} ...`;
+
+  return textAfter ? `${head} ${textAfter}` : head;
 }
 
 // Answered line, for example "5 of 8".

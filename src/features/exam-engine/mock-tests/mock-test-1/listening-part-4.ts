@@ -56,8 +56,15 @@ import type { ListeningDropdownPartContent } from "@/features/exam-engine/listen
 // Part 2 and Part 3 routes strip theirs. Nothing here is rendered on the
 // question screen.
 //
-// EXAM-09 builds no review and no score, so nothing reads this yet. The
-// next ticket marks the answers on the server, where the key stays.
+// EXAM-10 is what reads it. markListeningPartFour in
+// src/app/dashboard/mock-tests/mock-test-1/listening/part-4/actions.ts
+// imports this module on the server, marks the submitted answers against
+// the key here, and sends back review rows and a practice score. The key
+// itself never crosses to the browser in either direction.
+//
+// All five entries were confirmed against the answer sheet again in
+// EXAM-10 and none of them changed. Nothing was added and nothing was
+// guessed.
 const ANSWER_KEY: ListeningAnswerKeyEntry[] = [
   // tearing up a $20 bill.
   { questionId: "listening-part-4-q1", correctOptionId: "listening-part-4-q1-d", source: "answer-image" },
@@ -106,8 +113,9 @@ export const listeningPart4: ListeningDropdownPartContent = {
   // Answer sheet for Part 4, from
   // mock-tests/mock-test-1/extracted-links.md. Referenced from Cloudinary
   // and never downloaded. The key above covers the answers, so this is
-  // held for the review ticket as the source a reviewer can check the key
-  // against. Nothing in this ticket renders it.
+  // the source a reviewer can check the key against. EXAM-10 renders it
+  // on the answer review screen, collapsed behind a disclosure, the same
+  // way Parts 1 to 3 do.
   answerExplanationImageUrl: `${IMAGE_BASE}/v1785339155/Listening_Test_1_zAnswers_-_Part_4_q49ylj_lcxxk7.png`,
   answerExplanationImageAlt:
     "Answer sheet for Listening Part 4, listing the correct answer for each of the five questions.",

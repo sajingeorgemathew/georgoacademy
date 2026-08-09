@@ -51,6 +51,15 @@ export type ListeningReviewRow = {
   // their question stems, so this falls back to "Question 3" rather than
   // inventing a stem.
   label: string;
+  // The printed question, when the part has one (EXAM-10).
+  //
+  // Set for a dropdown completion part, where the question is an
+  // incomplete statement the learner reads on screen, and the review is
+  // unreadable without it: "Question 2" beside "took a picture of her $20
+  // bill." says nothing about what was being asked. Unset for Listening
+  // Parts 1 to 3, which speak their questions and print nothing, so a row
+  // there is unchanged and the table prints label alone.
+  statement?: string;
   selectedOptionId?: string;
   selectedOptionText?: string;
   correctOptionId?: string;
