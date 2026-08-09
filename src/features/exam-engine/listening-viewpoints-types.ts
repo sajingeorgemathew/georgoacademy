@@ -159,12 +159,13 @@ export type ListeningViewpointsAnswerMap = Readonly<Record<string, string>>;
 // There is one media screen and one question screen, neither of which
 // needs an index, so no screen here points back into the content.
 //
-// The part closes on part-complete, because the Part 6 answer review and
-// practice score are not built yet. The next ticket adds the three closing
+// EXAM-13 closed the part on part-complete, because the Part 6 answer
+// review and practice score were not built. EXAM-14 adds the three closing
 // kinds the sibling unions already carry, answer-review, score and
-// part-end, together with the flow ending option that produces them. They
-// are left out here rather than declared ahead of the screens that render
-// them, which is how listening-dropdown-types.ts and
+// part-end, and buildListeningViewpointsFlow now produces them by default.
+// part-complete stays declared rather than being deleted, because the
+// "complete" ending is still available for a viewpoints part that ships
+// before its review exists. That is how listening-dropdown-types.ts and
 // listening-video-types.ts grew.
 //
 // Named the way ListeningDropdownScreen and ListeningVideoScreen are, so
@@ -178,4 +179,8 @@ export type ListeningViewpointsScreen =
   // Every question in the part, on one screen.
   | { kind: "questions"; id: string }
   // Closing screen for a part whose review and score are not built yet.
-  | { kind: "part-complete"; id: string };
+  | { kind: "part-complete"; id: string }
+  // Closing screens for a part that has a review (EXAM-14).
+  | { kind: "answer-review"; id: string }
+  | { kind: "score"; id: string }
+  | { kind: "part-end"; id: string };

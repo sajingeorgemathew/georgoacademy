@@ -7,6 +7,7 @@ import { examCopy } from "@/features/exam-engine/exam-copy";
 import { listeningCopy } from "@/features/exam-engine/listening-copy";
 import { withoutListeningViewpointsAnswerKey } from "@/features/exam-engine/listening-viewpoints-flow";
 import { listeningPart6 } from "@/features/exam-engine/mock-tests/mock-test-1/listening-part-6";
+import { markListeningPartSix } from "./actions";
 
 export const metadata: Metadata = {
   title: "Mock Test 1 Listening Part 6 prototype - Toronto Academy of Education",
@@ -15,13 +16,13 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-// Mock Test 1 Listening Part 6 prototype (EXAM-13).
+// Mock Test 1 Listening Part 6 prototype (EXAM-13, closing screens added
+// by EXAM-14).
 //
-// The five screen sequence for Listening Part 6: the part intro, the
+// The seven screen sequence for Listening Part 6: the part intro, the
 // scenario, the community development report audio, one screen holding all
-// six viewpoints questions, and the completion screen. The answer review
-// and the practice score are the next ticket, which is why this part stops
-// where Parts 2 to 5 each stopped for one ticket.
+// six viewpoints questions, the answer review, the practice score, and the
+// end of part screen.
 //
 // This is an internal preview. Answers are held in the browser for the
 // length of the visit and nothing is saved. The standing notice above the
@@ -39,11 +40,10 @@ export const metadata: Metadata = {
 // anyone could read them out of the flight data. The key is stripped here,
 // on the server, before the content crosses the boundary.
 //
-// There is no actions.ts beside this file yet, because nothing is marked
-// in this ticket. The review ticket should add one, next to the key, the
-// way markListeningPartFive sits beside the Part 5 route, so the learner's
-// answers stay in local React state in the browser and only the finished
-// review rows and practice score come back.
+// The marking that goes with that stripping lives in actions.ts beside
+// this file, next to the key, the way markListeningPartFive does for Part
+// 5. The learner's answers stay in local React state in the browser and
+// only the finished review rows and practice score come back.
 
 export default async function ListeningPartSixPrototypePage() {
   const supabase = await createSupabaseServerClient();
@@ -75,12 +75,15 @@ export default async function ListeningPartSixPrototypePage() {
           </span>{" "}
           this is a Toronto Academy practice prototype, not the official CELPIP
           test. Your answers stay on this page and nothing is saved. The answer
-          review and the practice score for this part are not built yet. The
-          report can be replayed and Next does not wait for it to finish, and
-          the timer does not count down yet.
+          review and the practice score run for this visit only and are not an
+          official CELPIP score. The report can be replayed and Next does not
+          wait for it to finish, and the timer does not count down yet.
         </p>
 
-        <ListeningPartSixPrototype content={learnerContent} />
+        <ListeningPartSixPrototype
+          content={learnerContent}
+          markAnswers={markListeningPartSix}
+        />
       </div>
     </AppPageShell>
   );
