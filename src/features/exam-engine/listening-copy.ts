@@ -268,6 +268,53 @@ export const listeningCopy = {
     "Internal preview of Listening Part 5, Listening to a Discussion, built from Mock Test 1 content. Answers are held on the page only and nothing is saved.",
   part5PreviewDescription:
     "Prototype of Mock Test 1 Listening Part 5, with the workplace discussion video and the eight multiple-choice questions on one screen, local answer selection, and the answer review and practice score screens.",
+
+  // Viewpoints screens (EXAM-13).
+  //
+  // Screen type 4 followed by screen type 7, used by Listening Part 6,
+  // which completes statements from radio options rather than from a
+  // select. None of these strings names a part.
+  //
+  // reportInstruction drops the source document's "You will hear the
+  // report only once", for the same reason the conversation wording at the
+  // top of this file drops it: the clip can be replayed here, so printing
+  // the official-style sentence would be a promise the screen does not
+  // keep.
+  reportInstruction: "Listen to the following report.",
+  reportPlayerTitle: "Report audio",
+  reportHint:
+    "Play the report when you are ready, then continue to the questions.",
+  // Fallback instruction above a viewpoints question list, for a part
+  // whose content object does not carry its own. Mock Test 1 Part 6 does
+  // carry one, so this is the default rather than the value in use.
+  //
+  // Separate from dropdownInstruction above, which names the drop-down
+  // menu. A viewpoints question is answered from radio options, so naming
+  // a control that is not on the screen would be wrong.
+  viewpointsInstruction: "Choose the best way to complete each statement.",
+  // Same sentence the dropdown and multiple-choice lists show, and the
+  // same reason. See ANSWER_ALL_QUESTIONS_HINT above.
+  viewpointsAnswerAllHint: ANSWER_ALL_QUESTIONS_HINT,
+
+  // Listening Part 6 (EXAM-13).
+  //
+  // Same reason Parts 2 to 5 have their own blocks: "Listening Part 6" is
+  // not any field on the content object. partTitle is the section name,
+  // "Listening for Viewpoints", and title is the full practice test
+  // heading.
+  //
+  // Part 6 closes on the completion screen, because its answer review and
+  // practice score are not built yet, so it needs the heading and restart
+  // label pair the way Part 2 does. The review ticket should retire them
+  // the way EXAM-08, EXAM-10 and EXAM-12 retired the Part 3, Part 4 and
+  // Part 5 pairs.
+  part6CompleteHeading: "Listening Part 6 complete",
+  part6RestartLabel: "Restart Listening Part 6",
+  part6PreviewTitle: "Mock Test 1 Listening Part 6 Prototype",
+  part6PreviewSummary:
+    "Internal preview of Listening Part 6, Listening for Viewpoints, built from Mock Test 1 content. Answers are held on the page only and nothing is saved.",
+  part6PreviewDescription:
+    "Prototype of Mock Test 1 Listening Part 6, with the community development report audio and the six viewpoints questions on one screen, local answer selection, and a completion screen.",
 } as const;
 
 // Answered count under a dropdown question list, for example
