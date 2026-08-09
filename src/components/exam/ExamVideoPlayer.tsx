@@ -50,6 +50,15 @@ export type ExamVideoPlayerProps = {
   onEnded?: () => void;
   // Overrides the message shown when the clip cannot load.
   fallbackText?: string;
+  // Accessible name for the element, before the clip title is appended.
+  // Defaults to the instructional video wording, which is what EXAM-02
+  // built this player for. EXAM-11 made it a prop so the Listening Part 5
+  // discussion video is not announced as an instructional video, which it
+  // is not: it is practice test material.
+  playerLabel?: string;
+  // Overrides the text a browser that cannot play video at all shows, for
+  // the same reason.
+  unsupportedText?: string;
   className?: string;
 };
 
@@ -63,6 +72,8 @@ export function ExamVideoPlayer({
   preload = "metadata",
   onEnded,
   fallbackText,
+  playerLabel = examCopy.videoPlayerLabel,
+  unsupportedText = examCopy.videoUnsupportedText,
   className,
 }: ExamVideoPlayerProps) {
   const [hasError, setHasError] = useState(false);
@@ -92,11 +103,11 @@ export function ExamVideoPlayer({
             controls
             preload={preload}
             playsInline
-            aria-label={`${examCopy.videoPlayerLabel}: ${title}`}
+            aria-label={`${playerLabel}: ${title}`}
             onError={() => setHasError(true)}
             onEnded={onEnded}
           >
-            {examCopy.videoUnsupportedText}
+            {unsupportedText}
           </video>
         </div>
       )}
