@@ -64,11 +64,12 @@ import type { ListeningViewpointsPartContent } from "@/features/exam-engine/list
 // The key is complete, so shipping it to the browser would hand a learner
 // the answers. The Part 6 route strips it with
 // withoutListeningViewpointsAnswerKey before rendering, the same way the
-// Part 2 to Part 5 routes strip theirs. Nothing here is rendered on the
-// question screen, and EXAM-13 builds no review and no score, so nothing
-// reads it yet. The next ticket should read it from a server action beside
-// the Part 6 route, the way markListeningPartFive does, so the key itself
-// never crosses to the browser in either direction.
+// Part 2 to Part 5 routes strip theirs, so nothing here reaches the
+// question screen. Since EXAM-14 the key is read on the server by
+// markListeningPartSix, in actions.ts beside the Part 6 route, the way
+// markListeningPartFive reads the Part 5 key. Only the finished review
+// rows and practice score cross to the browser, so the key itself never
+// crosses in either direction.
 const ANSWER_KEY: ListeningAnswerKeyEntry[] = [
   // approve a plan to redevelop the vacant land.
   { questionId: "listening-part-6-q1", correctOptionId: "listening-part-6-q1-a", source: "answer-image" },
@@ -123,9 +124,9 @@ export const listeningPart6: ListeningViewpointsPartContent = {
   // Answer sheet for Part 6, from
   // mock-tests/mock-test-1/extracted-links.md. Referenced from Cloudinary
   // and never downloaded. The key above covers the answers, so this is the
-  // source a reviewer can check the key against. EXAM-13 renders it
-  // nowhere. The review ticket should put it on the answer review screen,
-  // collapsed behind a disclosure the way Parts 1 to 5 show theirs.
+  // source a reviewer can check the key against. Since EXAM-14 it sits on
+  // the answer review screen, collapsed behind a disclosure the way Parts
+  // 1 to 5 show theirs.
   answerExplanationImageUrl: `${IMAGE_BASE}/v1785339234/Listening_Test_1_zAnswers_-_Part_6_zregl5_omthfw.png`,
   answerExplanationImageAlt:
     "Answer sheet for Listening Part 6, listing the correct answer for each of the six questions.",

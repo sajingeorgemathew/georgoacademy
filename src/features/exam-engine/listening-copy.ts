@@ -296,25 +296,24 @@ export const listeningCopy = {
   // same reason. See ANSWER_ALL_QUESTIONS_HINT above.
   viewpointsAnswerAllHint: ANSWER_ALL_QUESTIONS_HINT,
 
-  // Listening Part 6 (EXAM-13).
+  // Listening Part 6 (EXAM-13, closing screens added by EXAM-14).
   //
   // Same reason Parts 2 to 5 have their own blocks: "Listening Part 6" is
   // not any field on the content object. partTitle is the section name,
   // "Listening for Viewpoints", and title is the full practice test
   // heading.
   //
-  // Part 6 closes on the completion screen, because its answer review and
-  // practice score are not built yet, so it needs the heading and restart
-  // label pair the way Part 2 does. The review ticket should retire them
-  // the way EXAM-08, EXAM-10 and EXAM-12 retired the Part 3, Part 4 and
-  // Part 5 pairs.
-  part6CompleteHeading: "Listening Part 6 complete",
-  part6RestartLabel: "Restart Listening Part 6",
+  // part6CompleteHeading and part6RestartLabel are gone, for the same
+  // reason the part3, part4 and part5 pairs went. Part 6 closed on the
+  // EXAM-13 completion screen for one ticket, and now ends on the answer
+  // review, the practice score and the end of part screen, whose wording
+  // is built by listening-review-copy.ts. The part2 pair above is still
+  // the template for the first cut of a part that has no review yet.
   part6PreviewTitle: "Mock Test 1 Listening Part 6 Prototype",
   part6PreviewSummary:
     "Internal preview of Listening Part 6, Listening for Viewpoints, built from Mock Test 1 content. Answers are held on the page only and nothing is saved.",
   part6PreviewDescription:
-    "Prototype of Mock Test 1 Listening Part 6, with the community development report audio and the six viewpoints questions on one screen, local answer selection, and a completion screen.",
+    "Prototype of Mock Test 1 Listening Part 6, with the community development report audio and the six viewpoints questions on one screen, local answer selection, and the answer review and practice score screens.",
 } as const;
 
 // Answered count under a dropdown question list, for example

@@ -1,6 +1,6 @@
 // Answer review rows and practice scoring for a Listening part (EXAM-04,
-// extended to dropdown completion parts by EXAM-10 and to video
-// discussion parts by EXAM-12).
+// extended to dropdown completion parts by EXAM-10, to video discussion
+// parts by EXAM-12, and to viewpoints parts by EXAM-14).
 //
 // Pure functions over the part content and the local answer map. No
 // React, no side effects, no storage, so the same helpers work on the
@@ -48,6 +48,16 @@
 // third thin adapter over the same core, added the same way and with the
 // same guarantee. The Parts 1 to 4 functions are untouched by it.
 //
+// EXAM-14 note. Listening Part 6 is a viewpoints part, so its content is
+// ListeningViewpointsPartContent: a flat list of incomplete statements
+// answered from a radio group. Fourth content shape, fourth thin adapter,
+// and again no new marking rule. Its describe function is the dropdown
+// one's twin rather than the video one's, because a viewpoints question is
+// a statement split around a blank, so the row needs the same
+// formatListeningStatementLabel treatment. What differs is only how the
+// question screen draws the control, which marking never sees. The Parts 1
+// to 5 functions are untouched by it.
+//
 // House style: normal hyphens only, no long hyphens or em dashes.
 
 import { listListeningQuestions } from "./listening-flow";
@@ -70,6 +80,11 @@ import type {
   ListeningVideoPartContent,
   ListeningVideoQuestion,
 } from "./listening-video-types";
+import type {
+  ListeningViewpointsAnswerMap,
+  ListeningViewpointsPartContent,
+  ListeningViewpointsQuestion,
+} from "./listening-viewpoints-types";
 import type {
   ListeningAnswerKeyEntry,
   ListeningReviewRow,
@@ -513,6 +528,61 @@ export function buildListeningVideoReviewRows(
 export function buildListeningVideoScoreSummary(
   content: ListeningVideoPartContent,
   answers: ListeningVideoAnswerMap,
+): ListeningScoreSummary {
+  return buildSummary(content.questions, content.answerKey, answers);
+}
+
+// Listening Part 6 and the other viewpoints parts (EXAM-14).
+//
+// The question is printed on screen as an incomplete statement, exactly as
+// a dropdown part's is, so the row carries it and it is built by the same
+// helper. Without it the review reads as a list of sentence fragments with
+// nothing to attach them to: "Question 3" beside "may be developed into a
+// nature walkway." says nothing about what was being asked.
+//
+// This is deliberately describeDropdownQuestion's twin rather than a reuse
+// of it. The two take different question types, and merging them would
+// mean widening one part's describe function to accept the other part's
+// content, which is the coupling the sibling type files were split up to
+// avoid. The shared work is already in formatListeningStatementLabel.
+//
+// Mock Test 1 Part 6 leaves textAfter unset on every question, since each
+// blank ends its statement, so every label here prints as head plus dots.
+// A part whose blank falls mid sentence prints the tail after the dots
+// without any change here.
+const describeViewpointsQuestion: DescribeQuestion<
+  ListeningViewpointsQuestion
+> = (question, questionNumber) => ({
+  label: formatListeningQuestionLabel(questionNumber),
+  statement: formatListeningStatementLabel(
+    question.textBefore,
+    question.textAfter,
+  ),
+});
+
+// One review row per viewpoints statement, in part order.
+export function buildListeningViewpointsReviewRows(
+  content: ListeningViewpointsPartContent,
+  answers: ListeningViewpointsAnswerMap,
+): ListeningReviewRow[] {
+  return buildRows(
+    content.questions,
+    content.answerKey,
+    answers,
+    describeViewpointsQuestion,
+  );
+}
+
+// Everything the viewpoints part's score screen needs, in one pass.
+//
+// Only these two adapters are exported for the viewpoints shape, the same
+// pair the video block above exports and for the same reason: the
+// individual counts the dropdown block exports are read nowhere outside
+// this file, so they are not copied a fourth time. Both closing screens
+// read the summary.
+export function buildListeningViewpointsScoreSummary(
+  content: ListeningViewpointsPartContent,
+  answers: ListeningViewpointsAnswerMap,
 ): ListeningScoreSummary {
   return buildSummary(content.questions, content.answerKey, answers);
 }

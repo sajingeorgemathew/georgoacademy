@@ -35,6 +35,15 @@ export type ListeningReviewCopyOptions = {
   // The part after this one, for the end screen placeholder line. Leave
   // unset for the last part built, which drops the line entirely.
   nextPartLabel?: string;
+  // The end screen placeholder line, written out (EXAM-14).
+  //
+  // Wins over the sentence nextPartLabel generates. It exists for the last
+  // part of a section, where what comes next is not another part: Listening
+  // Part 6 is followed by the full Listening section result, so
+  // "Listening Part 7 will be added in the next ticket" would be wrong in
+  // both halves. Leave unset everywhere else, which is what Parts 1 to 5
+  // do, so their line is generated exactly as before.
+  nextStepText?: string;
 };
 
 export type ListeningReviewCopy = {
@@ -80,6 +89,7 @@ export type ListeningReviewCopy = {
 export function buildListeningReviewCopy({
   partLabel,
   nextPartLabel,
+  nextStepText,
 }: ListeningReviewCopyOptions): ListeningReviewCopy {
   return {
     // Answer review screen.
@@ -131,9 +141,9 @@ export function buildListeningReviewCopy({
     endMessage: `You have completed ${partLabel} of Mock Test 1.`,
     backToDashboardLabel: "Back to dashboard",
     restartLabel: `Restart ${partLabel}`,
-    nextPartPlaceholder: nextPartLabel
-      ? `${nextPartLabel} will be added in the next ticket.`
-      : "",
+    nextPartPlaceholder:
+      nextStepText ??
+      (nextPartLabel ? `${nextPartLabel} will be added in the next ticket.` : ""),
     // Standing reminder on the last screen of a prototype run.
     endNotice:
       "Nothing from this run has been saved. Restarting clears the answers held on this page.",
@@ -187,6 +197,24 @@ export const listeningPartFourReviewCopy = buildListeningReviewCopy({
 export const listeningPartFiveReviewCopy = buildListeningReviewCopy({
   partLabel: "Listening Part 5",
   nextPartLabel: "Listening Part 6",
+});
+
+// Listening Part 6 (EXAM-14).
+//
+// The first viewpoints part to reach the closing screens, and it still
+// needs no component change. What differs about Part 6 is the shape of its
+// content, which is handled in listening-score.ts, not here.
+//
+// It is also the last Listening part, so nextPartLabel is left unset and
+// the end screen line is written out instead. There is no Listening Part
+// 7, and the thing that comes after this part is the full Listening
+// section result, which is a later ticket rather than the next one. The
+// line stays a plain sentence, which is why ListeningPartEndScreen prints
+// it as text rather than as a control.
+export const listeningPartSixReviewCopy = buildListeningReviewCopy({
+  partLabel: "Listening Part 6",
+  nextStepText:
+    "Full Listening section result will be added in a later ticket.",
 });
 
 // Status labels for the review table. Short, plain, and not a badge.
