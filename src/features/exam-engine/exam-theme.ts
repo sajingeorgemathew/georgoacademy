@@ -461,6 +461,34 @@ export const examScore = {
   note: "text-[11px] leading-4 text-academy-navy/60",
 } as const;
 
+// Full Listening section review and score screens (EXAM-15).
+//
+// The section review is six part groups stacked in one scroll, and the
+// section score is the summary card plus a part breakdown table. Both are
+// built from the EXAM-04 recipes above rather than from new chrome: a
+// group here is a small heading over an examReview table, and the
+// breakdown is an examReview table with three columns.
+//
+// What is added is only what stacking six tables needs. A group heading
+// has to be quiet enough that six of them do not read as six pages, and
+// the part label has to be separable from the section name so the two can
+// sit on one line at different weights.
+export const examSectionReview = {
+  // Column of part groups.
+  groupStack: "flex min-w-0 flex-col gap-5",
+  group: "flex min-w-0 flex-col gap-2",
+  groupHeading:
+    "flex min-w-0 flex-wrap items-baseline gap-x-2 gap-y-0.5 border-b border-academy-line pb-1.5",
+  groupLabel: "text-[13px] font-semibold leading-5 text-academy-navy",
+  groupTitle: "text-[11px] leading-4 text-academy-navy/60",
+  // Right hand count on the group heading, for example "8 questions".
+  groupMeta: "ml-auto shrink-0 text-[11px] leading-4 text-academy-navy/55",
+  // Part breakdown block on the score screen.
+  breakdown: "flex min-w-0 flex-col gap-2",
+  breakdownTitle:
+    "text-[11px] font-semibold uppercase tracking-[0.06em] text-academy-navy/55",
+} as const;
+
 // Shared body text tones inside the canvas. Exam copy runs tighter than
 // dashboard copy, so these sit a step below the marketing scale.
 export const examText = {
