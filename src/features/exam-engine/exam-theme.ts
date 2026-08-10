@@ -38,11 +38,41 @@ import type { ListeningReviewStatus } from "./listening-review-types";
 //
 // The frame carries a grey body colour so the gutter around the white
 // canvas reads as part of the machine, not as a gap in the page.
+//
+// Height (EXAM-15B). All three levels ask for the full height of their
+// parent, and that request is deliberately inert on an ordinary page: a
+// percentage height resolves to auto when the parent's own height comes
+// from its content, which is what happens everywhere the frame sits
+// inside a normal dashboard page. It only bites inside a parent with a
+// real height, which is what examViewport below gives it, and there it
+// makes the frame exactly one viewport tall so the two bars stay put and
+// the canvas takes the rest. One set of classes covers both, so no screen
+// has to know which one it is in.
 export const examFrame = {
-  page: "w-full bg-academy-paper-warm",
-  container: "mx-auto w-full max-w-5xl",
+  page: "flex h-full min-h-0 w-full flex-col bg-academy-paper-warm",
+  container: "mx-auto flex h-full min-h-0 w-full max-w-5xl flex-col",
   frame:
-    "flex w-full min-w-0 flex-col overflow-hidden rounded-sm border border-academy-line bg-academy-navy-soft/45",
+    "flex h-full min-h-0 w-full min-w-0 flex-col overflow-hidden rounded-sm border border-academy-line bg-academy-navy-soft/45",
+} as const;
+
+// Locked exam viewport (EXAM-15B).
+//
+// The full Listening route sits under /dashboard, so the dashboard layout
+// wraps it in navigation, a breadcrumb trail and a footer. A real computer
+// based test screen has none of that, so the route covers the lot with a
+// fixed overlay one viewport tall instead of trying to unpick the layout
+// around it.
+//
+// overlay is the sheet of neutral background pinned over the dashboard.
+// Its z-index is above the sticky app header, which sits at z-50, so no
+// dashboard chrome shows through at the top of the screen.
+//
+// inner is the fixed height box the exam frame fills. It never scrolls
+// itself: any overflow is handed to the canvas inside the frame, which is
+// the only region on the screen with a scrollbar.
+export const examViewport = {
+  overlay: "fixed inset-0 z-[60] overflow-hidden bg-academy-paper-warm",
+  inner: "mx-auto flex h-[100dvh] w-full flex-col overflow-hidden p-2 sm:p-3",
 } as const;
 
 // Grey title bar and grey footer bar.
@@ -71,9 +101,23 @@ export const examBar = {
 // region is the grey gutter, sheet is the bordered white page inside it.
 // The border is what makes the canvas read as a document the engine is
 // displaying rather than as the page background.
+//
+// The region is the one scrolling area on an exam screen (EXAM-15B). It
+// grows into whatever height the frame has left over after the two bars,
+// and anything longer than that scrolls inside it rather than moving the
+// browser page. On an ordinary page the frame has no fixed height, so
+// there is no leftover height to grow into and no overflow to scroll, and
+// the region draws exactly as it did before.
+//
+// The sheet grows to fill the region so a short screen still shows a full
+// height white page rather than a band of grey underneath it, and it
+// never shrinks below its content, so a long screen pushes the region
+// into scrolling instead of being cut off.
 export const examCanvas = {
-  region: "min-w-0 bg-academy-navy-soft/30 p-2 sm:p-3",
-  sheet: "min-w-0 border border-academy-line bg-academy-paper text-academy-navy",
+  region:
+    "flex min-h-0 min-w-0 grow flex-col overflow-y-auto bg-academy-navy-soft/30 p-2 sm:p-3",
+  sheet:
+    "min-w-0 shrink-0 grow border border-academy-line bg-academy-paper text-academy-navy",
   padded: "px-4 py-5 sm:px-6 sm:py-6",
   minHeight: "min-h-[20rem]",
 } as const;
