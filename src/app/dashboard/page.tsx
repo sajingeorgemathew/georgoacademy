@@ -4,11 +4,11 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { DashboardAccessSummary } from "@/components/dashboard/DashboardAccessSummary";
 import { DashboardBadgePreview } from "@/components/dashboard/DashboardBadgePreview";
 import { DashboardHero } from "@/components/dashboard/DashboardHero";
+import { DashboardMockTestCard } from "@/components/dashboard/DashboardMockTestCard";
 import { DashboardModuleGrid } from "@/components/dashboard/DashboardModuleGrid";
 import { DashboardProgressOverview } from "@/components/dashboard/DashboardProgressOverview";
 import { DashboardRecentFeedback } from "@/components/dashboard/DashboardRecentFeedback";
 import { DashboardRecommendedPractice } from "@/components/dashboard/DashboardRecommendedPractice";
-import { ExamShellPreviewLink } from "@/components/exam/ExamShellPreviewLink";
 import { DASHBOARD_MODULE_SLUGS } from "@/features/dashboard/dashboard-copy";
 import { getDashboardRecommendation } from "@/features/dashboard/dashboard-recommendations";
 import {
@@ -179,11 +179,12 @@ export default async function DashboardPage() {
         />
       </div>
 
-      {/* EXAM-01 and EXAM-02: temporary internal links to the exam shell
-          preview and the instruction screens preview. Remove this block
-          once the practice test entry points ship. */}
+      {/* EXAM-15A: the Mock Test 1 Listening test entry point. This block
+          used to be the internal preview link list, which carried one
+          card per exam engine ticket. The internal routes still work, but
+          they are no longer linked from the dashboard. */}
       <div className="mt-10">
-        <ExamShellPreviewLink />
+        <DashboardMockTestCard />
       </div>
     </>
   );

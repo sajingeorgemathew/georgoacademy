@@ -4,8 +4,10 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { AppPageShell } from "@/components/app/AppPageShell";
 import { ListeningPartOnePrototype } from "@/components/exam/listening/ListeningPartOnePrototype";
 import { examCopy } from "@/features/exam-engine/exam-copy";
+import { withoutListeningAnswerKey } from "@/features/exam-engine/listening-flow";
 import { listeningCopy } from "@/features/exam-engine/listening-copy";
 import { listeningPart1 } from "@/features/exam-engine/mock-tests/mock-test-1/listening-part-1";
+import { markListeningPartOne } from "./actions";
 
 export const metadata: Metadata = {
   title: "Mock Test 1 Listening Part 1 prototype - Toronto Academy of Education",
@@ -15,7 +17,7 @@ export const metadata: Metadata = {
 };
 
 // Mock Test 1 Listening Part 1 prototype (EXAM-03, closing screens from
-// EXAM-04).
+// EXAM-04, answer key stripped by EXAM-15A).
 //
 // The first practice test screen built on real content rather than
 // placeholder text. It runs the eighteen screen sequence for Listening
@@ -23,25 +25,32 @@ export const metadata: Metadata = {
 // question screens, two section breaks, then the answer review, the
 // practice score, and the end of part screen.
 //
-// This is an internal preview. Answers are held in the browser for the
-// length of the visit and nothing is saved. The practice score is a
-// simple correct out of total, and it is withheld entirely while the
-// Listening answer key is untranscribed. The standing notice above the
-// frame says so, and the page carries robots noindex.
+// This is an internal route. It is no longer linked from the dashboard,
+// which shows one card for the full Listening section instead, and it
+// stays reachable by typing the URL so a single part can be checked
+// during development. Answers are held in the browser for the length of
+// the visit and nothing is saved. The standing notice above the frame
+// says so, and the page carries robots noindex.
 //
 // The content is licensed Toronto Academy material and the clips are
 // served from Cloudinary, so the route sits under /dashboard where the
 // layout auth guard covers it, and the page verifies the session again
 // close to the content. No API route, no service role, and no write.
 //
-// The prototype itself is a client component because the screen sequence
-// and the selected answers are local state. The content object is plain
-// data, so passing it across the boundary costs one serialization and no
-// answer key: every entry in its answerKey list is pending, and no
-// correctOptionId is set anywhere in it. Once the real key is
-// transcribed, the key stops being safe to hand to the browser and has to
-// be split off, which is the first note in
-// docs/product/listening-part-1-review-score.md section 9.
+// withoutListeningAnswerKey is the EXAM-15A fix, and it is the same
+// precaution Parts 2 to 6 have taken since EXAM-05. When this route was
+// built the Part 1 key was a list of pending entries with no correct
+// option in it, so handing the content object whole to a client
+// component leaked nothing. The key was transcribed afterwards, and from
+// that point the page payload carried all eight correct option ids to
+// the browser before a learner had answered anything. The key is now
+// stripped here, on the server, before the content crosses the boundary.
+//
+// The marking that goes with that stripping lives in actions.ts beside
+// this file, next to the key. The prototype still holds the answers in
+// local React state and still saves nothing, and only the finished review
+// rows and practice score come back. The key is the only thing that stays
+// behind, and it stays behind in both directions.
 
 export default async function ListeningPartOnePrototypePage() {
   const supabase = await createSupabaseServerClient();
@@ -55,6 +64,8 @@ export default async function ListeningPartOnePrototypePage() {
   if (!user) {
     redirect("/login");
   }
+
+  const learnerContent = withoutListeningAnswerKey(listeningPart1);
 
   return (
     <AppPageShell
@@ -71,13 +82,15 @@ export default async function ListeningPartOnePrototypePage() {
           </span>{" "}
           this is a Toronto Academy practice prototype, not the official CELPIP
           test. Your answers stay on this page and nothing is saved. The answer
-          review and the practice score run on this page only, the practice
-          score is not an official CELPIP score, and it stays pending until the
-          answer key for this part is transcribed. Audio can be replayed and the
-          timer does not count down yet.
+          review and the practice score run for this visit only and are not an
+          official CELPIP score. Audio can be replayed and the timer does not
+          count down yet.
         </p>
 
-        <ListeningPartOnePrototype content={listeningPart1} />
+        <ListeningPartOnePrototype
+          content={learnerContent}
+          markAnswers={markListeningPartOne}
+        />
       </div>
     </AppPageShell>
   );

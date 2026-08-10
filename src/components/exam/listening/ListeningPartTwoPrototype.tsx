@@ -32,11 +32,12 @@ import type {
 // Listening Part 2 prototype (EXAM-05, closing screens added by EXAM-06).
 //
 // Same shape as ListeningPartOnePrototype, and still deliberately not
-// merged with it. Both parts now end on the answer review, the practice
-// score and the end of part screen, but they get there differently: Part
-// 1 marks its answers in the browser because it holds its own key, and
-// Part 2 cannot, because its key never leaves the server. See markAnswers
-// below.
+// merged with it. The two parts differ in their screen sequence: Part 1
+// has three conversation sections and the section break screens between
+// them, and Part 2 has one conversation and no breaks. They mark the same
+// way, though. Part 1 scored in the browser until EXAM-15A, and both now
+// send the answers to a server action because neither one holds its key.
+// See markAnswers below.
 //
 // It owns three pieces of state:
 //

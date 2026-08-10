@@ -113,10 +113,21 @@ export const listeningCopy = {
   audioUnsupportedText:
     "Your browser cannot play this audio clip. You can continue when you are ready.",
 
-  // Dashboard internal preview card.
+  // Listening Part 1 route heading (EXAM-03).
+  //
+  // These three strings were written for the dashboard preview card that
+  // EXAM-15A removed. previewTitle and previewSummary are still the
+  // heading and the standfirst on the Part 1 route itself, which is now
+  // reachable by URL only. previewDescription no longer has a caller and
+  // is kept beside them for the same reason the Part 2 to Part 6
+  // descriptions are: the six blocks stay symmetrical.
+  //
+  // previewSummary no longer says the practice score waits on the answer
+  // key. The key was transcribed after EXAM-04, and EXAM-15A moved the
+  // marking to the server, so Part 1 scores the same way Parts 2 to 6 do.
   previewTitle: "Mock Test 1 Listening Part 1 Prototype",
   previewSummary:
-    "Internal preview of the first Listening part built from Mock Test 1 content. Answers are held on the page only, nothing is saved, and the practice score waits on the answer key.",
+    "Internal preview of Listening Part 1, Listening to Problem Solving, built from Mock Test 1 content. Answers are held on the page only and nothing is saved.",
   previewDescription:
     "Prototype of Mock Test 1 Listening Part 1, with the conversation audio, the eight question screens, local answer selection, and the answer review and practice score screens.",
 
@@ -329,6 +340,38 @@ export const listeningCopy = {
     "Internal preview of the complete Listening section, Parts 1 to 6 in one run. Answers are held on the page only, nothing is saved, and the practice score at the end is not an official CELPIP score.",
   fullSectionPreviewDescription:
     "The full Listening section: the section instructions, the Listening instructional video, Parts 1 to 6 back to back with no score between them, then one answer review over all 38 questions and one practice score with a part breakdown.",
+
+  // Dashboard card for the full Listening test (EXAM-15A).
+  //
+  // The one Mock Test 1 entry a learner sees on the dashboard. EXAM-15A
+  // took the six part prototype cards, the shell preview card and the
+  // instruction preview card off the dashboard, so this is the only
+  // Listening card on it now. The routes behind the removed cards are
+  // untouched and still open when the URL is typed.
+  //
+  // These strings are learner facing, which is the difference from the
+  // fullSectionPreview block above: no Internal preview badge, no
+  // Prototype in the title, and the description names what the learner
+  // gets rather than what the ticket built. The route itself still
+  // carries its standing prototype notice above the frame, which is
+  // where that wording belongs, and still says the score is not an
+  // official CELPIP score.
+  //
+  // The three counts are written out rather than derived from the
+  // content object, so the dashboard does not have to import a section
+  // full of answer keys to render a card. Mock Test 1 Listening is 6
+  // parts and 38 questions; change these if the section content changes.
+  mockTestsHeading: "Mock tests",
+  mockTestsDescription:
+    "Full practice sections built from Toronto Academy Mock Test 1 content. Answers are held on the page for one visit and nothing is saved yet.",
+  fullSectionCardTitle: "Mock Test 1 - Listening Test",
+  fullSectionCardDescription:
+    "Complete the full Listening section with instructions, all 6 parts, answer review, and practice score.",
+  fullSectionCardSectionLabel: "Listening",
+  fullSectionCardPartsLabel: "6 parts",
+  fullSectionCardQuestionsLabel: "38 questions",
+  fullSectionCardStatusLabel: "Available",
+  fullSectionCardCtaLabel: "Start Listening test",
 } as const;
 
 // Answered count under a dropdown question list, for example

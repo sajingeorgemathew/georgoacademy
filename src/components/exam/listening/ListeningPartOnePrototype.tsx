@@ -1,6 +1,9 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
+import { ExamButton } from "../ExamButton";
+import { ExamInstructionRow } from "../ExamInstructionRow";
+import { ExamShell } from "../ExamShell";
 import { ListeningAnswerReviewScreen } from "./ListeningAnswerReviewScreen";
 import { ListeningAudioScreen } from "./ListeningAudioScreen";
 import { ListeningPartEndScreen } from "./ListeningPartEndScreen";
@@ -9,6 +12,7 @@ import { ListeningQuestionScreen } from "./ListeningQuestionScreen";
 import { ListeningScenarioScreen } from "./ListeningScenarioScreen";
 import { ListeningScoreScreen } from "./ListeningScoreScreen";
 import { ListeningSectionBreakScreen } from "./ListeningSectionBreakScreen";
+import { examScreenBody } from "@/features/exam-engine/exam-theme";
 import {
   buildListeningFlow,
   countListeningQuestions,
@@ -16,41 +20,43 @@ import {
   setListeningAnswer,
 } from "@/features/exam-engine/listening-flow";
 import {
-  buildListeningReviewRows,
-  buildListeningScoreSummary,
-} from "@/features/exam-engine/listening-score";
-import {
   formatListeningScreenPosition,
   formatListeningSectionBreak,
   formatListeningSectionLabel,
   listeningCopy,
 } from "@/features/exam-engine/listening-copy";
+import type { ListeningMarkedPart } from "@/features/exam-engine/listening-review-types";
 import type {
   ListeningAnswerMap,
   ListeningPartContent,
 } from "@/features/exam-engine/listening-types";
 
-// Listening Part 1 prototype (EXAM-03, closing screens added by EXAM-04).
+// Listening Part 1 prototype (EXAM-03, closing screens added by EXAM-04,
+// marking moved to the server by EXAM-15A).
 //
-// The only stateful piece of the Listening flow. It owns two things:
+// It owns three pieces of state:
 //
 // - which screen is showing, an index into the flow built by
 //   buildListeningFlow
-// - the answers, as { questionId: optionId }, which is the shape the
-//   answer review and the practice score read
+// - the answers, as { questionId: optionId }
+// - the marking result, once the server has returned one
 //
-// Both live in local component state. Nothing is written to a database,
-// and a page reload starts the part again. That is deliberate for a
-// prototype and is recorded in
+// All three live in local component state. Nothing is written to a
+// database, to localStorage or to a cookie, and a page reload starts the
+// part again. That is deliberate for a prototype and is recorded in
 // docs/product/listening-part-1-prototype.md and
 // docs/product/listening-part-1-review-score.md.
 //
 // EXAM-04 added the last three screens: answer review, practice score,
-// and end of part. They read the same local answer map through the pure
-// helpers in listening-score.ts, so this component still holds no derived
-// state and nothing is stored anywhere. The review rows and the summary
-// are recomputed from the answers whenever they change, which is cheap at
-// eight questions and removes any chance of a stale score.
+// and end of part. It calculated both in the browser, which was safe at
+// the time because the Part 1 answer key was a list of pending entries
+// with no correct option in it.
+//
+// That stopped being true once the key was transcribed, and EXAM-15A
+// closed the gap. This component is now the same shape as Parts 2 to 6:
+// the route strips the key before the content reaches it, so it never
+// sees a correct option until the learner has finished the part and the
+// server sends the review rows back. See markAnswers below.
 //
 // Back is enabled throughout, which the official-style flow would not
 // allow, so the sequence can be walked through repeatedly during review.
@@ -63,12 +69,34 @@ import type {
 // Every screen title, bullet, option and clip URL comes from the content
 // object passed in, so this component carries no Mock Test 1 text.
 
+// Marks an attempt on the server and returns the review rows and the
+// practice score. Resolves to null when the caller has no session.
+//
+// Passed in rather than imported, so this component depends on the shape
+// of the result and not on one particular route's action.
+export type ListeningPartOneMarkAction = (
+  answers: ListeningAnswerMap,
+) => Promise<ListeningMarkedPart | null>;
+
+// Where the marking request has got to.
+//
+// "failed" covers both a rejected request and a null reply, which is a
+// lost session. Both leave the learner in the same place with the same
+// thing to do, so they read as one state and the copy names both causes.
+type MarkingState =
+  | { status: "idle" }
+  | { status: "working" }
+  | { status: "ready"; marked: ListeningMarkedPart }
+  | { status: "failed" };
+
 export type ListeningPartOnePrototypeProps = {
   content: ListeningPartContent;
+  markAnswers: ListeningPartOneMarkAction;
 };
 
 export function ListeningPartOnePrototype({
   content,
+  markAnswers,
 }: ListeningPartOnePrototypeProps) {
   const screens = useMemo(() => buildListeningFlow(content), [content]);
   const questionCount = useMemo(
@@ -78,23 +106,58 @@ export function ListeningPartOnePrototype({
 
   const [screenIndex, setScreenIndex] = useState(0);
   const [answers, setAnswers] = useState<ListeningAnswerMap>({});
+  const [marking, setMarking] = useState<MarkingState>({ status: "idle" });
 
-  // Review rows and the practice summary are derived, never stored, so
-  // they cannot disagree with the answers they came from.
-  const reviewRows = useMemo(
-    () => buildListeningReviewRows(content, answers),
-    [content, answers],
-  );
-  const scoreSummary = useMemo(
-    () => buildListeningScoreSummary(content, answers),
-    [content, answers],
-  );
+  // Which marking request is the current one. A learner can leave the
+  // review, change an answer and come back faster than a reply arrives,
+  // and the older reply would then overwrite the newer one with a score
+  // for answers they have already changed. Every request takes a number
+  // and a reply is dropped unless its number is still the latest.
+  //
+  // A ref rather than state on purpose: nothing renders from it, and
+  // bumping it must take effect immediately rather than at the next
+  // render.
+  const markingRequestId = useRef(0);
 
   const screen = screens[screenIndex];
   const totalScreens = screens.length;
 
+  const requestMarking = async (submitted: ListeningAnswerMap) => {
+    markingRequestId.current += 1;
+    const requestId = markingRequestId.current;
+
+    setMarking({ status: "working" });
+
+    try {
+      const marked = await markAnswers(submitted);
+
+      if (markingRequestId.current !== requestId) {
+        return;
+      }
+
+      setMarking(marked ? { status: "ready", marked } : { status: "failed" });
+    } catch {
+      if (markingRequestId.current !== requestId) {
+        return;
+      }
+
+      setMarking({ status: "failed" });
+    }
+  };
+
+  // Marking is kicked off from the handler that walks onto the review
+  // screen, not from an effect. Answers cannot change while the review is
+  // showing without going back through a question screen first, so
+  // entering the review is exactly the moment the result is needed and
+  // exactly the moment it is known to be current.
   const goNext = () => {
-    setScreenIndex((current) => Math.min(current + 1, totalScreens - 1));
+    const nextIndex = Math.min(screenIndex + 1, totalScreens - 1);
+
+    if (screens[nextIndex]?.kind === "answer-review") {
+      void requestMarking(answers);
+    }
+
+    setScreenIndex(nextIndex);
   };
 
   const goBack = () => {
@@ -105,11 +168,15 @@ export function ListeningPartOnePrototype({
     setAnswers((current) => setListeningAnswer(current, questionId, optionId));
   };
 
-  // Start the part again from the first screen with an empty answer map.
-  // Nothing was saved, so there is nothing else to clear.
+  // Start the part again from the first screen with an empty answer map
+  // and no result. Nothing was saved, so there is nothing else to clear.
+  // The request id moves on so a reply still in flight cannot land on the
+  // fresh run.
   const restart = () => {
+    markingRequestId.current += 1;
     setScreenIndex(0);
     setAnswers({});
+    setMarking({ status: "idle" });
   };
 
   // Shared chrome props. Back is hidden on the first screen only, because
@@ -117,6 +184,51 @@ export function ListeningPartOnePrototype({
   const metaText = formatListeningScreenPosition(screenIndex + 1, totalScreens);
   const showBack = screenIndex > 0;
   const sectionCount = content.sections.length;
+
+  // Stands in for the review and the score while the server is marking,
+  // and carries the retry when it could not. Back still works, so a
+  // failed check is never a dead end: the learner can walk back to the
+  // questions with every answer still selected.
+  const renderMarkingScreen = () => {
+    const failed = marking.status === "failed";
+
+    return (
+      <ExamShell
+        title={content.title}
+        metaText={metaText}
+        showNext={false}
+        onBack={goBack}
+        showBack={showBack}
+      >
+        <div className={examScreenBody.stack}>
+          <ExamInstructionRow
+            heading={
+              failed
+                ? listeningCopy.markingFailedHeading
+                : listeningCopy.markingHeading
+            }
+            text={
+              failed
+                ? listeningCopy.markingFailedText
+                : listeningCopy.markingText
+            }
+          />
+
+          {failed ? (
+            <div className={examScreenBody.actions}>
+              <ExamButton
+                variant="primary"
+                size="md"
+                onClick={() => void requestMarking(answers)}
+              >
+                {listeningCopy.markingRetryLabel}
+              </ExamButton>
+            </div>
+          ) : null}
+        </div>
+      </ExamShell>
+    );
+  };
 
   if (!screen) {
     return null;
@@ -217,10 +329,14 @@ export function ListeningPartOnePrototype({
   }
 
   if (screen.kind === "answer-review") {
+    if (marking.status !== "ready") {
+      return renderMarkingScreen();
+    }
+
     return (
       <ListeningAnswerReviewScreen
         title={content.title}
-        rows={reviewRows}
+        rows={marking.marked.rows}
         explanationImageUrl={content.answerExplanationImageUrl}
         explanationImageAlt={content.answerExplanationImageAlt}
         metaText={metaText}
@@ -234,10 +350,17 @@ export function ListeningPartOnePrototype({
   }
 
   if (screen.kind === "score") {
+    // Reachable by pressing Back from the end screen, so the result can
+    // be missing here even though the review had it, for example after a
+    // failed retry. The same screen covers it.
+    if (marking.status !== "ready") {
+      return renderMarkingScreen();
+    }
+
     return (
       <ListeningScoreScreen
         title={content.title}
-        summary={scoreSummary}
+        summary={marking.marked.summary}
         onEndPart={goNext}
         onReviewAnswers={goBack}
         metaText={metaText}
