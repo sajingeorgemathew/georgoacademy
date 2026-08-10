@@ -46,11 +46,11 @@ export const metadata: Metadata = {
 // local React state and still saves nothing. The key is the only thing
 // that stays behind, and it stays behind in both directions.
 //
-// Part 1 does not do any of this. Its key is now transcribed too, so the
-// same reasoning applies to it and it still ships the key to the browser.
-// Moving Part 1 across is recorded as follow up work in
-// docs/product/listening-part-2-review-score.md section 7, and was left
-// out of this ticket because it is a Part 1 change.
+// Part 1 did not do any of this for several tickets, because its key was
+// untranscribed when it was built and there was nothing to leak. Once the
+// key landed, the same reasoning applied to it and it was still shipping
+// the key to the browser. EXAM-15A moved it across, so all six parts now
+// strip on the server and mark on the server.
 
 export default async function ListeningPartTwoPrototypePage() {
   const supabase = await createSupabaseServerClient();
