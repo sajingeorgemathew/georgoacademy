@@ -121,8 +121,13 @@ export function buildListeningSectionCopy({
       "At the end, you will review your answers and see a practice score.",
       "This is Toronto Academy practice, not an official CELPIP score.",
     ],
+    // EXAM-15B dropped the "Internal prototype" opening. This route is a
+    // learner facing test now, so the notice says what a learner needs to
+    // know about their answers and their score and nothing about which
+    // build stage the screen is at. What it protects, that the result is
+    // not an official CELPIP one, is unchanged.
     instructionNotice:
-      "Internal prototype. Your answers are held on this screen only, nothing is saved, and the practice score is not an official CELPIP result.",
+      "Your answers are held on this screen only, nothing is saved, and the practice score is not an official CELPIP result.",
     introTitle: "Listening section",
     introSummary:
       "Six parts in one run, with the answer review and the practice score at the end rather than after each part.",

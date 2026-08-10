@@ -328,18 +328,16 @@ export const listeningCopy = {
 
   // Full Listening section (EXAM-15).
   //
-  // The dashboard card for the route that runs all six parts in one go.
-  // The wording says what the part cards do not: no score appears between
-  // the parts, and the one result is at the end over all 38 questions.
+  // The fullSectionPreviewTitle, fullSectionPreviewSummary and
+  // fullSectionPreviewDescription strings that sat here are gone. They
+  // were the internal preview page heading, eyebrow summary and
+  // description for /dashboard/mock-tests/mock-test-1/listening, and
+  // EXAM-15B turned that route into a locked exam screen with no page
+  // heading and no description at all. Nothing read them afterwards.
+  //
   // Screen wording for that route lives in listening-section-copy.ts,
-  // which is where the section owned screens read from. These three
-  // strings sit here because this file is what the dashboard preview card
-  // already reads.
-  fullSectionPreviewTitle: "Mock Test 1 Full Listening Section",
-  fullSectionPreviewSummary:
-    "Internal preview of the complete Listening section, Parts 1 to 6 in one run. Answers are held on the page only, nothing is saved, and the practice score at the end is not an official CELPIP score.",
-  fullSectionPreviewDescription:
-    "The full Listening section: the section instructions, the Listening instructional video, Parts 1 to 6 back to back with no score between them, then one answer review over all 38 questions and one practice score with a part breakdown.",
+  // which is where the section owned screens read from, and the test's own
+  // name is SECTION_TITLE in the section content file.
 
   // Dashboard card for the full Listening test (EXAM-15A).
   //
@@ -349,13 +347,17 @@ export const listeningCopy = {
   // Listening card on it now. The routes behind the removed cards are
   // untouched and still open when the URL is typed.
   //
-  // These strings are learner facing, which is the difference from the
-  // fullSectionPreview block above: no Internal preview badge, no
+  // These strings are learner facing: no Internal preview badge, no
   // Prototype in the title, and the description names what the learner
-  // gets rather than what the ticket built. The route itself still
-  // carries its standing prototype notice above the frame, which is
-  // where that wording belongs, and still says the score is not an
-  // official CELPIP score.
+  // gets rather than what the ticket built. fullSectionCardTitle is also
+  // the name the test itself carries in its top bar, so the card and the
+  // first screen of the run agree.
+  //
+  // The caveats that used to sit in a notice above the frame moved into
+  // the run itself when EXAM-15B removed the page chrome. The instruction
+  // screen says answers are held on the screen and nothing is saved, and
+  // the review and score screens say the result is not an official CELPIP
+  // score.
   //
   // The three counts are written out rather than derived from the
   // content object, so the dashboard does not have to import a section

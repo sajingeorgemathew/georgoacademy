@@ -38,7 +38,12 @@ import type { ListeningSectionContent } from "../../listening-section-types";
 // A part screen keeps its own content.title, which names the part, so this
 // appears on the instruction screen, the video screen, the five
 // transitions, the review, the score and the end screen only.
-const SECTION_TITLE = "Practice Test 1 - Listening Section";
+//
+// EXAM-15B made this the learner facing name of the test, so the first
+// screen of the run says the same thing as the dashboard card that opened
+// it. The six part titles are deliberately left alone: they are shared
+// with the part level routes, which are internal and stay that way.
+const SECTION_TITLE = "Mock Test 1 - Listening Test";
 
 export const mockTest1ListeningSection: ListeningSectionContent = {
   testId: "mock-test-1",
