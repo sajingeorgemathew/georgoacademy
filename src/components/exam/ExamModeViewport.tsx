@@ -27,7 +27,9 @@ import { examViewport } from "@/features/exam-engine/exam-theme";
 //   are while a long screen scrolls between them
 // - document scrolling is switched off while this is mounted, so a
 //   trackpad flick or a space bar press cannot drag the exam up the screen
-//   or reveal the dashboard page behind it
+//   or reveal the dashboard page behind it, and scroll chaining is refused
+//   as well so a flick past the end of the canvas cannot bounce the
+//   document either
 //
 // The scroll lock is written on the elements themselves rather than
 // through a class, and the previous inline values are put back on unmount,
@@ -55,13 +57,25 @@ export function ExamModeViewport({ children, label }: ExamModeViewportProps) {
 
     const previousRootOverflow = root.style.overflow;
     const previousBodyOverflow = body.style.overflow;
+    const previousRootOverscroll = root.style.overscrollBehavior;
+    const previousBodyOverscroll = body.style.overscrollBehavior;
 
     root.style.overflow = "hidden";
     body.style.overflow = "hidden";
+    // overflow hidden stops the document scrolling, and this stops the
+    // bounce (EXAM-15C). A trackpad flick or a touch drag that runs past
+    // the end of the exam canvas can still rubber band the document on
+    // macOS and on mobile Safari, which flashes a strip of the dashboard
+    // behind the exam. Refusing the chain here means the only thing that
+    // moves on screen is the canvas, and only while it has somewhere to go.
+    root.style.overscrollBehavior = "none";
+    body.style.overscrollBehavior = "none";
 
     return () => {
       root.style.overflow = previousRootOverflow;
       body.style.overflow = previousBodyOverflow;
+      root.style.overscrollBehavior = previousRootOverscroll;
+      body.style.overscrollBehavior = previousBodyOverscroll;
     };
   }, []);
 

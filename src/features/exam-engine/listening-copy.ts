@@ -74,8 +74,12 @@ export const listeningCopy = {
   // Different from audioFallbackHeading, which covers a clip that exists
   // and would not load. This one covers a clip that is not in the source
   // material at all, so there is nothing to reload and no point telling
-  // anyone to check their connection. Mock Test 1 Listening Part 3
-  // Question 1 is the only place it appears.
+  // anyone to check their connection.
+  //
+  // No shipped question reaches it. Mock Test 1 Listening Part 3 Question 1
+  // was the one place it appeared, and the corrected source document
+  // supplied that recording. It is kept as the generic answer for a real
+  // gap in a future part, not for that question.
   questionAudioMissingHeading: "This question has no audio yet",
   questionAudioMissingText:
     "The recording for this question is missing from the source practice test and is added once it is supplied. The answer options below are the ones from the practice test.",

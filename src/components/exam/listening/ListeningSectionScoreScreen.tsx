@@ -1,9 +1,11 @@
 import { ExamButton } from "../ExamButton";
 import { ExamInstructionRow } from "../ExamInstructionRow";
 import { ExamShell } from "../ExamShell";
+import { ListeningEstimatedBandCard } from "./ListeningEstimatedBandCard";
 import { ListeningScoreSummaryCard } from "./ListeningScoreSummaryCard";
 import { ListeningSectionScoreBreakdown } from "./ListeningSectionScoreBreakdown";
 import { examScreenBody } from "@/features/exam-engine/exam-theme";
+import { estimateListeningBand } from "@/features/exam-engine/listening-band-score";
 import { buildListeningReviewCopy } from "@/features/exam-engine/listening-review-copy";
 import type { ListeningReviewCopy } from "@/features/exam-engine/listening-review-copy";
 import type { ListeningScoreSummary } from "@/features/exam-engine/listening-review-types";
@@ -20,11 +22,18 @@ import type { ListeningSectionPartResult } from "@/features/exam-engine/listenin
 // say nothing about what happens after it. The bottom bar Back still
 // works, and lands on the review screen.
 //
-// The screen prints no CELPIP score and no CELPIP level. The summary card
-// carries the practice result note, and when part of the answer key is
-// incomplete it shows the pending state instead of a number. Nothing on
-// this screen calculates anything itself: the counts arrive marked from
-// the server.
+// The screen prints no official CELPIP score. The summary card carries the
+// practice result note, and when part of the answer key is incomplete it
+// shows the pending state instead of a number. The counts themselves arrive
+// marked from the server; nothing on this screen marks an answer.
+//
+// EXAM-15C added the estimated band card between the summary and the
+// breakdown, and it appears conditionally. estimateListeningBand returns
+// null unless the project's own Listening score chart covers the attempt,
+// which means a complete answer key and a section of 38 questions, so a
+// section that is short a key or is not out of 38 shows the same screen
+// this ticket found, with no band on it. Nothing is estimated from a chart
+// the project does not have. See listening-band-score.ts.
 //
 // The four headline readings are the EXAM-04 ListeningScoreSummaryCard,
 // not a copy of it. That card takes part wording, and every reading on it
@@ -58,6 +67,10 @@ export function ListeningSectionScoreScreen({
   onBack,
   showBack = true,
 }: ListeningSectionScoreScreenProps) {
+  // null whenever the project criteria do not support an estimate, and the
+  // card is left out entirely in that case rather than shown empty.
+  const bandEstimate = estimateListeningBand(summary);
+
   const cardCopy: ListeningReviewCopy = {
     ...buildListeningReviewCopy({ partLabel: copy.sectionName }),
     totalQuestionsLabel: copy.totalQuestionsLabel,
@@ -83,6 +96,10 @@ export function ListeningSectionScoreScreen({
         <ExamInstructionRow heading={copy.scoreTitle} text={copy.scoreSubtitle} />
 
         <ListeningScoreSummaryCard summary={summary} copy={cardCopy} />
+
+        {bandEstimate ? (
+          <ListeningEstimatedBandCard estimate={bandEstimate} copy={copy} />
+        ) : null}
 
         <ListeningSectionScoreBreakdown parts={parts} copy={copy} />
 

@@ -13,7 +13,7 @@
 // so fills sections with three entries. Here there is one, which is why
 // the flow produces no section break screens.
 //
-// Three notes on the source material, all deliberate:
+// Two notes on the source material, both deliberate:
 //
 // - The scenario sentence in the document wraps "woman's" in a curly
 //   apostrophe. It is normalized to a straight apostrophe here, the same
@@ -21,10 +21,14 @@
 //   credit cards." and EXAM-05 applied to the curly quotation marks in
 //   the Part 2 option about the name "Amir". Typography only. No wording
 //   changed.
-// - The document lists the conversation clip twice, on two different
-//   Cloudinary accounts. See CONVERSATION_AUDIO_URL below.
-// - There is no question clip for Question 1. See the note on that
-//   question below.
+// - The conversation clip is served from the current Cloudinary account,
+//   which is not the account the document's AUDIO line points at. See
+//   CONVERSATION_AUDIO_URL below.
+//
+// Question 1 used to be the third note here. The source document was
+// corrected on 2026-08-16 and now carries a real Q1 recording, so that
+// question is an ordinary question again and the EXAM-15C conversation
+// replay workaround is gone. See the note on Q1_AUDIO_URL below.
 //
 // The answer key is confirmed and complete, which means this file must
 // never be handed to the browser whole. See the note on ANSWER_KEY.
@@ -78,21 +82,37 @@ const IMAGE_BASE = "https://res.cloudinary.com/dkvsshy7n/image/upload";
 // The conversation clip, and the one content decision in this file worth
 // reading before changing it.
 //
-// The source document lists the Part 3 conversation twice:
+// The document that EXAM-07 read listed the Part 3 conversation twice:
 //
 //   1. under the AUDIO heading, on the old Cloudinary account ds1wvtjft
 //   2. under the Question 1 heading, on the current account dkvsshy7n
 //
-// Both filenames end in the same asset name, Listening_Test_1_-_Part_3_-
-// _Audio_nk6pmi, so the second is a re-upload of the same conversation
-// and not a question clip that happens to be named oddly. The current
-// account is used here, because every other Part 3 clip lives there and
-// mock-tests/mock-test-1/extracted-links.md flags the old account as
-// unconfirmed.
+// Both filenames ended in the same asset name, Listening_Test_1_-_Part_3_
+// -_Audio_nk6pmi, so the second was a re-upload of the same conversation
+// and not a question clip that happened to be named oddly. The current
+// account copy is what is used here, because every other Part 3 clip
+// lives there and mock-tests/mock-test-1/extracted-links.md flags the old
+// account as unconfirmed.
 //
-// The cost of that reading is Question 1: the document has no clip left
-// for it. Nothing is invented to fill the gap. See that question below.
+// The corrected document no longer carries that second copy: the Question
+// 1 slot now holds the real Q1 recording, which is the whole point of the
+// correction. The current account url is kept anyway rather than swapped
+// for the old account url on the AUDIO line, because it is the same
+// asset, it is the account every other clip in this part is served from,
+// and it is recorded in extracted-links.md as the confirmed copy. Swap it
+// only if that Cloudinary asset is actually removed.
 const CONVERSATION_AUDIO_URL = `${AUDIO_BASE}/v1785338301/Listening_Test_1_-_Part_3_-_Audio_nk6pmi_ugrx14.mp3`;
+
+// Question 1's own recording, supplied in the corrected source document on
+// 2026-08-16 and read from the Question 1 slot of Listening PART 03.
+//
+// It is a real question clip, not another copy of the conversation: the
+// asset name is Listening_Test_1_-_Part_3_-_Q1, matching the Q2 to Q6
+// naming this part already used, and it sits on the current dkvsshy7n
+// account with the rest of them. Before this correction that slot held the
+// conversation re-upload, which is why EXAM-15C had to caption Question 1
+// as a conversation replay. Nothing about that workaround is left.
+const Q1_AUDIO_URL = `${AUDIO_BASE}/v1786331722/Listening_Test_1_-_Part_3_-_Q1_eavvnb_in9hcf.mp3`;
 
 export const listeningPart3: ListeningPartContent = {
   testId: "mock-test-1",
@@ -131,20 +151,18 @@ export const listeningPart3: ListeningPartContent = {
         {
           id: "listening-part-3-q1",
           number: 1,
-          // No audioUrl. The Question 1 slot in the source document holds
-          // the conversation clip, not a question clip, and there is no
-          // Part_3_-_Q1 file anywhere in the document. This is risk 2 in
-          // docs/product/exam-engine-reference-audit.md.
+          // An ordinary question clip since the source document was
+          // corrected. This closes risk 2 in
+          // docs/product/exam-engine-reference-audit.md, which was the
+          // missing Q1 recording, and it retires the EXAM-15C
+          // fallbackToConversationAudio workaround: the field is gone from
+          // this question and from ListeningQuestion, so nothing replays
+          // the conversation on a question screen any more.
           //
-          // Pointing this at the conversation clip would play the whole
-          // two and a half minute conversation again in place of a one
-          // sentence question, which is worse than saying nothing, so the
-          // field is left unset and the question screen says the clip is
-          // missing. The options and the answer key are intact and come
-          // from the document as written.
-          //
-          // Fill this in as soon as the Q1 recording is supplied. Nothing
-          // else about this question needs to change.
+          // The options and the answer key below are untouched by the
+          // correction. They were always read from the document text and
+          // the Part 3 answer sheet, never from the audio.
+          audioUrl: Q1_AUDIO_URL,
           options: [
             {
               id: "listening-part-3-q1-a",

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { Fragment, useMemo, useRef, useState } from "react";
 import { ExamButton } from "../ExamButton";
 import { ExamInstructionRow } from "../ExamInstructionRow";
 import { ExamShell } from "../ExamShell";
@@ -21,7 +21,10 @@ import { ListeningVideoScreen } from "./ListeningVideoScreen";
 import { ListeningViewpointsQuestionScreen } from "./ListeningViewpointsQuestionScreen";
 import { ListeningViewpointsScreen } from "./ListeningViewpointsScreen";
 import { examScreenBody } from "@/features/exam-engine/exam-theme";
-import { getListeningQuestion } from "@/features/exam-engine/listening-flow";
+import {
+  getListeningQuestion,
+  resolveListeningQuestionAudio,
+} from "@/features/exam-engine/listening-flow";
 import {
   formatListeningSectionBreak,
   formatListeningSectionLabel,
@@ -391,6 +394,11 @@ export function ListeningSectionPrototype({
         <ListeningQuestionScreen
           title={part.content.title}
           question={question}
+          // Resolved from the part content, not decided here, so a
+          // question behaves the same in this run as it does in its own
+          // part route. Every Parts 1 to 3 question has its own clip, so
+          // this resolves to that clip on every question screen.
+          audio={resolveListeningQuestionAudio(part.content, partScreen)}
           questionNumber={partScreen.questionNumber}
           questionCount={questionCount}
           selectedOptionId={answers[question.id]}
@@ -526,127 +534,152 @@ export function ListeningSectionPrototype({
     return null;
   }
 
-  if (screen.kind === "part") {
-    return renderPartScreen(screen);
-  }
+  // The screen at the current position.
+  //
+  // Wrapped in a function so the whole flow can be given one key below.
+  // Everything after the part branch belongs to the section rather than to
+  // a part, so it carries the section title and the section meta line.
+  const renderCurrentScreen = () => {
+    if (screen.kind === "part") {
+      return renderPartScreen(screen);
+    }
 
-  // Everything below belongs to the section rather than to a part, so it
-  // carries the section title and the section meta line.
-  const metaText = formatListeningSectionMeta(screenIndex + 1, totalScreens);
+    const metaText = formatListeningSectionMeta(screenIndex + 1, totalScreens);
 
-  const sectionProgress = {
-    totalParts,
-    totalQuestions,
-    answeredCount,
-    copy,
+    const sectionProgress = {
+      totalParts,
+      totalQuestions,
+      answeredCount,
+      copy,
+    };
+
+    if (screen.kind === "section-instructions") {
+      return (
+        <ListeningSectionInstructionScreen
+          content={content.instructionScreen}
+          {...sectionProgress}
+          metaText={metaText}
+          onNext={goNext}
+          onBack={goBack}
+          showBack={showBack}
+        />
+      );
+    }
+
+    if (screen.kind === "section-video") {
+      return (
+        <ListeningSectionVideoScreen
+          content={content.videoScreen}
+          {...sectionProgress}
+          metaText={metaText}
+          onNext={goNext}
+          // Skip goes exactly where Next goes. Nothing here is gated on the
+          // clip, so the control is a shortcut past the player rather than a
+          // second path through the flow.
+          onSkip={goNext}
+          onBack={goBack}
+          showBack={showBack}
+        />
+      );
+    }
+
+    if (screen.kind === "part-transition") {
+      const nextPart = content.parts[screen.partIndex];
+      const completedPart = content.parts[screen.partIndex - 1];
+
+      if (!nextPart || !completedPart) {
+        return null;
+      }
+
+      return (
+        <ListeningSectionPartTransitionScreen
+          title={content.title}
+          completedPartLabel={completedPart.partLabel}
+          nextPartLabel={nextPart.partLabel}
+          nextPartNumber={nextPart.partNumber}
+          {...sectionProgress}
+          metaText={metaText}
+          onNext={goNext}
+          onBack={goBack}
+          showBack={showBack}
+        />
+      );
+    }
+
+    if (screen.kind === "section-review") {
+      if (marking.status !== "ready") {
+        return renderMarkingScreen(metaText);
+      }
+
+      return (
+        <ListeningSectionReviewScreen
+          title={content.title}
+          parts={marking.marked.parts}
+          {...sectionProgress}
+          metaText={metaText}
+          onNext={goNext}
+          // Back lands on the last question screen of Part 6, which is the
+          // prototype affordance the ticket asks for.
+          onBack={goBack}
+          showBack={showBack}
+        />
+      );
+    }
+
+    if (screen.kind === "section-score") {
+      // Reachable by pressing Back from the end screen, so the result can
+      // be missing here even though the review had it, for example after a
+      // failed retry. The same screen covers it.
+      if (marking.status !== "ready") {
+        return renderMarkingScreen(metaText);
+      }
+
+      return (
+        <ListeningSectionScoreScreen
+          title={content.title}
+          summary={marking.marked.summary}
+          parts={marking.marked.parts}
+          copy={copy}
+          onEndSection={goNext}
+          onReviewAnswers={goBack}
+          metaText={metaText}
+          onBack={goBack}
+          showBack={showBack}
+        />
+      );
+    }
+
+    // End of Listening section screen. The last screen in the flow, so
+    // there is no Next.
+    return (
+      <ListeningSectionEndScreen
+        title={content.title}
+        onRestart={restart}
+        copy={copy}
+        metaText={metaText}
+        onBack={goBack}
+        showBack={showBack}
+      />
+    );
   };
 
-  if (screen.kind === "section-instructions") {
-    return (
-      <ListeningSectionInstructionScreen
-        content={content.instructionScreen}
-        {...sectionProgress}
-        metaText={metaText}
-        onNext={goNext}
-        onBack={goBack}
-        showBack={showBack}
-      />
-    );
-  }
-
-  if (screen.kind === "section-video") {
-    return (
-      <ListeningSectionVideoScreen
-        content={content.videoScreen}
-        {...sectionProgress}
-        metaText={metaText}
-        onNext={goNext}
-        // Skip goes exactly where Next goes. Nothing here is gated on the
-        // clip, so the control is a shortcut past the player rather than a
-        // second path through the flow.
-        onSkip={goNext}
-        onBack={goBack}
-        showBack={showBack}
-      />
-    );
-  }
-
-  if (screen.kind === "part-transition") {
-    const nextPart = content.parts[screen.partIndex];
-    const completedPart = content.parts[screen.partIndex - 1];
-
-    if (!nextPart || !completedPart) {
-      return null;
-    }
-
-    return (
-      <ListeningSectionPartTransitionScreen
-        title={content.title}
-        completedPartLabel={completedPart.partLabel}
-        nextPartLabel={nextPart.partLabel}
-        nextPartNumber={nextPart.partNumber}
-        {...sectionProgress}
-        metaText={metaText}
-        onNext={goNext}
-        onBack={goBack}
-        showBack={showBack}
-      />
-    );
-  }
-
-  if (screen.kind === "section-review") {
-    if (marking.status !== "ready") {
-      return renderMarkingScreen(metaText);
-    }
-
-    return (
-      <ListeningSectionReviewScreen
-        title={content.title}
-        parts={marking.marked.parts}
-        {...sectionProgress}
-        metaText={metaText}
-        onNext={goNext}
-        // Back lands on the last question screen of Part 6, which is the
-        // prototype affordance the ticket asks for.
-        onBack={goBack}
-        showBack={showBack}
-      />
-    );
-  }
-
-  if (screen.kind === "section-score") {
-    // Reachable by pressing Back from the end screen, so the result can be
-    // missing here even though the review had it, for example after a
-    // failed retry. The same screen covers it.
-    if (marking.status !== "ready") {
-      return renderMarkingScreen(metaText);
-    }
-
-    return (
-      <ListeningSectionScoreScreen
-        title={content.title}
-        summary={marking.marked.summary}
-        parts={marking.marked.parts}
-        copy={copy}
-        onEndSection={goNext}
-        onReviewAnswers={goBack}
-        metaText={metaText}
-        onBack={goBack}
-        showBack={showBack}
-      />
-    );
-  }
-
-  // End of Listening section screen. The last screen in the flow, so there
-  // is no Next.
-  return (
-    <ListeningSectionEndScreen
-      title={content.title}
-      onRestart={restart}
-      copy={copy}
-      metaText={metaText}
-      onBack={goBack}
-      showBack={showBack}
-    />
-  );
+  // One keyed fragment around the whole flow, and the reason it is here is
+  // the exam canvas (EXAM-15C).
+  //
+  // Inside the locked viewport the canvas is the only region that scrolls,
+  // and it is the same DOM element on every screen, so its scroll offset
+  // used to carry over: pressing Next at the bottom of the Part 5 question
+  // list landed on the next screen already scrolled halfway down it. Keying
+  // on the screen id remounts the frame when the screen changes, so every
+  // screen opens at the top of the canvas.
+  //
+  // The second thing it buys is media. A question screen that follows
+  // another question screen used to reuse the same audio element with a new
+  // src, which leaves a browser free to keep playing the old clip. A
+  // remount tears the player down with the screen it belonged to.
+  //
+  // A fragment rather than a wrapper element, because the exam frame fills
+  // its parent by height and an extra div in the chain would have to be
+  // taught the same flex rules.
+  return <Fragment key={screen.id}>{renderCurrentScreen()}</Fragment>;
 }

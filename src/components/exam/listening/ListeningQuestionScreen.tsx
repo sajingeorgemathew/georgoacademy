@@ -12,7 +12,10 @@ import {
   examText,
 } from "@/features/exam-engine/exam-theme";
 import { listeningCopy } from "@/features/exam-engine/listening-copy";
-import type { ListeningQuestion } from "@/features/exam-engine/listening-types";
+import type {
+  ListeningQuestion,
+  ListeningQuestionAudio,
+} from "@/features/exam-engine/listening-types";
 
 // Question screen for a Listening part (EXAM-03).
 //
@@ -37,13 +40,29 @@ import type { ListeningQuestion } from "@/features/exam-engine/listening-types";
 // The question stem is spoken, not printed, in this part. prompt is
 // rendered when a part has one, which is what Parts 4 to 6 will need.
 //
-// A question with no clip at all shows a notice in the player's place
-// (EXAM-07). That is not a normal state: it exists because Mock Test 1
-// Listening Part 3 Question 1 has no recording in the source document.
+// What plays in the left column is not decided here. The caller passes the
+// result of resolveListeningQuestionAudio, which is the one place the rule
+// lives, and this screen draws one of its two states (EXAM-15C):
+//
+// - "question", the normal case and the only one any shipped content is
+//   in: the question clip, captioned as question audio
+// - "missing", no clip at all: a notice in the player's place, so a screen
+//   with nothing to play says so instead of showing an empty player
+//
+// This screen used to draw a third state, a labelled conversation replay,
+// for Mock Test 1 Listening Part 3 Question 1 while that question had no
+// recording of its own. The corrected source document supplied it, so the
+// replay branch and its copy are gone and Question 1 renders like any
+// other question.
 
 export type ListeningQuestionScreenProps = {
   title: string;
   question: ListeningQuestion;
+  // What to play, from resolveListeningQuestionAudio. Left optional so a
+  // caller that has only the question still renders the right thing: the
+  // question clip when it has one, and the missing notice when it does
+  // not, which is what this screen did before EXAM-15C.
+  audio?: ListeningQuestionAudio;
   // Position in the part, for example 3 of 8.
   questionNumber: number;
   questionCount: number;
@@ -61,6 +80,7 @@ export type ListeningQuestionScreenProps = {
 export function ListeningQuestionScreen({
   title,
   question,
+  audio,
   questionNumber,
   questionCount,
   selectedOptionId,
@@ -77,6 +97,14 @@ export function ListeningQuestionScreen({
   // One radio group per question, so moving between questions never
   // leaves two groups sharing a name.
   const groupName = `${question.id}-options`;
+
+  // Falls back to the question's own clip so a caller that passes nothing
+  // gets the pre EXAM-15C behaviour rather than an empty column.
+  const resolvedAudio: ListeningQuestionAudio =
+    audio ??
+    (question.audioUrl
+      ? { kind: "question", url: question.audioUrl }
+      : { kind: "missing" });
 
   return (
     <ExamShell
@@ -100,17 +128,11 @@ export function ListeningQuestionScreen({
           <div className={examListening.columnStack}>
             <ExamInstructionRow text={listeningCopy.questionInstruction} />
 
-            {question.audioUrl ? (
-              <ListeningAudioPlayer
-                src={question.audioUrl}
-                title={`${listeningCopy.questionPlayerTitle} ${questionNumber}`}
-              />
-            ) : (
+            {resolvedAudio.kind === "missing" ? (
               // No clip for this question in the source material. The
-              // notice says so plainly instead of playing something else,
-              // because the alternative on hand is the conversation
-              // recording, which is not the question. See the missing
-              // clip note in listening-part-3.ts.
+              // notice says so plainly rather than playing something else.
+              // No content in the project reaches this: it is the guard for
+              // a future part whose source is short a recording.
               <div className={examAudio.wrap}>
                 <div className={examAudio.fallback} role="status">
                   <p className={examAudio.fallbackTitle}>
@@ -121,6 +143,11 @@ export function ListeningQuestionScreen({
                   </p>
                 </div>
               </div>
+            ) : (
+              <ListeningAudioPlayer
+                src={resolvedAudio.url}
+                title={`${listeningCopy.questionPlayerTitle} ${questionNumber}`}
+              />
             )}
 
             {question.prompt ? (

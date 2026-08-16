@@ -16,6 +16,7 @@ import {
   buildListeningFlow,
   countListeningQuestions,
   getListeningQuestion,
+  resolveListeningQuestionAudio,
   setListeningAnswer,
 } from "@/features/exam-engine/listening-flow";
 import {
@@ -302,6 +303,11 @@ export function ListeningPartThreePrototype({
       <ListeningQuestionScreen
         title={content.title}
         question={question}
+        // Resolved from the content, not decided here, so this route and
+        // the full section route always play the same thing on the same
+        // screen. All six Part 3 questions have their own clip since the
+        // source document was corrected, Question 1 included.
+        audio={resolveListeningQuestionAudio(content, screen)}
         questionNumber={screen.questionNumber}
         questionCount={questionCount}
         selectedOptionId={answers[question.id]}
