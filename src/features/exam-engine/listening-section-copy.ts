@@ -84,6 +84,12 @@ export type ListeningSectionCopy = {
   endSectionLabel: string;
   reviewAnswersLabel: string;
 
+  // Estimated band card on the practice score screen.
+  estimatedBandLabel: string;
+  estimatedBandRangeNote: string;
+  estimatedBandSourceNote: string;
+  estimatedBandNote: string;
+
   // End of section screen.
   endTitle: string;
   endMessage: string;
@@ -188,6 +194,29 @@ export function buildListeningSectionCopy({
     endSectionLabel: "End Listening section",
     reviewAnswersLabel: "Review answers",
 
+    // Estimated band card (EXAM-15C).
+    //
+    // Three wording rules, and the first one is the reason this block is
+    // reviewed rather than edited casually:
+    //
+    // - The reading is named an estimate every time it appears, and the
+    //   note under it says in a full sentence that it is not an official
+    //   CELPIP score. Nothing here says official score, official band,
+    //   guaranteed band or final result.
+    // - The range note says out loud that the source chart's rows overlap,
+    //   so a two level reading reads as the chart being approximate rather
+    //   than as the app being unsure of its own arithmetic.
+    // - The source note says where the mapping came from, so a learner or a
+    //   teacher can check it, and does not claim the mapping models how a
+    //   real level is calculated. It does not.
+    estimatedBandLabel: "Estimated CELPIP Listening band",
+    estimatedBandRangeNote:
+      "The score ranges on that chart overlap, so an estimate can cover two levels.",
+    estimatedBandSourceNote:
+      "Estimated from the published CELPIP Listening score chart, which maps a Listening score out of 38 to a CELPIP level. A real CELPIP level also takes question difficulty into account, which a practice estimate cannot do.",
+    estimatedBandNote:
+      "This is a Toronto Academy practice estimate, not an official CELPIP score.",
+
     // 11. End of Listening section.
     endTitle: "End of Listening Section",
     endMessage: `You have completed the Listening section of ${testLabel}.`,
@@ -257,6 +286,20 @@ export function formatListeningSectionAnswered(
   return `${answered} of ${total} question${
     total === 1 ? "" : "s"
   } answered.`;
+}
+
+// Line under the estimated band, for example
+// "Estimated from 25 correct answers out of 38."
+//
+// The raw count is repeated here rather than left to the summary card
+// above, so the reading and the number it came from are never read apart.
+export function formatListeningBandBasis(
+  correctCount: number,
+  totalQuestions: number,
+): string {
+  return `Estimated from ${correctCount} correct answer${
+    correctCount === 1 ? "" : "s"
+  } out of ${totalQuestions}.`;
 }
 
 // Breakdown cell, for example "5 / 8".

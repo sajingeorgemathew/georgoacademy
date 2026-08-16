@@ -16,6 +16,7 @@ import {
   buildListeningFlow,
   countListeningQuestions,
   getListeningQuestion,
+  resolveListeningQuestionAudio,
   setListeningAnswer,
 } from "@/features/exam-engine/listening-flow";
 import {
@@ -296,6 +297,7 @@ export function ListeningPartTwoPrototype({
       <ListeningQuestionScreen
         title={content.title}
         question={question}
+        audio={resolveListeningQuestionAudio(content, screen)}
         questionNumber={screen.questionNumber}
         questionCount={questionCount}
         selectedOptionId={answers[question.id]}

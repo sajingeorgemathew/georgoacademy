@@ -49,6 +49,7 @@ import type {
   ListeningAnswerMap,
   ListeningPartContent,
   ListeningQuestion,
+  ListeningQuestionAudio,
   ListeningQuestionScreenRef,
   ListeningScreen,
 } from "./listening-types";
@@ -191,6 +192,40 @@ export function getListeningQuestion(
   screen: ListeningQuestionScreenRef,
 ): ListeningQuestion | undefined {
   return content.sections[screen.sectionIndex]?.questions[screen.questionIndex];
+}
+
+// What the question screen should play for one question (EXAM-15C).
+//
+// One rule, in one place, for every route that renders a Parts 1 to 3
+// question screen: the question's own clip plays, and a question with no
+// clip is "missing" so the screen can say the recording is not in the
+// source test. Both the part level route and the full section route call
+// this, so the two cannot disagree about what plays on any screen, and
+// neither one needs a special case for a particular question.
+//
+// Every Parts 1 to 3 question in Mock Test 1 now has its own clip, so
+// "missing" is unreachable from the content that ships. It is kept because
+// it is the honest answer for a real gap in a source practice test, and a
+// screen that has nothing to play should say so rather than play something
+// else.
+//
+// EXAM-15C originally had a third branch here, which replayed the section
+// conversation for Mock Test 1 Listening Part 3 Question 1 while that
+// question had no recording. The corrected source document supplied the
+// recording, so the branch and the fallbackToConversationAudio field it
+// read are both gone.
+export function resolveListeningQuestionAudio(
+  content: ListeningPartContent,
+  screen: ListeningQuestionScreenRef,
+): ListeningQuestionAudio {
+  const question =
+    content.sections[screen.sectionIndex]?.questions[screen.questionIndex];
+
+  if (question?.audioUrl) {
+    return { kind: "question", url: question.audioUrl };
+  }
+
+  return { kind: "missing" };
 }
 
 // Whether a question has a selected option.

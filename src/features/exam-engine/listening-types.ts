@@ -38,12 +38,14 @@ export type ListeningQuestion = {
   number: number;
   // Clip that reads the question aloud.
   //
-  // Optional since EXAM-07, and only because Mock Test 1 Listening Part 3
-  // Question 1 has no clip in the source document. That is a gap in the
-  // source material, not a shape a part is expected to have: every other
-  // question in Parts 1 to 3 sets this. A question screen with no clip
-  // says so rather than falling back to another recording. See the note
-  // on that question in mock-tests/mock-test-1/listening-part-3.ts.
+  // Optional since EXAM-07, when Mock Test 1 Listening Part 3 Question 1
+  // had no clip in the source document. That clip was supplied in the
+  // corrected document on 2026-08-16, so every question in Parts 1 to 3
+  // now sets this and the optionality is a guard rather than a case any
+  // shipped content is in. A question that reaches a screen without a clip
+  // is a gap in the source material, and the screen says so instead of
+  // playing something else. See resolveListeningQuestionAudio in
+  // listening-flow.ts.
   audioUrl?: string;
   // On screen question stem, for a part that prints its questions.
   prompt?: string;
@@ -163,6 +165,31 @@ export type ListeningScreen =
   // and a plain sentence about what is coming, so a part can ship before
   // its review does. Listening Part 2 uses this; Part 1 does not.
   | { kind: "part-complete"; id: string };
+
+// What a question screen has to play, once the content has been read
+// (EXAM-15C).
+//
+// The question screen used to branch on question.audioUrl being set
+// inline. Naming the state instead keeps the decision in one place,
+// resolveListeningQuestionAudio, so the part routes and the full section
+// route cannot disagree about what a screen plays:
+//
+// - "question", the normal case and the only case any shipped content is
+//   in: the clip that reads the question aloud
+// - "missing", a question with no clip at all. The screen says the
+//   recording is not in the source test rather than showing an empty
+//   player.
+//
+// EXAM-15C also carried a "conversation" state, which replayed the section
+// conversation on Mock Test 1 Listening Part 3 Question 1 while that
+// question had no recording of its own. The corrected source document
+// supplied that recording, so the state and the content flag that reached
+// it are both gone. "missing" stays: it is generic, it costs nothing, and
+// it is what should happen if a future part arrives with a clip the source
+// does not have.
+export type ListeningQuestionAudio =
+  | { kind: "question"; url: string }
+  | { kind: "missing" };
 
 // Narrowed screen kinds, for a component that only handles one of them.
 export type ListeningQuestionScreenRef = Extract<

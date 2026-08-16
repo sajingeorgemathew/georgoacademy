@@ -236,6 +236,15 @@ constant `PRACTICE_ESTIMATE_DISCLAIMER` in
 
 By media type: 26 mp3, 1 mp4, 19 png.
 
+This table counts the document as it was audited. The 2026-08-16
+correction to `Mock Test 1 -Sajinlinks.docx` swapped one URL without
+changing the total: the Part 3 Question 1 slot lost the section audio
+re-upload and gained a real question clip, so section audio is 7 and
+question audio is 19 in the corrected document. Both counts are current in
+`mock-tests/mock-test-1/extracted-links.md`. The re-upload URL is still
+what the Part 3 content serves the conversation from, so no asset was
+retired.
+
 Two Cloudinary cloud names appear: `dkvsshy7n` for 45 assets and
 `ds1wvtjft` for 1. The single `ds1wvtjft` asset is the Listening Part 3
 section audio and looks like a leftover from an earlier upload account.
@@ -404,13 +413,15 @@ that depends on it can ship.
    into structured data. This blocks EXAM-04. Reading answer keys are
    present as text and are already captured in the content map.
 
-2. **Listening Part 3 Question 1 audio is probably wrong.** The slot for
-   Part 3 Question 1 points at
-   `Listening_Test_1_-_Part_3_-_Audio_nk6pmi_ugrx14.mp3`. Every other
-   question slot points at a file named `Q<n>`. There is no
-   `Part_3_-_Q1` file anywhere in the document. The most likely reading
-   is that this is a re-upload of the Part 3 section audio and the real
-   Q1 audio was never uploaded. Verify before building Part 3.
+2. **Listening Part 3 Question 1 audio is probably wrong.** Closed on
+   2026-08-16. The reading was right: the Question 1 slot held
+   `Listening_Test_1_-_Part_3_-_Audio_nk6pmi_ugrx14.mp3`, a re-upload of
+   the Part 3 section audio, and the real Q1 recording had never been
+   uploaded. The source document was corrected and that slot now holds
+   `Listening_Test_1_-_Part_3_-_Q1_eavvnb_in9hcf.mp3`, matching the `Q<n>`
+   naming every other question slot uses. Part 3 Question 1 plays its own
+   question audio, and the EXAM-15C conversation replay workaround built
+   while the clip was missing has been removed.
 
 3. **Listening Part 3 has two section audio URLs.** One on the old
    `ds1wvtjft` cloud, one on `dkvsshy7n`. Confirm which is current and

@@ -70,8 +70,15 @@ export const examFrame = {
 // inner is the fixed height box the exam frame fills. It never scrolls
 // itself: any overflow is handed to the canvas inside the frame, which is
 // the only region on the screen with a scrollbar.
+//
+// overscroll-none on the overlay (EXAM-15C). The document scroll lock stops
+// the page moving, but a flick that reaches the end of the canvas can still
+// chain out to the document and produce the rubber band bounce that shows a
+// strip of the dashboard behind the exam. Refusing the chain at the overlay
+// keeps the screen still.
 export const examViewport = {
-  overlay: "fixed inset-0 z-[60] overflow-hidden bg-academy-paper-warm",
+  overlay:
+    "fixed inset-0 z-[60] overflow-hidden overscroll-none bg-academy-paper-warm",
   inner: "mx-auto flex h-[100dvh] w-full flex-col overflow-hidden p-2 sm:p-3",
 } as const;
 
@@ -80,10 +87,18 @@ export const examViewport = {
 // Both are deliberately thin. A test engine bar is chrome, so it holds a
 // line of small text and small controls and gives the rest of the height
 // to the canvas.
+//
+// shrink-0 on both (EXAM-15C). Inside the fixed exam viewport the frame is
+// a flex column with a hard height, and a flex item shrinks below its
+// content by default. Without this, a screen tall enough to fight for space
+// can squeeze the bars: the title bar loses its padding, and on a short
+// window the Back and Next controls can be clipped. The two bars keep their
+// height and the canvas absorbs the difference, which is the whole point of
+// giving it grow and min-h-0.
 export const examBar = {
-  top: "flex w-full min-w-0 flex-wrap items-center gap-x-3 gap-y-1.5 border-b border-academy-line bg-linear-to-b from-academy-navy-soft to-academy-navy-soft/65 px-3 py-1.5 sm:px-4",
+  top: "flex w-full min-w-0 shrink-0 flex-wrap items-center gap-x-3 gap-y-1.5 border-b border-academy-line bg-linear-to-b from-academy-navy-soft to-academy-navy-soft/65 px-3 py-1.5 sm:px-4",
   bottom:
-    "flex w-full min-w-0 flex-wrap items-center gap-x-3 gap-y-1.5 border-t border-academy-line bg-linear-to-b from-academy-navy-soft/65 to-academy-navy-soft px-3 py-1.5 sm:px-4",
+    "flex w-full min-w-0 shrink-0 flex-wrap items-center gap-x-3 gap-y-1.5 border-t border-academy-line bg-linear-to-b from-academy-navy-soft/65 to-academy-navy-soft px-3 py-1.5 sm:px-4",
   title:
     "min-w-0 basis-full truncate text-[13px] font-semibold leading-5 text-academy-navy sm:basis-auto sm:flex-1",
   meta: "min-w-0 truncate text-[11px] leading-4 text-academy-navy/60",
@@ -113,9 +128,13 @@ export const examBar = {
 // height white page rather than a band of grey underneath it, and it
 // never shrinks below its content, so a long screen pushes the region
 // into scrolling instead of being cut off.
+//
+// overscroll-contain (EXAM-15C): reaching the end of a long question list
+// must not hand the scroll on to whatever is behind the exam. The canvas
+// keeps it, so the two bars and the dashboard underneath both stay put.
 export const examCanvas = {
   region:
-    "flex min-h-0 min-w-0 grow flex-col overflow-y-auto bg-academy-navy-soft/30 p-2 sm:p-3",
+    "flex min-h-0 min-w-0 grow flex-col overflow-y-auto overscroll-contain bg-academy-navy-soft/30 p-2 sm:p-3",
   sheet:
     "min-w-0 shrink-0 grow border border-academy-line bg-academy-paper text-academy-navy",
   padded: "px-4 py-5 sm:px-6 sm:py-6",
@@ -502,6 +521,26 @@ export const examScore = {
   pendingHeading: "text-[13px] font-semibold leading-5 text-academy-navy",
   pendingText: "text-[11px] leading-4 text-academy-navy/70",
   // Practice result disclaimer under the readings.
+  note: "text-[11px] leading-4 text-academy-navy/60",
+} as const;
+
+// Estimated band card on the Listening practice score screen (EXAM-15C).
+//
+// The same bordered strip as examScore above, on purpose: the estimate is
+// one more reading on the same result screen, not a certificate. So there is
+// no seal, no ribbon, no coloured band and nothing that could be mistaken
+// for an official score report.
+//
+// The reading itself is the largest thing on the card and the notes under it
+// are the smallest, because the notes are what stop the number being read as
+// an official result and they have to sit with it rather than somewhere else
+// on the screen.
+export const examBandCard = {
+  card: "flex min-w-0 flex-col gap-1 rounded-sm border border-academy-line bg-academy-navy-soft/35 px-4 py-3.5",
+  label:
+    "text-[11px] font-semibold uppercase tracking-[0.06em] text-academy-navy/55",
+  value: "text-xl font-semibold leading-7 text-academy-navy",
+  basis: "text-[13px] leading-5 text-academy-navy/85",
   note: "text-[11px] leading-4 text-academy-navy/60",
 } as const;
 

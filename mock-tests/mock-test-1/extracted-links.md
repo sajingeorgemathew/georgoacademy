@@ -28,19 +28,27 @@ which arrives in three sections.
 | Part 1 | Audio 3 | https://res.cloudinary.com/dkvsshy7n/video/upload/v1785336452/Listening_Test_1_-_Part_1_-_Audio_3_yju6z2_njlegx.mp3 |
 | Part 2 | Audio | https://res.cloudinary.com/dkvsshy7n/video/upload/v1785336642/Listening_Test_1_-_Part_2_-_Audio_jwpkne_vodvcl.mp3 |
 | Part 3 | Audio, old cloud | https://res.cloudinary.com/ds1wvtjft/video/upload/v1783342851/Listening_Test_1_-_Part_3_-_Audio_nk6pmi.mp3 |
-| Part 3 | Audio, current cloud, placed in the Question 1 slot | https://res.cloudinary.com/dkvsshy7n/video/upload/v1785338301/Listening_Test_1_-_Part_3_-_Audio_nk6pmi_ugrx14.mp3 |
+| Part 3 | Audio, current cloud, re-upload | https://res.cloudinary.com/dkvsshy7n/video/upload/v1785338301/Listening_Test_1_-_Part_3_-_Audio_nk6pmi_ugrx14.mp3 |
 | Part 4 | Audio | https://res.cloudinary.com/dkvsshy7n/video/upload/v1785338654/Listening_Test_1_-_Part_4_-_Audio_sgdzdx_rnbaom.mp3 |
 | Part 6 | Audio | https://res.cloudinary.com/dkvsshy7n/video/upload/v1785338937/Listening_Test_1_-_Part_6_-_Audio_vyzpjt_ydlff9.mp3 |
 
 Review items:
 
-- Part 3 has two section audio URLs on two different Cloudinary accounts.
-  Confirm which is current and whether `ds1wvtjft` is still live.
-- The second Part 3 entry sits in the document where a `Q1` file should
-  be. There is no `Part_3_-_Q1` file anywhere in the document, so the
-  Part 3 Question 1 audio looks missing. See risk 2 in the parent audit.
+- Part 3 had two section audio URLs on two different Cloudinary accounts.
+  The `dkvsshy7n` re-upload is the copy the content file uses, because
+  every other Part 3 clip is served from that account. Whether the old
+  `ds1wvtjft` copy is still live is still unconfirmed and still does not
+  matter, since nothing points at it.
+- The second Part 3 entry used to sit in the document where the `Q1` file
+  should be, which is why Part 3 Question 1 looked like it had no audio.
+  That was risk 2 in the parent audit. The source document was corrected
+  on 2026-08-16 and the Question 1 slot now holds a real
+  `Listening_Test_1_-_Part_3_-_Q1` clip, listed in the question table
+  below. The `ugrx14` re-upload is no longer printed in the document; the
+  row above is kept because it is the URL the content still serves the
+  conversation from.
 
-## Listening question audio (18)
+## Listening question audio (19)
 
 One clip per question. Only Parts 1, 2, and 3 have spoken questions.
 Parts 4, 5, and 6 present their questions on screen.
@@ -60,15 +68,15 @@ Parts 4, 5, and 6 present their questions on screen.
 | Part 2 | Q3 | https://res.cloudinary.com/dkvsshy7n/video/upload/v1785336780/Listening_Test_1_-_Part_2_-_Q3_ssh5zr_nbeq1b.mp3 |
 | Part 2 | Q4 | https://res.cloudinary.com/dkvsshy7n/video/upload/v1785336828/Listening_Test_1_-_Part_2_-_Q4_ueomg6_j0emyc.mp3 |
 | Part 2 | Q5 | https://res.cloudinary.com/dkvsshy7n/video/upload/v1785338140/Listening_Test_1_-_Part_2_-_Q5_nvvqr5_pdb3vo.mp3 |
-| Part 3 | Q1 | missing, see the section audio table above |
+| Part 3 | Q1 | https://res.cloudinary.com/dkvsshy7n/video/upload/v1786331722/Listening_Test_1_-_Part_3_-_Q1_eavvnb_in9hcf.mp3 |
 | Part 3 | Q2 | https://res.cloudinary.com/dkvsshy7n/video/upload/v1785338355/Listening_Test_1_-_Part_3_-_Q2_jgb51x_kvkjvq.mp3 |
 | Part 3 | Q3 | https://res.cloudinary.com/dkvsshy7n/video/upload/v1785338430/Listening_Test_1_-_Part_3_-_Q3_tm8ncz_ni6qao.mp3 |
 | Part 3 | Q4 | https://res.cloudinary.com/dkvsshy7n/video/upload/v1785338482/Listening_Test_1_-_Part_3_-_Q4_cu3weu_k1cn63.mp3 |
 | Part 3 | Q5 | https://res.cloudinary.com/dkvsshy7n/video/upload/v1785338528/Listening_Test_1_-_Part_3_-_Q5_pcbseb_ebj30k.mp3 |
 | Part 3 | Q6 | https://res.cloudinary.com/dkvsshy7n/video/upload/v1785338595/Listening_Test_1_-_Part_3_-_Q6_stqqhq_c4twqn.mp3 |
 
-Counted as 18 usable question clips. The Part 3 Q1 row is listed for
-completeness and has no usable URL.
+19 usable question clips, one per spoken question. It was 18 until the
+source document was corrected on 2026-08-16 and Part 3 Q1 gained a URL.
 
 ## Listening video (1)
 
