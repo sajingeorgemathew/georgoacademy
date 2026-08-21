@@ -11,15 +11,30 @@
 //
 // House style: normal hyphens only, no long hyphens or em dashes.
 
-// Tone of a timer reading. The frame does not own a clock yet, so a state
-// is passed in. Countdown behaviour arrives with the flow tickets.
+// Tone of a timer reading.
+//
+// The frame still owns no clock: it is handed a formatted value and a
+// tone, and a caller decides both. What changed in EXAM-15D is that there
+// is now a shared clock to hand it one, useExamCountdown, and its phases
+// map onto these tones through examTimerStatusTones.
 //
 // - normal: plenty of time left
-// - warning: the answer window is closing
-// - expired: the window has run out
-// - muted: a fixed label rather than a live value, for example the
-//   speaking preparation and recording pair
-export type ExamTimerState = "normal" | "warning" | "expired" | "muted";
+// - warning: the answer window is closing, amber
+// - urgent: the last few seconds of the window, red
+// - expired: the window has run out, red, and the value reads
+//   "Time is up" rather than a number
+// - muted: a fixed label rather than a live value, for example a window
+//   that has not started yet
+//
+// urgent was added by EXAM-15D. warning was red before it and is amber
+// now, so the two steps of notice are distinguishable rather than the
+// warning arriving at full strength.
+export type ExamTimerState =
+  | "normal"
+  | "warning"
+  | "urgent"
+  | "expired"
+  | "muted";
 
 // One timer reading in the top bar, for example
 // { label: "Time remaining", value: "9 minutes" }.

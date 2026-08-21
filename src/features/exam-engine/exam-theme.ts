@@ -168,15 +168,32 @@ export const examButtonSizes: Record<ExamButtonSize, string> = {
 //
 // No chip, no ring, no rounded box. The reading is a line of text that
 // belongs to the bar, and state is carried by colour and weight only.
+//
+// tabular-nums on the value is what makes a live countdown safe to put
+// here (EXAM-15D). Every digit is the same width, and the countdown pads
+// its reading to 00:30, so the number changes four times a second without
+// anything beside it moving.
 export const examTimer = {
   base: "inline-flex min-w-0 items-baseline gap-1 whitespace-nowrap text-[11px] leading-4 sm:text-xs",
   label: "shrink-0 opacity-75",
   value: "font-semibold tabular-nums",
 } as const;
 
+// Colour only, deliberately. Nothing here changes a size, a weight on the
+// value, a background or a border, so a reading moving from normal to
+// urgent cannot reflow the bar, resize it, or push the Next control. There
+// is no animation and no flashing: the ticket rules both out, and a
+// blinking timer in a test window is a distraction rather than a warning.
+//
+// warning is amber and urgent is red (EXAM-15D). warning used to be red,
+// which left nothing louder for the final seconds to escalate to.
+//
+// expired adds weight to the whole reading rather than to the value alone.
+// The label is dropped at that point, so there is no label left to grow.
 export const examTimerStates: Record<ExamTimerState, string> = {
   normal: "text-academy-navy",
-  warning: "text-academy-red",
+  warning: "text-academy-amber",
+  urgent: "text-academy-red",
   expired: "font-semibold text-academy-red",
   muted: "text-academy-navy/55",
 };

@@ -322,6 +322,10 @@ export function ListeningPartOnePrototype({
         questionCount={questionCount}
         selectedOptionId={answers[question.id]}
         onSelectOption={(optionId) => selectAnswer(question.id, optionId)}
+        // The flow screen id, so the answering window restarts when the
+        // learner moves to another question and not when they change their
+        // mind about an option (EXAM-15D).
+        timerScreenKey={screen.id}
         metaText={metaText}
         onNext={goNext}
         onBack={goBack}

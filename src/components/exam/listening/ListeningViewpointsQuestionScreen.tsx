@@ -2,12 +2,14 @@
 
 import { ExamInstructionRow } from "../ExamInstructionRow";
 import { ExamShell } from "../ExamShell";
+import { ExamCountdownTimer } from "../timer/ExamCountdownTimer";
 import { ListeningViewpointsQuestionList } from "./ListeningViewpointsQuestionList";
 import {
   examListening,
   examListeningChoice,
   examScreenBody,
 } from "@/features/exam-engine/exam-theme";
+import { EXAM_QUESTION_TIMER_SECONDS } from "@/features/exam-engine/exam-timer-utils";
 import {
   formatListeningAnsweredCount,
   listeningCopy,
@@ -23,7 +25,7 @@ import type {
 // where an incomplete statement is finished from radio options, and the
 // screen the reference layout matters most for in this part:
 //
-// - grey top bar with the static "Time remaining: 30 seconds" reading
+// - grey top bar with a live "Time remaining: 00:30" countdown
 // - white exam canvas, single column, no split
 // - compact instruction row at the top
 // - left aligned numbered statements, ruled apart
@@ -44,8 +46,13 @@ import type {
 // a learner scrolling a six question form can see why Next is not
 // available without hunting for the empty control.
 //
-// The timer reading is fixed. Nothing counts down in this ticket, which is
-// why it is passed in the shell's muted state.
+// The timer is real from EXAM-15D, and it belongs to the screen rather
+// than to any one question on it: this part answers all six questions in
+// one window, so the window is keyed to the screen and answering a
+// question does not restart it. Reaching zero changes the reading to
+// "Time is up" and nothing else. No answer is cleared, the list is not
+// disabled, and Next still waits on every question being answered. See
+// docs/product/exam-timer-foundation.md.
 
 export type ListeningViewpointsQuestionScreenProps = {
   title: string;
@@ -58,9 +65,15 @@ export type ListeningViewpointsQuestionScreenProps = {
   // Instruction line above the list. Defaults to the viewpoints wording
   // when a part's content does not carry its own.
   instructionText?: string;
-  // Static reading in the top bar. Nothing counts down in this ticket.
+  // Label in front of the countdown in the top bar.
   timerLabel?: string;
-  timerValue?: string;
+  // How long the answering window runs. Defaults to the standard question
+  // window, which is the 30 seconds this screen has always shown.
+  timerSeconds?: number;
+  // What the countdown resets on. Defaults to the first question's id,
+  // which is stable for as long as this screen is showing. A caller with a
+  // flow screen id can pass that instead.
+  timerScreenKey?: string;
   metaText?: string;
   onNext?: () => void;
   onBack?: () => void;
@@ -75,7 +88,8 @@ export function ListeningViewpointsQuestionScreen({
   allAnswered,
   instructionText = listeningCopy.viewpointsInstruction,
   timerLabel = listeningCopy.questionTimerLabel,
-  timerValue = listeningCopy.questionTimerValue,
+  timerSeconds = EXAM_QUESTION_TIMER_SECONDS,
+  timerScreenKey,
   metaText,
   onNext,
   onBack,
@@ -88,12 +102,15 @@ export function ListeningViewpointsQuestionScreen({
   return (
     <ExamShell
       title={title}
-      timerLabel={timerLabel}
-      timerValue={timerValue}
-      // muted, not normal or warning: this is a fixed label rather than a
-      // live value, and the shell reserves that state for exactly this
-      // case. A countdown arrives with a later ticket.
-      timerState="muted"
+      timerSlot={
+        <ExamCountdownTimer
+          // Keyed on the screen rather than on a question, because every
+          // question in this part is answered inside one window.
+          screenKey={timerScreenKey ?? questions[0]?.id ?? title}
+          durationSeconds={timerSeconds}
+          label={timerLabel}
+        />
+      }
       metaText={metaText}
       onNext={onNext}
       nextDisabled={!allAnswered}

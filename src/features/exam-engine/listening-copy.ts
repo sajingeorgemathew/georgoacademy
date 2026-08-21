@@ -84,11 +84,19 @@ export const listeningCopy = {
   questionAudioMissingText:
     "The recording for this question is missing from the source practice test and is added once it is supplied. The answer options below are the ones from the practice test.",
 
-  // Static timer on the question screens. Nothing counts down in this
-  // ticket, so the reading is shown in the muted state that the shell
-  // reserves for a fixed label rather than a live value.
+  // Timer label on the question screens.
+  //
+  // questionTimerValue is gone (EXAM-15D). It held the string
+  // "30 seconds", which the top bar printed on every question screen and
+  // which never changed, so a learner saw what looked like a clock and was
+  // not one. The reading is now produced by ExamCountdownTimer from a real
+  // deadline, and the window length is EXAM_QUESTION_TIMER_SECONDS in
+  // exam-timer-utils.ts rather than a piece of copy.
+  //
+  // The label stays here because it is wording. It is the same sentence as
+  // examCopy.timeRemainingLabel and is kept separate so Listening can be
+  // reworded without touching the other three sections.
   questionTimerLabel: "Time remaining",
-  questionTimerValue: "30 seconds",
 
   // Closing screens.
   //
