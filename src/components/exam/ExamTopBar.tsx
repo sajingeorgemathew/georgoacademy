@@ -20,12 +20,20 @@ import type { ExamTimerReading } from "@/features/exam-engine/exam-shell-types";
 // preparation window and the recording window. Listening, Reading and
 // Writing pass a single reading.
 //
+// A reading can also be live (EXAM-15D). timerSlot takes a component that
+// owns its own clock, ExamCountdownTimer, and renders it in the same strip
+// the fixed readings sit in, so a counting timer and a static one look
+// identical and sit in the same place. The bar still owns no clock: it
+// owns the strip, and whatever is put in it draws itself.
+//
 // On a narrow screen the title takes the first row on its own and the
 // controls wrap underneath, so the bar never scrolls sideways.
 
 export type ExamTopBarProps = {
   title: string;
   timers?: ExamTimerReading[];
+  // A live timer to render alongside any fixed readings.
+  timerSlot?: ReactNode;
   // Small note beside the timers, for example a part label.
   metaText?: string;
   showNext?: boolean;
@@ -41,6 +49,7 @@ export type ExamTopBarProps = {
 export function ExamTopBar({
   title,
   timers,
+  timerSlot,
   metaText,
   showNext = true,
   nextLabel = examCopy.nextLabel,
@@ -59,7 +68,7 @@ export function ExamTopBar({
       </h2>
 
       <div className={examBar.actions}>
-        {readings.length > 0 ? (
+        {readings.length > 0 || timerSlot ? (
           <div className={examBar.readings}>
             {readings.map((reading, index) => (
               <ExamTimerDisplay
@@ -69,6 +78,8 @@ export function ExamTopBar({
                 state={reading.state}
               />
             ))}
+
+            {timerSlot}
           </div>
         ) : null}
 

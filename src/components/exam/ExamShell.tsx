@@ -22,9 +22,14 @@ import type {
 //   covers Listening, Reading and Writing
 // - timers for a list, which covers the Speaking pair of preparation and
 //   recording. When timers is set it wins.
+// - timerSlot for a live reading that owns its own clock, which is what
+//   EXAM-15D added and what every timed Listening screen now passes. It
+//   renders in the same strip as the fixed readings and can sit beside
+//   them, so a screen can show one of each.
 //
-// The shell owns no clock. Countdown behaviour belongs to the flow
-// tickets, which pass a formatted value and a state down.
+// The shell still owns no clock. It is handed either a formatted value or
+// a component that formats its own, and it renders whichever it gets in
+// the same place.
 //
 // Navigation takes either an href or a handler. Use an href where the
 // next screen is a route, and a handler where the sequence is held in
@@ -40,6 +45,9 @@ export type ExamShellProps = {
   // Two or more readings, for example the Speaking pair. Overrides the
   // single reading props above.
   timers?: ExamTimerReading[];
+  // A live timer component, normally ExamCountdownTimer. Rendered in the
+  // top bar beside any fixed readings.
+  timerSlot?: ReactNode;
   // Small note in the top bar beside the timers.
   metaText?: string;
 
@@ -75,6 +83,7 @@ export function ExamShell({
   timerValue,
   timerState = "normal",
   timers,
+  timerSlot,
   metaText,
   showNext = true,
   nextLabel,
@@ -106,6 +115,7 @@ export function ExamShell({
           <ExamTopBar
             title={title}
             timers={readings}
+            timerSlot={timerSlot}
             metaText={metaText}
             showNext={showNext}
             nextLabel={nextLabel}

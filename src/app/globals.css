@@ -25,6 +25,11 @@
   --academy-blue-soft: #eef4fb;
   --academy-red: #c8102e;
   --academy-red-soft: #fdeef0;
+  /* Warning tone, used by the exam countdown timer for the closing part
+     of a timed window. It sits between the neutral navy and the red so a
+     learner gets a step of notice before the final seconds, and it is
+     dark enough to keep its contrast against the pale exam chrome. */
+  --academy-amber: #a1591a;
   --academy-paper: #ffffff;
   --academy-paper-warm: #faf8f4;
   --academy-line: #e4e7ee;
@@ -46,6 +51,7 @@
   --color-academy-blue-soft: var(--academy-blue-soft);
   --color-academy-red: var(--academy-red);
   --color-academy-red-soft: var(--academy-red-soft);
+  --color-academy-amber: var(--academy-amber);
   --color-academy-paper: var(--academy-paper);
   --color-academy-paper-warm: var(--academy-paper-warm);
   --color-academy-line: var(--academy-line);

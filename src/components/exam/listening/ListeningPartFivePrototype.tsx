@@ -307,6 +307,10 @@ export function ListeningPartFivePrototype({
         onSelectOption={selectAnswer}
         allAnswered={areAllListeningVideoQuestionsAnswered(content, answers)}
         instructionText={content.questionInstruction}
+        // The flow screen id, so the answering window belongs to this
+        // screen and is not restarted by any of the eight selections made
+        // on it (EXAM-15D).
+        timerScreenKey={screen.id}
         metaText={metaText}
         onNext={goNext}
         onBack={goBack}

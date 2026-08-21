@@ -92,6 +92,15 @@ import type {
 // whole question list for the one screen parts, exactly as it is in the
 // part routes. It is not gated on media finishing anywhere yet.
 //
+// Every question screen in the run carries a live countdown from EXAM-15D,
+// and this component's only part in it is passing the flow screen id down
+// as the timer's key. The countdown owns itself from there. It changes
+// nothing about this component's navigation, its answer map or its
+// marking: reaching zero does not advance a screen, does not submit, and
+// does not clear a selection, so the answers this component holds at the
+// end of Part 6 are the same whether every window ran out or none did. See
+// docs/product/exam-timer-foundation.md.
+//
 // Every screen title, question, option and media URL comes from the
 // section content object passed in, so this component carries no Mock Test
 // 1 text of its own. The answer keys are not among them: the route strips
@@ -403,6 +412,10 @@ export function ListeningSectionPrototype({
           questionCount={questionCount}
           selectedOptionId={answers[question.id]}
           onSelectOption={(optionId) => selectAnswer(question.id, optionId)}
+          // The flow screen id, so the answering window restarts when the
+          // learner moves to another question and not when they change
+          // their mind about an option (EXAM-15D).
+          timerScreenKey={partScreen.id}
           metaText={metaText}
           onNext={goNext}
           onBack={goBack}
@@ -485,6 +498,10 @@ export function ListeningSectionPrototype({
           onSelectOption={selectAnswer}
           allAnswered={allAnswered}
           instructionText={part.content.questionInstruction}
+          // The flow screen id, so the answering window belongs to this
+          // screen and is not restarted by the selections made on it
+          // (EXAM-15D).
+          timerScreenKey={partScreen.id}
           metaText={metaText}
           onNext={goNext}
           onBack={goBack}
@@ -502,6 +519,10 @@ export function ListeningSectionPrototype({
           onSelectOption={selectAnswer}
           allAnswered={allAnswered}
           instructionText={part.content.questionInstruction}
+          // The flow screen id, so the answering window belongs to this
+          // screen and is not restarted by the selections made on it
+          // (EXAM-15D).
+          timerScreenKey={partScreen.id}
           metaText={metaText}
           onNext={goNext}
           onBack={goBack}
@@ -519,6 +540,10 @@ export function ListeningSectionPrototype({
           onSelectOption={selectAnswer}
           allAnswered={allAnswered}
           instructionText={part.content.questionInstruction}
+          // The flow screen id, so the answering window belongs to this
+          // screen and is not restarted by the selections made on it
+          // (EXAM-15D).
+          timerScreenKey={partScreen.id}
           metaText={metaText}
           onNext={goNext}
           onBack={goBack}
