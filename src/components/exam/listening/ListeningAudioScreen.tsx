@@ -21,6 +21,13 @@ import { listeningCopy } from "@/features/exam-engine/listening-copy";
 // No timer. The ticket hides the timer on the audio screens, because in
 // this prototype nothing is counting down and the clip can be replayed.
 //
+// The clip can be asked to start on its own (EXAM-15F). The full Listening
+// route passes autoPlayMedia, because the official test plays a clip when
+// its screen opens rather than waiting to be asked, and the internal part
+// routes pass nothing and behave as they always did. It is an attempt: a
+// browser that refuses autoplay leaves the controls where they are and the
+// player prints a short line saying to press play.
+//
 // The prototype does not gate Next on the clip finishing. When that
 // arrives, pass onAudioEnded and hold nextDisabled until it fires. The
 // prop is here already so that change does not need a new component.
@@ -39,6 +46,8 @@ export type ListeningAudioScreenProps = {
   instructionText?: string;
   // Quiet line under the player.
   hintText?: string;
+  // Ask the browser to start the clip when the screen opens.
+  autoPlayMedia?: boolean;
   metaText?: string;
   onAudioEnded?: () => void;
   onNext?: () => void;
@@ -55,6 +64,7 @@ export function ListeningAudioScreen({
   sectionLabel,
   instructionText = listeningCopy.conversationInstruction,
   hintText = listeningCopy.conversationHint,
+  autoPlayMedia = false,
   metaText,
   onAudioEnded,
   onNext,
@@ -79,6 +89,7 @@ export function ListeningAudioScreen({
             src={audioSrc}
             title={audioTitle}
             durationLabel={durationLabel}
+            autoPlay={autoPlayMedia}
             onEnded={onAudioEnded}
           />
 

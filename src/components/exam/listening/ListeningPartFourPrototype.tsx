@@ -28,6 +28,7 @@ import type {
   ListeningDropdownPartContent,
 } from "@/features/exam-engine/listening-dropdown-types";
 import type { ListeningMarkedPart } from "@/features/exam-engine/listening-review-types";
+import { getListeningPartScreenTimer } from "@/features/exam-engine/listening-timing";
 
 // Listening Part 4 prototype (EXAM-09, closing screens added by EXAM-10).
 //
@@ -78,6 +79,11 @@ import type { ListeningMarkedPart } from "@/features/exam-engine/listening-revie
 // content reaches this component, and this component never sees a correct
 // option until the learner has finished the part and the server sends the
 // review rows back.
+
+// The one answering window this part's question screen runs
+// (EXAM-15F). Resolved once at module level, because it is a constant
+// of the format rather than anything this component decides.
+const SCREEN_TIMER = getListeningPartScreenTimer(4);
 
 // Marks an attempt on the server and returns the review rows and the
 // practice score. Resolves to null when the caller has no session.
@@ -312,6 +318,15 @@ export function ListeningPartFourPrototype({
         // screen and is not restarted by any of the five selections made
         // on it (EXAM-15D).
         timerScreenKey={screen.id}
+        // The Part 4 screen window from listening-timing.ts, not the
+        // 30 second per question default this screen used to fall back to
+        // (EXAM-15F). Nothing enforces it on this route: no onTimeExpire
+        // is passed, so the reading reaches "Time is up" and the screen
+        // stays put, which is what keeps this route usable for
+        // development.
+        timerSeconds={SCREEN_TIMER.seconds}
+        timerWarningAtSeconds={SCREEN_TIMER.warningAtSeconds}
+        timerUrgentAtSeconds={SCREEN_TIMER.urgentAtSeconds}
         metaText={metaText}
         onNext={goNext}
         onBack={goBack}

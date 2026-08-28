@@ -9,7 +9,7 @@ import {
   examListeningDropdown,
   examScreenBody,
 } from "@/features/exam-engine/exam-theme";
-import { EXAM_QUESTION_TIMER_SECONDS } from "@/features/exam-engine/exam-timer-utils";
+import { LISTENING_QUESTION_TIMER } from "@/features/exam-engine/listening-timing";
 import {
   formatListeningAnsweredCount,
   listeningCopy,
@@ -39,18 +39,28 @@ import type {
 // holds no state: the answers are owned by the prototype above it, so
 // leaving the screen and coming back shows what was chosen before.
 //
-// Next is disabled until every question has an answer, which is what
-// allAnswered carries. The count under the list says how many are left,
-// so a learner scrolling a five question form can see why Next is not
-// available without hunting for the empty control.
+// Next is gated on every question having an answer by default, which is
+// what allAnswered carries. The count under the list says how many are
+// left, so a learner scrolling a five question form can see why Next is
+// not available without hunting for the empty control.
+//
+// The full Listening route turns that gate off through requireAllAnswered
+// (EXAM-15F): a window that expires has to advance whether or not the form
+// is finished, and an official-style test lets a learner leave a question
+// blank and take the zero for it. The individual Part 4 route keeps the
+// gate, because it is a development route.
 //
 // The timer is real from EXAM-15D, and it belongs to the screen rather
 // than to any one question on it: this part answers all five questions in
 // one window, so the window is keyed to the screen and answering a
-// question does not restart it. Reaching zero changes the reading to
-// "Time is up" and nothing else. No answer is cleared, the list is not
-// disabled, and Next still waits on every question being answered. See
-// docs/product/exam-timer-foundation.md.
+// question does not restart it.
+//
+// What happens at zero is the caller's decision (EXAM-15F). Passing
+// onTimeExpire, which the full route does and the part route does not,
+// advances the flow; with no handler the reading simply becomes "Time is
+// up" and the screen stays put. Either way no answer is cleared, no
+// question is disabled and nothing is submitted. See
+// docs/product/listening-format-strict-timing-polish.md.
 
 export type ListeningDropdownQuestionScreenProps = {
   title: string;
@@ -60,18 +70,27 @@ export type ListeningDropdownQuestionScreenProps = {
   // Whether every question has an answer. Passed in rather than worked
   // out here, so the rule that gates Next lives in one place.
   allAnswered: boolean;
+  // Whether Next waits for every question to be answered. False on the
+  // full Listening route, where a blank is a legal answer worth zero.
+  requireAllAnswered?: boolean;
   // Instruction line above the list. Defaults to the standard dropdown
   // wording when a part's content does not carry its own.
   instructionText?: string;
   // Label in front of the countdown in the top bar.
   timerLabel?: string;
-  // How long the answering window runs. Defaults to the standard question
-  // window, which is the 30 seconds this screen has always shown.
+  // How long the answering window runs. Defaults to the per question
+  // window, which is wrong for a five question screen, so every caller
+  // passes the Part 4 screen window from listening-timing.ts.
   timerSeconds?: number;
+  timerWarningAtSeconds?: number;
+  timerUrgentAtSeconds?: number;
   // What the countdown resets on. Defaults to the first question's id,
   // which is stable for as long as this screen is showing. A caller with a
   // flow screen id can pass that instead.
   timerScreenKey?: string;
+  // Fired once when the window reaches zero. Only the full Listening route
+  // passes one.
+  onTimeExpire?: () => void;
   metaText?: string;
   onNext?: () => void;
   onBack?: () => void;
@@ -84,10 +103,14 @@ export function ListeningDropdownQuestionScreen({
   answers,
   onSelectOption,
   allAnswered,
+  requireAllAnswered = true,
   instructionText = listeningCopy.dropdownInstruction,
   timerLabel = listeningCopy.questionTimerLabel,
-  timerSeconds = EXAM_QUESTION_TIMER_SECONDS,
+  timerSeconds = LISTENING_QUESTION_TIMER.seconds,
+  timerWarningAtSeconds,
+  timerUrgentAtSeconds,
   timerScreenKey,
+  onTimeExpire,
   metaText,
   onNext,
   onBack,
@@ -106,12 +129,15 @@ export function ListeningDropdownQuestionScreen({
           // question in this part is answered inside one window.
           screenKey={timerScreenKey ?? questions[0]?.id ?? title}
           durationSeconds={timerSeconds}
+          warningAtSeconds={timerWarningAtSeconds}
+          urgentAtSeconds={timerUrgentAtSeconds}
           label={timerLabel}
+          onExpire={onTimeExpire}
         />
       }
       metaText={metaText}
       onNext={onNext}
-      nextDisabled={!allAnswered}
+      nextDisabled={requireAllAnswered && !allAnswered}
       onBack={onBack}
       showBack={showBack}
     >
@@ -127,7 +153,9 @@ export function ListeningDropdownQuestionScreen({
 
           <p className={examListeningDropdown.progressNote}>
             {formatListeningAnsweredCount(answeredCount, questions.length)}
-            {allAnswered ? null : ` ${listeningCopy.dropdownAnswerAllHint}`}
+            {requireAllAnswered && !allAnswered
+              ? ` ${listeningCopy.dropdownAnswerAllHint}`
+              : null}
           </p>
         </div>
       </div>

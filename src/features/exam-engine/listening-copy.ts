@@ -124,6 +124,12 @@ export const listeningCopy = {
     "Check your connection and reload the page to try again. You can continue when you are ready.",
   audioUnsupportedText:
     "Your browser cannot play this audio clip. You can continue when you are ready.",
+  // Shown under the controls when the browser blocked the clip from
+  // starting on its own (EXAM-15F). Browser autoplay policies can refuse a
+  // clip with sound even after a click elsewhere on the page, so the
+  // screen says what to do rather than sitting silent.
+  audioAutoplayBlockedText:
+    "This clip did not start on its own. Press play to begin.",
 
   // Listening Part 1 route heading (EXAM-03).
   //
@@ -311,10 +317,16 @@ export const listeningCopy = {
   // whose content object does not carry its own. Mock Test 1 Part 6 does
   // carry one, so this is the default rather than the value in use.
   //
-  // Separate from dropdownInstruction above, which names the drop-down
-  // menu. A viewpoints question is answered from radio options, so naming
-  // a control that is not on the screen would be wrong.
-  viewpointsInstruction: "Choose the best way to complete each statement.",
+  // The same sentence as dropdownInstruction above, and deliberately so
+  // since EXAM-15F. It used to stop at "each statement", because EXAM-13
+  // answered a viewpoints question from radio options and naming a
+  // drop-down menu would have promised a control that was not on the
+  // screen. The control is a select now, so the clause the source document
+  // actually carries comes back. It is kept as its own entry rather than
+  // pointed at dropdownInstruction because a viewpoints part is still its
+  // own content shape and can still want its own wording.
+  viewpointsInstruction:
+    "Choose the best way to complete each statement from the drop-down menu.",
   // Same sentence the dropdown and multiple-choice lists show, and the
   // same reason. See ANSWER_ALL_QUESTIONS_HINT above.
   viewpointsAnswerAllHint: ANSWER_ALL_QUESTIONS_HINT,

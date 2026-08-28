@@ -110,8 +110,19 @@ export function ExamShell({
 
   return (
     <div className={cx(examFrame.page, className)}>
-      <div className={examFrame.container}>
-        <section className={examFrame.frame} aria-label={title}>
+      {/* data-exam-frame and data-exam-window are the hooks the exam mode
+          rules in globals.css use (EXAM-15F, second QA pass). Inside a
+          data-exam-viewport the container drops its max width and the
+          window drops its border and rounded corners, so the test fills
+          the browser window. On the internal part routes, which render
+          this shell inside the dashboard content column, none of those
+          rules apply and the frame draws as it always did. */}
+      <div data-exam-frame="true" className={examFrame.container}>
+        <section
+          data-exam-window="true"
+          className={examFrame.frame}
+          aria-label={title}
+        >
           <ExamTopBar
             title={title}
             timers={readings}

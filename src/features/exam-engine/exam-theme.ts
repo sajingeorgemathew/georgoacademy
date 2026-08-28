@@ -2,14 +2,23 @@
 //
 // Same idea as src/features/design/design-tokens.ts: every value is a
 // Tailwind class string, and the raw colours stay in src/app/globals.css.
-// No new colour token was added for the exam engine. The frame is built
-// from the existing academy palette:
+// The frame is built from the academy palette:
 //
+// - academy-exam-surface for the sheet behind the exam frame
+// - academy-exam-gutter for the grey the white canvas sits in
 // - academy-navy-soft and academy-line for the grey bars and rules
 // - academy-paper for the white exam canvas
 // - academy-blue for the primary Next action
 // - academy-blue-soft for the answer side of a split screen
 // - academy-red for a closing or expired timer
+//
+// EXAM-15F added the first two. Everything in exam mode used to sit on
+// academy-paper-warm, which is the warm off white the signed in product
+// and the landing page share, and the bars and the gutter were drawn as
+// translucent navy over it. The result read as a warm marketing page with
+// a test on top of it. The two exam tokens are flat and cool, no alpha is
+// laid over anything warm any more, and the two bars are one solid colour
+// rather than a gradient. Nothing outside the exam engine uses them.
 //
 // The exam surface intentionally looks different from the dashboard. It
 // uses square corners instead of pill controls, tight chrome, and no
@@ -39,6 +48,11 @@ import type { ListeningReviewStatus } from "./listening-review-types";
 // The frame carries a grey body colour so the gutter around the white
 // canvas reads as part of the machine, not as a gap in the page.
 //
+// Both colours are the flat exam neutrals (EXAM-15F) rather than the warm
+// paper the rest of the signed in product uses, so an exam screen looks
+// the same on the internal part routes as it does inside the locked
+// viewport, and neither one picks up the warm cast.
+//
 // Height (EXAM-15B). All three levels ask for the full height of their
 // parent, and that request is deliberately inert on an ordinary page: a
 // percentage height resolves to auto when the parent's own height comes
@@ -49,10 +63,10 @@ import type { ListeningReviewStatus } from "./listening-review-types";
 // the canvas takes the rest. One set of classes covers both, so no screen
 // has to know which one it is in.
 export const examFrame = {
-  page: "flex h-full min-h-0 w-full flex-col bg-academy-paper-warm",
+  page: "flex h-full min-h-0 w-full flex-col bg-academy-exam-surface",
   container: "mx-auto flex h-full min-h-0 w-full max-w-5xl flex-col",
   frame:
-    "flex h-full min-h-0 w-full min-w-0 flex-col overflow-hidden rounded-sm border border-academy-line bg-academy-navy-soft/45",
+    "flex h-full min-h-0 w-full min-w-0 flex-col overflow-hidden rounded-sm border border-academy-line bg-academy-exam-gutter",
 } as const;
 
 // Locked exam viewport (EXAM-15B).
@@ -63,23 +77,43 @@ export const examFrame = {
 // fixed overlay one viewport tall instead of trying to unpick the layout
 // around it.
 //
-// overlay is the sheet of neutral background pinned over the dashboard.
-// Its z-index is above the sticky app header, which sits at z-50, so no
-// dashboard chrome shows through at the top of the screen.
+// overlay is the sheet of neutral background pinned over the window. It is
+// the flat exam neutral (EXAM-15F): the warm paper it used to carry let a
+// strip of marketing colour frame the test from the first screen to the
+// last.
 //
-// inner is the fixed height box the exam frame fills. It never scrolls
+// Since the second EXAM-15F QA pass the dashboard chrome is not rendered on
+// an exam route at all, so the overlay is no longer covering anything. It
+// still pins itself to the window rather than flowing in the page, because
+// that is what guarantees the two bars stay put while the canvas between
+// them scrolls, and z-[100] stays as a floor under it: it is above the app
+// header at z-50 and the mobile drawer at z-40, so an exam route added to
+// the shell's list before its own page is ready still cannot show chrome
+// through the test.
+//
+// inner is the window tall box the exam frame fills. It never scrolls
 // itself: any overflow is handed to the canvas inside the frame, which is
 // the only region on the screen with a scrollbar.
 //
+// Full bleed (second QA pass). Both the padding around the frame and the
+// centring of it are gone. The frame used to sit in a 2 or 3 pixel gutter,
+// centred and capped at max-w-5xl by examFrame.container, which on a wide
+// monitor drew the test as a floating card on a grey field, in roughly the
+// same place and at roughly the same width as the dashboard content column
+// it had just replaced. Test software fills the screen, so the frame does
+// now: the cap is lifted inside the viewport by the exam mode rules in
+// globals.css, and the frame's own border and rounded corners are dropped
+// there too, because a border drawn along the edge of the window is not a
+// frame, it is a stray line.
+//
 // overscroll-none on the overlay (EXAM-15C). The document scroll lock stops
 // the page moving, but a flick that reaches the end of the canvas can still
-// chain out to the document and produce the rubber band bounce that shows a
-// strip of the dashboard behind the exam. Refusing the chain at the overlay
-// keeps the screen still.
+// chain out to the document and produce the rubber band bounce. Refusing
+// the chain at the overlay keeps the screen still.
 export const examViewport = {
   overlay:
-    "fixed inset-0 z-[60] overflow-hidden overscroll-none bg-academy-paper-warm",
-  inner: "mx-auto flex h-[100dvh] w-full flex-col overflow-hidden p-2 sm:p-3",
+    "fixed inset-0 z-[100] overflow-hidden overscroll-none bg-academy-exam-surface",
+  inner: "flex h-full w-full min-w-0 flex-col overflow-hidden",
 } as const;
 
 // Grey title bar and grey footer bar.
@@ -95,10 +129,16 @@ export const examViewport = {
 // window the Back and Next controls can be clipped. The two bars keep their
 // height and the canvas absorbs the difference, which is the whole point of
 // giving it grow and min-h-0.
+//
+// One flat colour each, no gradient (EXAM-15F). Both bars used to be a
+// vertical fade between a solid navy tint and a translucent one, which
+// picked up whatever was behind the frame and read as a product header
+// rather than test chrome. A bar that never changes shade is also a bar a
+// learner stops looking at, which is what chrome is for.
 export const examBar = {
-  top: "flex w-full min-w-0 shrink-0 flex-wrap items-center gap-x-3 gap-y-1.5 border-b border-academy-line bg-linear-to-b from-academy-navy-soft to-academy-navy-soft/65 px-3 py-1.5 sm:px-4",
+  top: "flex w-full min-w-0 shrink-0 flex-wrap items-center gap-x-3 gap-y-1.5 border-b border-academy-line bg-academy-navy-soft px-3 py-1.5 sm:px-4",
   bottom:
-    "flex w-full min-w-0 shrink-0 flex-wrap items-center gap-x-3 gap-y-1.5 border-t border-academy-line bg-linear-to-b from-academy-navy-soft/65 to-academy-navy-soft px-3 py-1.5 sm:px-4",
+    "flex w-full min-w-0 shrink-0 flex-wrap items-center gap-x-3 gap-y-1.5 border-t border-academy-line bg-academy-navy-soft px-3 py-1.5 sm:px-4",
   title:
     "min-w-0 basis-full truncate text-[13px] font-semibold leading-5 text-academy-navy sm:basis-auto sm:flex-1",
   meta: "min-w-0 truncate text-[11px] leading-4 text-academy-navy/60",
@@ -132,9 +172,13 @@ export const examBar = {
 // overscroll-contain (EXAM-15C): reaching the end of a long question list
 // must not hand the scroll on to whatever is behind the exam. The canvas
 // keeps it, so the two bars and the dashboard underneath both stay put.
+//
+// The gutter is the flat exam neutral (EXAM-15F). It used to be navy at
+// 30 percent over the warm page colour, so the grey around the white sheet
+// carried the warm cast through with it.
 export const examCanvas = {
   region:
-    "flex min-h-0 min-w-0 grow flex-col overflow-y-auto overscroll-contain bg-academy-navy-soft/30 p-2 sm:p-3",
+    "flex min-h-0 min-w-0 grow flex-col overflow-y-auto overscroll-contain bg-academy-exam-gutter p-2 sm:p-3",
   sheet:
     "min-w-0 shrink-0 grow border border-academy-line bg-academy-paper text-academy-navy",
   padded: "px-4 py-5 sm:px-6 sm:py-6",
@@ -307,6 +351,10 @@ export const examVideo = {
     "flex min-w-0 flex-col items-center justify-center gap-1 bg-academy-navy-soft px-4 py-8 text-center",
   fallbackTitle: "text-[13px] font-semibold leading-5 text-academy-navy",
   fallbackText: "max-w-md text-[11px] leading-4 text-academy-navy/60",
+  // Shown under the stage when the browser refused to start the clip on
+  // its own (EXAM-15F). Same strip the audio player uses, same reason.
+  autoplayNotice:
+    "min-w-0 border-t border-academy-line bg-academy-navy-soft px-3 py-1.5 text-[11px] leading-4 text-academy-navy",
 } as const;
 
 // Section intro block at the top of an instruction screen.
@@ -368,6 +416,11 @@ export const examAudio = {
     "flex min-w-0 flex-col items-center justify-center gap-1 bg-academy-navy-soft px-4 py-6 text-center",
   fallbackTitle: "text-[13px] font-semibold leading-5 text-academy-navy",
   fallbackText: "max-w-md text-[11px] leading-4 text-academy-navy/60",
+  // Shown under the controls when the browser refused to start the clip on
+  // its own (EXAM-15F). A quiet strip rather than a banner: the controls
+  // are right above it and still work, so this is a pointer, not an error.
+  autoplayNotice:
+    "min-w-0 border-t border-academy-line bg-academy-navy-soft px-3 py-1.5 text-[11px] leading-4 text-academy-navy",
 } as const;
 
 // Listening screens (EXAM-03).
@@ -414,17 +467,23 @@ export const examListening = {
 // The select is capped rather than full width. Option text here is a
 // sentence fragment, so a control stretched across a wide canvas would
 // put its value a long way from the statement it completes.
+// Boxed completion blocks, brought into line with examListeningChoice in
+// the second EXAM-15F QA pass. Same box, same tinted header strip carrying
+// the number and the statement, and the select in the body of the box
+// under it. Parts 4, 5 and 6 all answer a whole question set on one screen,
+// so they should look like one screen type with two controls rather than
+// two screen types.
 export const examListeningDropdown = {
-  list: "flex min-w-0 flex-col",
-  item: "flex min-w-0 flex-col gap-2 border-b border-academy-line/70 py-3 first:pt-0 last:border-b-0 last:pb-0",
-  statement: "block min-w-0 text-[13px] leading-6 text-academy-navy",
-  number:
-    "mr-1.5 font-semibold tabular-nums text-academy-navy/60",
+  list: "flex min-w-0 flex-col gap-2",
+  item: "min-w-0 overflow-hidden rounded-sm border border-academy-line bg-academy-paper",
+  statement:
+    "block w-full min-w-0 border-b border-academy-line bg-academy-navy-soft/60 px-3 py-2 text-[13px] leading-6 text-academy-navy",
+  number: "mr-2 font-semibold tabular-nums text-academy-navy/55",
   // The blank in the statement. Underscores come from the source
   // document, so they are drawn rather than replaced, just quieted.
   blank: "px-0.5 tracking-tight text-academy-navy/45",
-  // Indented so the control reads as belonging to the statement above it.
-  control: "min-w-0 sm:pl-6",
+  // The control sits in the body of the box, under the statement strip.
+  control: "min-w-0 p-2",
   select: `h-8 w-full min-w-0 max-w-lg rounded-sm border border-academy-line bg-academy-paper px-2 text-[13px] leading-5 text-academy-navy ${focus.ring}`,
   // Shown while the question has no answer.
   selectEmpty: "text-academy-navy/55",
@@ -448,17 +507,65 @@ export const examListeningDropdown = {
 //
 // No panel per question, no shadow and no pill, so eight questions read
 // as one form rather than as eight widgets.
+// Boxed question blocks, rewritten in the second EXAM-15F QA pass.
+//
+// The list used to be ruled rows: a bold question, four options stacked
+// under it in one column, a hairline, repeat. Eight of those on the Part 5
+// screen made a page a learner scrolled the way they scroll an article,
+// which is what the QA pass reported as feeling like a web quiz rather
+// than test software. The content was right; the shape was wrong.
+//
+// Three changes, and each is doing a specific job:
+//
+// - **Every question is a box.** A border around the item and a tinted
+//   header strip carrying the number and the question turns a run of text
+//   into a run of discrete things to answer, which is what a test screen
+//   is. It also gives the eye a place to stop between questions without
+//   needing white space to do it.
+// - **Options sit in two columns from the small breakpoint up.** Four
+//   options in one column is four rows; in two columns it is two. Across
+//   eight questions that is the difference between a screen a learner
+//   scrolls three times and one they scroll once. On a narrow window it
+//   falls back to one column, where the extra height is unavoidable and
+//   the box is still doing its job.
+// - **Selection is a filled row, not a bolder rule.** The option wash is
+//   academy-blue-soft, the same accent the split screen answer panel uses,
+//   so what is chosen is legible at a glance across a screen of 32
+//   options.
+//
+// The whole row is the click target, so nobody has to hit the small circle
+// itself, and the hover wash makes that obvious before the click.
+//
+// Used by the Part 5 multiple choice list and, through
+// examListeningDropdown, by the Part 4 and Part 6 completion lists, so all
+// three one screen parts read as one family.
 export const examListeningChoice = {
-  list: "flex min-w-0 flex-col",
-  item: "flex min-w-0 flex-col border-b border-academy-line/70 py-3 first:pt-0 last:border-b-0 last:pb-0",
-  // The question itself, and the radio group's legend. A legend is not a
-  // flex container in every browser, so the number is an inline span with
-  // its own right margin rather than a gap.
-  prompt: "min-w-0 text-[13px] font-semibold leading-5 text-academy-navy",
-  number: "mr-1.5 font-semibold tabular-nums text-academy-navy/60",
-  // Indented so the options read as belonging to the question above
-  // them. The column itself is examListening.optionList.
-  options: "mt-1.5 flex min-w-0 flex-col sm:pl-6",
+  list: "flex min-w-0 flex-col gap-2",
+  item: "min-w-0 overflow-hidden rounded-sm border border-academy-line bg-academy-paper",
+  // The fieldset fills the box. Preflight has already stripped its border,
+  // padding and margin, so it adds no geometry of its own.
+  fieldset: "w-full min-w-0",
+  // The question itself, and the radio group's legend.
+  //
+  // A legend sits in the fieldset's border box by default and shrinks to
+  // its content. The fieldset has no border here and this is display block
+  // at full width, so it draws as an ordinary header strip. The number is
+  // an inline span with a right margin rather than a flex gap, because a
+  // legend is not a flex container in every browser.
+  prompt:
+    "block w-full min-w-0 border-b border-academy-line bg-academy-navy-soft/60 px-3 py-2 text-[13px] font-semibold leading-5 text-academy-navy",
+  number: "mr-2 font-semibold tabular-nums text-academy-navy/55",
+  // Two columns from sm up, one below it.
+  options: "grid min-w-0 grid-cols-1 gap-x-5 gap-y-0.5 p-2 sm:grid-cols-2",
+  // One option. Compact, no rule between rows: the box and the two column
+  // grid already group them, and a hairline inside a grid cell would draw
+  // a line to nowhere.
+  optionRow:
+    "flex min-w-0 cursor-pointer items-start gap-2 rounded-sm px-2 py-1.5 transition-colors hover:bg-academy-navy-soft/45",
+  optionRowSelected: "bg-academy-blue-soft hover:bg-academy-blue-soft",
+  optionInput:
+    "mt-0.5 h-3.5 w-3.5 shrink-0 accent-academy-blue focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-academy-blue",
+  optionText: "min-w-0 text-[13px] leading-5 text-academy-navy",
   // Answered count under the list, beside Next being unavailable.
   progressNote: "text-[11px] leading-4 text-academy-navy/60",
 } as const;

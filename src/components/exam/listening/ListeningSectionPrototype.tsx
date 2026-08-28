@@ -43,6 +43,10 @@ import {
   formatListeningSectionPartMeta,
   listeningSectionCopy,
 } from "@/features/exam-engine/listening-section-copy";
+import {
+  LISTENING_QUESTION_TIMER,
+  getListeningPartScreenTimer,
+} from "@/features/exam-engine/listening-timing";
 import type { ListeningSectionCopy } from "@/features/exam-engine/listening-section-copy";
 import type {
   ListeningSectionAnswerMap,
@@ -86,20 +90,49 @@ import type {
 // mounted for the whole section. Restart clears all 38 and returns to the
 // instruction screen.
 //
-// Back is enabled throughout, which the official-style flow would not
-// allow, so the sequence can be walked through repeatedly during review.
-// Next on a question screen is gated on that question, or on that part's
-// whole question list for the one screen parts, exactly as it is in the
-// part routes. It is not gated on media finishing anywhere yet.
+// Strict exam behaviour (EXAM-15F). This component is where the full run
+// stops being a walkthrough and starts behaving like a test, and it is the
+// only place that changed: the six individual part routes render the same
+// screens with none of the rules below, so they stay usable for
+// development. See docs/product/listening-format-strict-timing-polish.md.
 //
-// Every question screen in the run carries a live countdown from EXAM-15D,
-// and this component's only part in it is passing the flow screen id down
-// as the timer's key. The countdown owns itself from there. It changes
-// nothing about this component's navigation, its answer map or its
-// marking: reaching zero does not advance a screen, does not submit, and
-// does not clear a selection, so the answers this component holds at the
-// end of Part 6 are the same whether every window ran out or none did. See
-// docs/product/exam-timer-foundation.md.
+// Three rules, all of them props passed down rather than behaviour built
+// into a screen:
+//
+// - **Forward only.** Back is hidden from the first screen of the run to
+//   the last question screen of Part 6. A learner cannot return to a
+//   previous question or a previous part, which is the published rule. The
+//   two closing screens keep Back, because it is what moves between the
+//   score and the review and neither of them is answerable.
+// - **A window that closes moves the test on.** Every question screen is
+//   handed goNext as its onTimeExpire, so reaching zero advances to the
+//   next question, the next part transition or the review, exactly as
+//   pressing Next would. Nothing else happens: no modal, no alert, no
+//   sound, no flashing, no scroll and no focus move. The answer map is not
+//   touched, so a question answered before its window closed keeps its
+//   answer and a question left blank stays blank and marks as incorrect.
+// - **Next never waits for an answer.** requireAnswer and
+//   requireAllAnswered are false throughout the run. A gate that blocks
+//   Next until every question is answered cannot survive a window that has
+//   to advance regardless, and leaving a question blank and taking the
+//   zero is what the official test allows.
+//
+// Timer durations come from listening-timing.ts, which is also where the
+// working behind them is written down. Parts 1 to 3 keep the published 30
+// seconds per question. Parts 4, 5 and 6 answer their whole question set
+// on one screen, so each gets one window sized for that set, 3.5, 4 and 5
+// minutes, with wider amber and red thresholds to match. Those three are
+// derived from the published per-part allowance minus the clip, and are
+// labelled as derived where they are defined.
+//
+// Media is asked to start on its own. The learner reached the screen by
+// pressing Next, which is the user gesture a browser autoplay policy looks
+// for, so the instructional video, every conversation and news clip, the
+// Part 5 discussion video, the Part 6 report and each Parts 1 to 3
+// question clip all attempt to play as their screen opens. A browser that
+// refuses leaves the controls alone and the player prints a line saying to
+// press play. No clip is muted to get around a policy and no clip is
+// downloaded.
 //
 // Every screen title, question, option and media URL comes from the
 // section content object passed in, so this component carries no Mock Test
@@ -229,14 +262,35 @@ export function ListeningSectionPrototype({
     setMarking({ status: "idle" });
   };
 
-  // Shared chrome props. Back is hidden on the first screen only, because
-  // there is nothing behind it inside the section.
-  const showBack = screenIndex > 0;
+  // Shared chrome props.
+  //
+  // Back is hidden for the whole of the test itself (EXAM-15F). The
+  // official rule is that a learner cannot return to a previous part, and
+  // once a question window expires and advances by itself the same is true
+  // within a part: a question whose window has closed is closed. So rather
+  // than clamping Back to the current part and then having to explain why
+  // it sometimes does nothing, the run is forward only from the section
+  // instructions to the last question screen of Part 6.
+  //
+  // The two screens that keep it are the practice score and the end of
+  // section screen, and neither is answerable. Back on the score returns to
+  // the answer review, which is the same move the score screen's own
+  // "Review answers" control makes, and Back on the end screen returns to
+  // the score. The answer review itself does not get Back, because behind
+  // it is Part 6 with the correct answers now on display.
+  //
+  // The marking screen therefore has no Back either. Its recovery is the
+  // retry control it already carries, which re-sends the answers this
+  // component is still holding.
+  const showBack =
+    screen?.kind === "section-score" || screen?.kind === "section-end";
 
   // Stands in for the review and the score while the server is marking,
-  // and carries the retry when it could not. Back still works, so a failed
-  // check is never a dead end: the learner can walk back into Part 6 with
-  // every answer still selected.
+  // and carries the retry when it could not. The retry is the whole
+  // recovery now (EXAM-15F): the run is forward only, so a failed check
+  // cannot be answered by walking back into Part 6. It does not need to be.
+  // This component is still holding all 38 answers, so pressing retry
+  // sends exactly what the first attempt sent.
   const renderMarkingScreen = (metaText: string) => {
     const failed = marking.status === "failed";
 
@@ -380,6 +434,7 @@ export function ListeningSectionPrototype({
             partScreen.sectionIndex,
             part.content.sections.length,
           )}
+          autoPlayMedia
           metaText={metaText}
           onNext={goNext}
           onBack={goBack}
@@ -412,10 +467,22 @@ export function ListeningSectionPrototype({
           questionCount={questionCount}
           selectedOptionId={answers[question.id]}
           onSelectOption={(optionId) => selectAnswer(question.id, optionId)}
+          // A blank is a legal answer in the full run and marks as
+          // incorrect, so Next does not wait for one (EXAM-15F).
+          requireAnswer={false}
+          // The question is spoken in this part, so the clip is the
+          // question. It starts with the screen (EXAM-15F).
+          autoPlayAudio
           // The flow screen id, so the answering window restarts when the
           // learner moves to another question and not when they change
           // their mind about an option (EXAM-15D).
           timerScreenKey={partScreen.id}
+          timerSeconds={LISTENING_QUESTION_TIMER.seconds}
+          timerWarningAtSeconds={LISTENING_QUESTION_TIMER.warningAtSeconds}
+          timerUrgentAtSeconds={LISTENING_QUESTION_TIMER.urgentAtSeconds}
+          // 30 seconds up moves to the next question, or to the part
+          // transition after the last one (EXAM-15F).
+          onTimeExpire={goNext}
           metaText={metaText}
           onNext={goNext}
           onBack={goBack}
@@ -435,6 +502,7 @@ export function ListeningSectionPrototype({
             instructionText={
               part.content.mediaInstruction ?? listeningCopy.newsItemInstruction
             }
+            autoPlayMedia
             metaText={metaText}
           onNext={goNext}
           onBack={goBack}
@@ -449,6 +517,7 @@ export function ListeningSectionPrototype({
             title={part.content.title}
             media={part.content.media}
             instructionText={part.content.mediaInstruction}
+            autoPlayMedia
             metaText={metaText}
           onNext={goNext}
           onBack={goBack}
@@ -475,6 +544,7 @@ export function ListeningSectionPrototype({
           instructionText={
             part.content.mediaInstruction ?? listeningCopy.discussionInstruction
           }
+          autoPlayMedia
           metaText={metaText}
           onNext={goNext}
           onBack={goBack}
@@ -484,10 +554,15 @@ export function ListeningSectionPrototype({
     }
 
     // Every question in the part on one screen, for Parts 4, 5 and 6.
+    //
+    // One window for the whole screen, sized for the whole question set
+    // rather than for one question (EXAM-15F). The three durations and the
+    // working behind each of them are in listening-timing.ts.
     const allAnswered = areAllListeningSectionPartQuestionsAnswered(
       part,
       answers,
     );
+    const screenTimer = getListeningPartScreenTimer(part.partNumber);
 
     if (part.kind === "dropdown") {
       return (
@@ -497,11 +572,21 @@ export function ListeningSectionPrototype({
           answers={answers}
           onSelectOption={selectAnswer}
           allAnswered={allAnswered}
+          // A blank is a legal answer in the full run and marks as
+          // incorrect, so Next does not wait for the form to be finished
+          // (EXAM-15F).
+          requireAllAnswered={false}
           instructionText={part.content.questionInstruction}
           // The flow screen id, so the answering window belongs to this
           // screen and is not restarted by the selections made on it
           // (EXAM-15D).
           timerScreenKey={partScreen.id}
+          timerSeconds={screenTimer.seconds}
+          timerWarningAtSeconds={screenTimer.warningAtSeconds}
+          timerUrgentAtSeconds={screenTimer.urgentAtSeconds}
+          // The screen window closing moves the run to the next part
+          // transition, or to the answer review after Part 6 (EXAM-15F).
+          onTimeExpire={goNext}
           metaText={metaText}
           onNext={goNext}
           onBack={goBack}
@@ -518,11 +603,21 @@ export function ListeningSectionPrototype({
           answers={answers}
           onSelectOption={selectAnswer}
           allAnswered={allAnswered}
+          // A blank is a legal answer in the full run and marks as
+          // incorrect, so Next does not wait for the form to be finished
+          // (EXAM-15F).
+          requireAllAnswered={false}
           instructionText={part.content.questionInstruction}
           // The flow screen id, so the answering window belongs to this
           // screen and is not restarted by the selections made on it
           // (EXAM-15D).
           timerScreenKey={partScreen.id}
+          timerSeconds={screenTimer.seconds}
+          timerWarningAtSeconds={screenTimer.warningAtSeconds}
+          timerUrgentAtSeconds={screenTimer.urgentAtSeconds}
+          // The screen window closing moves the run to the next part
+          // transition, or to the answer review after Part 6 (EXAM-15F).
+          onTimeExpire={goNext}
           metaText={metaText}
           onNext={goNext}
           onBack={goBack}
@@ -539,11 +634,21 @@ export function ListeningSectionPrototype({
           answers={answers}
           onSelectOption={selectAnswer}
           allAnswered={allAnswered}
+          // A blank is a legal answer in the full run and marks as
+          // incorrect, so Next does not wait for the form to be finished
+          // (EXAM-15F).
+          requireAllAnswered={false}
           instructionText={part.content.questionInstruction}
           // The flow screen id, so the answering window belongs to this
           // screen and is not restarted by the selections made on it
           // (EXAM-15D).
           timerScreenKey={partScreen.id}
+          timerSeconds={screenTimer.seconds}
+          timerWarningAtSeconds={screenTimer.warningAtSeconds}
+          timerUrgentAtSeconds={screenTimer.urgentAtSeconds}
+          // The screen window closing moves the run to the next part
+          // transition, or to the answer review after Part 6 (EXAM-15F).
+          onTimeExpire={goNext}
           metaText={metaText}
           onNext={goNext}
           onBack={goBack}
@@ -643,8 +748,11 @@ export function ListeningSectionPrototype({
           {...sectionProgress}
           metaText={metaText}
           onNext={goNext}
-          // Back lands on the last question screen of Part 6, which is the
-          // prototype affordance the ticket asks for.
+          // showBack is false here (EXAM-15F). Behind the review is the
+          // last question screen of Part 6, and the review has just put the
+          // correct answers on the screen, so returning to it is the one
+          // move the run must not offer. The handler stays wired so the
+          // screen keeps one navigation contract with every other screen.
           onBack={goBack}
           showBack={showBack}
         />

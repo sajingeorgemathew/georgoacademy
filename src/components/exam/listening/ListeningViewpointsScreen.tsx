@@ -43,6 +43,10 @@ export type ListeningViewpointsScreenProps = {
   instructionText?: string;
   // Quiet line under the player.
   hintText?: string;
+  // Ask the browser to start the clip when the screen opens (EXAM-15F).
+  // Passed straight through to ListeningAudioScreen, so Part 6 behaves the
+  // way every other Listening media screen does.
+  autoPlayMedia?: boolean;
   metaText?: string;
   onAudioEnded?: () => void;
   onNext?: () => void;
@@ -56,6 +60,7 @@ export function ListeningViewpointsScreen({
   media,
   instructionText = listeningCopy.reportInstruction,
   hintText = listeningCopy.reportHint,
+  autoPlayMedia = false,
   metaText,
   onAudioEnded,
   onNext,
@@ -71,6 +76,7 @@ export function ListeningViewpointsScreen({
       durationLabel={media.durationLabel}
       instructionText={instructionText}
       hintText={hintText}
+      autoPlayMedia={autoPlayMedia}
       metaText={metaText}
       onAudioEnded={onAudioEnded}
       onNext={onNext}
