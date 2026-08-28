@@ -43,6 +43,10 @@ export type ExamVideoScreenProps = {
   // Passed through to the player. Drop to none when a page holds several
   // players.
   preload?: "none" | "metadata";
+  // Ask the browser to start the clip when the screen opens (EXAM-15F).
+  // The full Listening route passes it for the instructional video, which
+  // keeps its controls either way because it is instructional.
+  autoPlayVideo?: boolean;
   // Fires when the clip finishes. Requires a client component parent.
   onVideoEnded?: () => void;
 
@@ -80,6 +84,7 @@ export function ExamVideoScreen({
   helperText,
   metaText,
   preload,
+  autoPlayVideo = false,
   onVideoEnded,
   showNext = true,
   nextLabel,
@@ -132,6 +137,7 @@ export function ExamVideoScreen({
             poster={posterSrc}
             durationLabel={durationLabel}
             preload={preload}
+            autoPlay={autoPlayVideo}
             onEnded={onVideoEnded}
           />
 

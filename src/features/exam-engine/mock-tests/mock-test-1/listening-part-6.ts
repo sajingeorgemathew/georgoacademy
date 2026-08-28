@@ -26,10 +26,14 @@
 // - The source instructs the questions with "Choose the best way to
 //   complete each statement from the drop-down menu ( )". Unlike Part 5,
 //   that is not a copy and paste artefact here: the six items really are
-//   stems. EXAM-13 renders radio options because the ticket asks for them,
-//   so the drop-down clause is dropped rather than naming a control that
-//   is not on the screen. Recorded in
-//   docs/product/listening-part-6-prototype.md.
+//   stems. EXAM-13 rendered radio options because its ticket asked for
+//   them, and dropped the drop-down clause rather than naming a control
+//   that was not on the screen. EXAM-15F renders the select the source
+//   describes, so both instruction lines carry the clause again and this
+//   file's wording is the source's wording. See
+//   docs/product/listening-format-strict-timing-polish.md. Nothing else in
+//   this file changed: the six ids, the four option ids under each of them
+//   and the answer key are exactly as EXAM-13 wrote them.
 // - The running time is written as the source document states it, "about
 //   3 minutes", rather than measured. The content map agrees.
 // - Part 6 has no question audio at all. The statements are read on
@@ -101,9 +105,11 @@ export const listeningPart6: ListeningViewpointsPartContent = {
     // left out rather than printed and broken.
     "You will hear a report. It is about 3 minutes long.",
     "Then 6 questions will appear.",
-    // The source bullet ends "from the drop-down menu". EXAM-13 renders
-    // radio options, so the clause is dropped.
-    "Choose the best way to answer each question.",
+    // The source bullet ends "from the drop-down menu". EXAM-13 dropped
+    // the clause because it rendered radio options; EXAM-15F renders the
+    // select the source describes, so the bullet is the source bullet
+    // again.
+    "Choose the best way to answer each question from the drop-down menu.",
   ],
   // No context image for this part. extracted-links.md records Part 1 as
   // the only Listening part with one, so imageUrl stays unset rather than
@@ -119,7 +125,11 @@ export const listeningPart6: ListeningViewpointsPartContent = {
     durationLabel: "About 3 minutes",
   },
   mediaInstruction: "Listen to the following report.",
-  questionInstruction: "Choose the best way to complete each statement.",
+  // The source document's own line above the question list, restored in
+  // full by EXAM-15F now that the control is a select. EXAM-13 dropped the
+  // drop-down clause rather than name a control that was not there.
+  questionInstruction:
+    "Choose the best way to complete each statement from the drop-down menu.",
   answerKey: ANSWER_KEY,
   // Answer sheet for Part 6, from
   // mock-tests/mock-test-1/extracted-links.md. Referenced from Cloudinary

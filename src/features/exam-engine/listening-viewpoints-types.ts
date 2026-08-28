@@ -13,31 +13,42 @@
 // deliberately not merged with either:
 //
 // - A dropdown part's questions are incomplete statements answered from a
-//   select. Part 6's questions are incomplete statements too, so the
-//   statement shape is the same, but EXAM-13 answers them from a radio
-//   group. Reusing ListeningDropdownPartContent would mean one content
-//   type whose questions are drawn two different ways depending on which
-//   screen picked it up, which is exactly the kind of implicit branch the
-//   sibling files were split up to avoid.
+//   select, and since EXAM-15F Part 6's are too. What still separates the
+//   two shapes is the media: a dropdown part's clip is
+//   ListeningDropdownMedia and a viewpoints part's is
+//   ListeningViewpointsMedia, and the two parts keep separate flows and
+//   separate content files. The question shapes are now identical, which
+//   is why the question list is shared rather than duplicated: EXAM-15F
+//   deleted ListeningViewpointsQuestionList and
+//   ListeningViewpointsQuestionScreen now renders
+//   ListeningDropdownQuestionList over these questions directly.
 // - A video part's questions are whole questions answered from a radio
-//   group, so the control matches, but its media is a video with a poster
-//   and an aspect ratio and its question type has one prompt string and no
-//   blank. textBefore and textAfter would be dead fields there, and prompt
-//   would be a dead field here.
+//   group, and its media is a video with a poster and an aspect ratio. Its
+//   question type has one prompt string and no blank, so textBefore and
+//   textAfter would be dead fields there and prompt would be a dead field
+//   here. Part 5 keeps that shape on purpose: its eight source items are
+//   whole interrogatives with no blank for a select to sit in.
 //
-// So this shape is the statement of the dropdown part with the control of
-// the video part. What all four shapes share is imported rather than
+// So this shape is the statement of the dropdown part with the media of a
+// viewpoints part. What all four shapes share is imported rather than
 // copied: the scenario shape, the instruction bullet shape, and the answer
 // key entry.
 //
-// One note on the source material. The Mock Test 1 document instructs
-// this part with "Choose the best way to complete each statement from the
-// drop-down menu", and unlike Part 5 that is not a copy and paste
-// artefact: the six items really are sentence stems. EXAM-13 still renders
-// radio options, because the ticket asks for them, so the wording that
-// reaches the screen drops the drop-down clause rather than promising a
-// control that is not there. The deviation is recorded in
-// docs/product/listening-part-6-prototype.md.
+// One note on the source material, now settled. The Mock Test 1 document
+// instructs this part with "Choose the best way to complete each statement
+// from the drop-down menu", and unlike Part 5 that is not a copy and paste
+// artefact: the six items really are sentence stems. EXAM-13 rendered
+// radio options anyway, because its ticket asked for them, and dropped the
+// drop-down clause from the learner-facing wording rather than promising a
+// control that was not there.
+//
+// EXAM-15F corrected the control rather than the copy. The screen now
+// draws a select, the instruction lines carry the drop-down clause again,
+// and the deviation recorded in
+// docs/product/listening-part-6-prototype.md is closed. Nothing in this
+// file changed to do it: the fields below were already the right shape,
+// which is the whole reason the correction was cheap. See
+// docs/product/listening-format-strict-timing-polish.md.
 //
 // This file holds types only, no runtime values, so it can be imported
 // from a server component or a client component without pulling any
@@ -68,9 +79,11 @@ export type ListeningViewpointsOption = {
 // The statement is stored split around the blank rather than as one string
 // with a placeholder in it, so the screen decides how the blank is drawn
 // and no component has to parse a sentence. Same reasoning as
-// ListeningDropdownQuestion. In Mock Test 1 Part 6 every blank ends its
-// statement, so textAfter is unset throughout, but the field is here for a
-// part whose blank falls mid sentence.
+// ListeningDropdownQuestion, and structurally the same type, which is what
+// lets ListeningDropdownQuestionList render one of these without a
+// conversion step. In Mock Test 1 Part 6 every blank ends its statement,
+// so textAfter is unset throughout, but the field is here for a part whose
+// blank falls mid sentence.
 export type ListeningViewpointsQuestion = {
   id: string;
   // Position inside the part, counting from 1. Display only.

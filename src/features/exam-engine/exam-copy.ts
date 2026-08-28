@@ -56,6 +56,12 @@ export const examCopy = {
   // Shown by a browser that cannot play video at all.
   videoUnsupportedText:
     "Your browser cannot play this instructional video. You can continue when you are ready.",
+  // Shown under the stage when the browser blocked the clip from starting
+  // on its own (EXAM-15F). Browser autoplay policies can refuse a clip
+  // with sound even after a click elsewhere on the page, so the screen
+  // says what to do rather than sitting on a still frame.
+  videoAutoplayBlockedText:
+    "This video did not start on its own. Press play to begin.",
 
   // Internal preview routes. This wording marks the previews as staff
   // facing pages, so nobody mistakes one for a practice test.

@@ -12,7 +12,7 @@ import {
   examListening,
   examText,
 } from "@/features/exam-engine/exam-theme";
-import { EXAM_QUESTION_TIMER_SECONDS } from "@/features/exam-engine/exam-timer-utils";
+import { LISTENING_QUESTION_TIMER } from "@/features/exam-engine/listening-timing";
 import { listeningCopy } from "@/features/exam-engine/listening-copy";
 import type {
   ListeningQuestion,
@@ -37,7 +37,14 @@ import type {
 // A client component, because selecting an option is an event handler.
 // It holds no state itself: the selection is owned by the prototype above
 // it, so moving back to a question shows the answer that was chosen
-// before. Next is disabled until an option is selected.
+// before.
+//
+// Next is gated on an option being selected by default. The full Listening
+// route turns that gate off through requireAnswer (EXAM-15F): a window
+// that expires has to advance whether or not the question was answered,
+// and the official-style test lets a learner leave a question blank and
+// take the zero for it. The individual part routes keep the gate, because
+// they are development routes.
 //
 // The question stem is spoken, not printed, in this part. prompt is
 // rendered when a part has one, which is what Parts 4 to 6 will need.
@@ -54,11 +61,24 @@ import type {
 // The timer is real from EXAM-15D. The bar used to print a fixed
 // "Time remaining: 30 seconds", which looked like a clock and was not one.
 // It now runs a countdown keyed to the question, so moving to the next
-// question starts a fresh window and choosing an option does not. Reaching
-// zero changes the reading to "Time is up" and nothing else: the screen
-// stays put, the selection stays selected, and Next behaves exactly as it
-// did. Auto-submit and auto-advance are later tickets. See
-// docs/product/exam-timer-foundation.md.
+// question starts a fresh window and choosing an option does not. The
+// window is 30 seconds, which is the one Listening duration published
+// directly, and it comes from listening-timing.ts with the rest of them.
+//
+// What happens at zero is the caller's decision (EXAM-15F). Passing
+// onTimeExpire, which the full route does and the part routes do not,
+// advances to the next question or the next transition; with no handler
+// the reading simply becomes "Time is up" and the screen stays put. Either
+// way the selection stays selected, no option is disabled and nothing is
+// submitted. See docs/product/listening-format-strict-timing-polish.md.
+//
+// The question clip can be asked to start on its own (EXAM-15F). The full
+// route passes autoPlayAudio, because the official test speaks the
+// question as the screen opens rather than waiting to be asked. It is an
+// attempt, not a guarantee: a browser that refuses autoplay leaves the
+// controls exactly where they were and the player prints a short line
+// saying to press play. The part routes pass nothing and behave as they
+// always did.
 //
 // This screen used to draw a third state, a labelled conversation replay,
 // for Mock Test 1 Listening Part 3 Question 1 while that question had no
@@ -79,16 +99,26 @@ export type ListeningQuestionScreenProps = {
   questionCount: number;
   selectedOptionId?: string;
   onSelectOption: (optionId: string) => void;
+  // Whether Next waits for an option to be selected. False on the full
+  // Listening route, where a blank is a legal answer worth zero.
+  requireAnswer?: boolean;
+  // Whether the question clip attempts to start on its own.
+  autoPlayAudio?: boolean;
   // Label in front of the countdown in the top bar.
   timerLabel?: string;
-  // How long the answering window runs. Defaults to the standard question
-  // window, which is the 30 seconds this screen has always shown.
+  // How long the answering window runs. Defaults to the published 30
+  // second per question window.
   timerSeconds?: number;
+  timerWarningAtSeconds?: number;
+  timerUrgentAtSeconds?: number;
   // What the countdown resets on. Defaults to the question's own id, which
   // is unique across the whole Listening section, so every question screen
   // gets its own window without a caller having to build a key. A caller
   // with a flow screen id can pass that instead.
   timerScreenKey?: string;
+  // Fired once when the window reaches zero. Only the full Listening route
+  // passes one.
+  onTimeExpire?: () => void;
   metaText?: string;
   onNext?: () => void;
   onBack?: () => void;
@@ -103,9 +133,14 @@ export function ListeningQuestionScreen({
   questionCount,
   selectedOptionId,
   onSelectOption,
+  requireAnswer = true,
+  autoPlayAudio = false,
   timerLabel = listeningCopy.questionTimerLabel,
-  timerSeconds = EXAM_QUESTION_TIMER_SECONDS,
+  timerSeconds = LISTENING_QUESTION_TIMER.seconds,
+  timerWarningAtSeconds,
+  timerUrgentAtSeconds,
   timerScreenKey,
+  onTimeExpire,
   metaText,
   onNext,
   onBack,
@@ -135,12 +170,15 @@ export function ListeningQuestionScreen({
           // caused by choosing an option.
           screenKey={timerScreenKey ?? question.id}
           durationSeconds={timerSeconds}
+          warningAtSeconds={timerWarningAtSeconds}
+          urgentAtSeconds={timerUrgentAtSeconds}
           label={timerLabel}
+          onExpire={onTimeExpire}
         />
       }
       metaText={metaText}
       onNext={onNext}
-      nextDisabled={!hasAnswer}
+      nextDisabled={requireAnswer && !hasAnswer}
       onBack={onBack}
       showBack={showBack}
     >
@@ -170,6 +208,7 @@ export function ListeningQuestionScreen({
               <ListeningAudioPlayer
                 src={resolvedAudio.url}
                 title={`${listeningCopy.questionPlayerTitle} ${questionNumber}`}
+                autoPlay={autoPlayAudio}
               />
             )}
 
@@ -225,9 +264,9 @@ export function ListeningQuestionScreen({
               </div>
             </fieldset>
 
-            {hasAnswer ? null : (
+            {requireAnswer && !hasAnswer ? (
               <p className={examText.muted}>{listeningCopy.selectAnswerHint}</p>
-            )}
+            ) : null}
           </div>
         }
       />

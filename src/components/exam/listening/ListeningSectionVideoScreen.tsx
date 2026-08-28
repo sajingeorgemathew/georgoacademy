@@ -23,6 +23,14 @@ import type { ListeningSectionVideoContent } from "@/features/exam-engine/listen
 // is the first screen of Part 1.
 //
 // No timer. Instructional video screens carry no countdown.
+//
+// The clip attempts to start on its own (EXAM-15F), because the learner
+// reached this screen by pressing Next and a walkthrough that waits to be
+// pressed a second time is friction rather than instruction. It keeps its
+// controls, because it is instructional and a learner may well want to
+// pause it or watch a step again, and the skip control under it is
+// unchanged. A browser that refuses autoplay shows the poster frame and a
+// short line saying to press play.
 
 export type ListeningSectionVideoScreenProps = {
   content: ListeningSectionVideoContent;
@@ -56,6 +64,7 @@ export function ListeningSectionVideoScreen({
       videoSrc={content.video.src}
       posterSrc={content.video.poster}
       durationLabel={content.video.durationLabel}
+      autoPlayVideo
       description={content.description}
       helperText={content.helperText}
       metaText={metaText}

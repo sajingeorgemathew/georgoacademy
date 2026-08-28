@@ -1,10 +1,7 @@
 "use client";
 
 import { cx } from "@/features/design/design-tokens";
-import {
-  examListening,
-  examListeningChoice,
-} from "@/features/exam-engine/exam-theme";
+import { examListeningChoice } from "@/features/exam-engine/exam-theme";
 import type {
   ListeningVideoAnswerMap,
   ListeningVideoQuestion,
@@ -40,6 +37,24 @@ import type {
 // Nothing here knows which option is correct. The answer key is stripped
 // on the server before the content reaches the browser.
 
+// Boxed exam blocks since the second EXAM-15F QA pass. Each question is a
+// bordered box with a tinted header strip carrying its number and the
+// question, and its four options sit in a two column grid inside the box.
+// Eight questions stacked as ruled rows in one column read as an article a
+// learner scrolls; eight boxes with two columns of options read as a form
+// they work through, and take about half the height. The recipes are in
+// examListeningChoice, and the Part 4 and Part 6 completion lists use the
+// same box so all three one screen parts look like one screen type.
+//
+// The control is still a radio group and that is deliberate. Part 6 became
+// a select in EXAM-15F because its items are sentence stems with a blank;
+// all eight Part 5 items in the Mock Test 1 source are full interrogatives
+// ending in a question mark, so there is no blank for a select to sit in
+// and building one would mean inventing stems the source does not carry.
+// The correction here was to the shape of the screen, not to the content
+// or the control. See
+// docs/product/listening-format-strict-timing-polish.md.
+
 export type ListeningVideoQuestionListProps = {
   questions: ListeningVideoQuestion[];
   answers: ListeningVideoAnswerMap;
@@ -59,7 +74,7 @@ export function ListeningVideoQuestionList({
 
         return (
           <li key={question.id} className={examListeningChoice.item}>
-            <fieldset className="min-w-0">
+            <fieldset className={examListeningChoice.fieldset}>
               <legend className={examListeningChoice.prompt}>
                 <span className={examListeningChoice.number}>
                   {question.number}.
@@ -67,12 +82,7 @@ export function ListeningVideoQuestionList({
                 {question.prompt}
               </legend>
 
-              <div
-                className={cx(
-                  examListeningChoice.options,
-                  examListening.optionList,
-                )}
-              >
+              <div className={examListeningChoice.options}>
                 {question.options.map((option) => {
                   const isSelected = option.id === selectedOptionId;
 
@@ -80,8 +90,8 @@ export function ListeningVideoQuestionList({
                     <label
                       key={option.id}
                       className={cx(
-                        examListening.optionRow,
-                        isSelected ? examListening.optionRowSelected : "",
+                        examListeningChoice.optionRow,
+                        isSelected ? examListeningChoice.optionRowSelected : "",
                       )}
                     >
                       <input
@@ -90,9 +100,9 @@ export function ListeningVideoQuestionList({
                         value={option.id}
                         checked={isSelected}
                         onChange={() => onSelectOption(question.id, option.id)}
-                        className={examListening.optionInput}
+                        className={examListeningChoice.optionInput}
                       />
-                      <span className={examListening.optionText}>
+                      <span className={examListeningChoice.optionText}>
                         {option.text}
                       </span>
                     </label>

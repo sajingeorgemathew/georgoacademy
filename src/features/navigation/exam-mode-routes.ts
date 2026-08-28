@@ -1,0 +1,44 @@
+// Which signed in routes run in exam mode (EXAM-15F, second QA pass).
+//
+// An exam mode route is a route that must fill the browser window with a
+// test and show nothing else: no dashboard sidebar, no account pill, no
+// breadcrumb trail, no footer, and none of the warm page background the
+// rest of the signed in product uses.
+//
+// EXAM-15B covered the dashboard with a fixed overlay instead of teaching
+// the shared shell about exam routes, deliberately, to keep test engine
+// rules out of the frame every signed in screen uses. A browser test found
+// the weakness in that approach: an overlay only ever covers chrome, so
+// the chrome is still mounted, still focusable, still read by a screen
+// reader, and one CSS change anywhere up the tree that creates a
+// containing block turns the overlay back into a box inside the dashboard
+// content column. The route is exam mode or it is not, so the shell asks
+// this module and renders accordingly, and the overlay's job shrinks to
+// owning the viewport rather than hiding a page.
+//
+// This list holds routes, not prefixes, and matching is exact. That is the
+// point: /dashboard/mock-tests/mock-test-1/listening is the test a learner
+// sits, and the six part routes under it are internal development routes
+// that keep their dashboard chrome, their preview headings and their
+// prototype notices. Adding one of them here would silently turn a
+// development route into something that looks like a real test.
+//
+// A trailing slash is tolerated because a typed URL can carry one. Query
+// strings and hashes never reach usePathname, so they need no handling.
+//
+// House style: normal hyphens only, no long hyphens or em dashes.
+
+export const EXAM_MODE_ROUTES: readonly string[] = [
+  "/dashboard/mock-tests/mock-test-1/listening",
+];
+
+// Whether a pathname is one of the exam mode routes.
+//
+// Pure, and takes the pathname rather than reading it, so the shell can
+// call it during a server render and a test can call it with a string.
+export function isExamModeRoute(pathname: string): boolean {
+  const normalised =
+    pathname.length > 1 ? pathname.replace(/\/+$/, "") : pathname;
+
+  return EXAM_MODE_ROUTES.includes(normalised);
+}

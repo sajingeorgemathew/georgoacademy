@@ -29,6 +29,11 @@ import { listeningCopy } from "@/features/exam-engine/listening-copy";
 //
 // No timer. The video screen carries no countdown, the same way the audio
 // screens do not.
+//
+// The clip can be asked to start on its own (EXAM-15F). The full Listening
+// route passes autoPlayMedia and the internal part route does not, and a
+// browser that refuses autoplay leaves the controls where they are and the
+// player prints a short line saying to press play.
 
 export type ListeningVideoScreenProps = {
   title: string;
@@ -42,6 +47,8 @@ export type ListeningVideoScreenProps = {
   instructionText?: string;
   // Quiet line under the player.
   hintText?: string;
+  // Ask the browser to start the clip when the screen opens.
+  autoPlayMedia?: boolean;
   metaText?: string;
   onVideoEnded?: () => void;
   onNext?: () => void;
@@ -58,6 +65,7 @@ export function ListeningVideoScreen({
   posterSrc,
   instructionText = listeningCopy.discussionInstruction,
   hintText = listeningCopy.discussionVideoHint,
+  autoPlayMedia = false,
   metaText,
   onVideoEnded,
   onNext,
@@ -84,6 +92,7 @@ export function ListeningVideoScreen({
             poster={posterSrc}
             durationLabel={durationLabel}
             preload="metadata"
+            autoPlay={autoPlayMedia}
             playerLabel={listeningCopy.discussionVideoPlayerLabel}
             unsupportedText={listeningCopy.discussionVideoUnsupportedText}
             onEnded={onVideoEnded}
