@@ -6,19 +6,21 @@
 // tested on its own later.
 //
 // The flow is very short, because a Reading part is one working screen.
-// For Mock Test 1 Reading Part 1 it produces three screens:
+// For Mock Test 1 Reading Part 1 it produces four screens:
 //
 //   1  part intro
 //   2  the split screen, message on the left and all 11 questions on the
 //      right
-//   3  end of part
+//   3  the practice score for the part
+//   4  the question by question answer review, opened from the score
 //
 // It is still built rather than typed out inline, so the ids come from
-// the content object and the prototype cannot drift from the flow. It is
-// also what EXAM-17 extends: the answer review, the practice score and
-// the end of part screen go in behind an ending option, the way
+// the content object and the prototype cannot drift from the flow.
+//
+// EXAM-16 built the first two screens and closed on a completion screen.
+// EXAM-17 added screens 3 and 4 behind an ending option, the way
 // buildListeningViewpointsFlow grew from EXAM-13 to EXAM-14, rather than
-// by rewriting this function.
+// by rewriting this function. The EXAM-16 ending is still one call away.
 //
 // House style: normal hyphens only, no long hyphens or em dashes.
 
@@ -29,16 +31,51 @@ import type {
   ReadingScreen,
 } from "./reading-types";
 
+// How a Reading part closes.
+//
+// "score" is the EXAM-17 ending: the practice score, then the answer
+// review opened from it. "complete" is the EXAM-16 ending for a part
+// whose marking is not built yet: one completion screen and nothing else.
+//
+// The option exists rather than the old ending being replaced outright,
+// the way buildListeningViewpointsFlow kept its own. A Reading part built
+// before its answer key is confirmed can still ask for
+// { ending: "complete" } and ship, and nothing has to pretend to a score
+// it cannot calculate.
+export type ReadingFlowEnding = "score" | "complete";
+
+export type ReadingFlowOptions = {
+  ending?: ReadingFlowEnding;
+};
+
 // Build the screen order for a Reading part.
 //
-// No options yet. EXAM-16 builds one ending, the completion screen, so an
-// ending parameter now would be a parameter with one legal value.
-export function buildReadingFlow(content: ReadingPartContent): ReadingScreen[] {
-  return [
+// ending defaults to "score", so Mock Test 1 Reading Part 1 gets its four
+// screen flow without passing anything.
+export function buildReadingFlow(
+  content: ReadingPartContent,
+  options: ReadingFlowOptions = {},
+): ReadingScreen[] {
+  const { ending = "score" } = options;
+
+  const screens: ReadingScreen[] = [
     { kind: "part-intro", id: `${content.sectionId}-intro` },
     { kind: "correspondence", id: `${content.sectionId}-questions` },
-    { kind: "part-complete", id: `${content.sectionId}-complete` },
   ];
+
+  if (ending === "complete") {
+    screens.push({
+      kind: "part-complete",
+      id: `${content.sectionId}-complete`,
+    });
+  } else {
+    screens.push(
+      { kind: "score", id: `${content.sectionId}-score` },
+      { kind: "answer-review", id: `${content.sectionId}-review` },
+    );
+  }
+
+  return screens;
 }
 
 // Every question in the part, in order, flattened across the groups.
@@ -65,10 +102,17 @@ export function listReadingQuestions(
 //
 // This is not a substitute for marking on the server. It keeps the
 // answers off the page, which is why the screen that marks answers has to
-// do the comparison where the key lives. EXAM-16 marks nothing at all, so
-// there is no server action beside the route yet; EXAM-17 adds one, and
-// it must read the key from the content module rather than from anything
-// the browser sends back.
+// do the comparison where the key lives. EXAM-17 is that comparison:
+// markReadingPartOne, in actions.ts beside the route, reads the key from
+// the content module on the server and never from anything the browser
+// sends back. The browser sends its selections and receives finished
+// review rows, so the key is never serialized in either direction.
+//
+// EXAM-17 note on what is stripped. The two places a key can hide in a
+// Reading part are content.answerKey and question.correctOptionId, and
+// both go below. The question groups are rebuilt rather than mutated, so
+// the module level content object is left exactly as it was and a second
+// call cannot find a part that has already been emptied.
 export function withoutReadingAnswerKey(
   content: ReadingPartContent,
 ): ReadingPartContent {
@@ -108,21 +152,17 @@ export function countAnsweredReadingQuestions(
   ).length;
 }
 
-// Whether every question in the part has an answer.
+// There is deliberately no areAllReadingQuestionsAnswered here.
 //
-// An empty question list would make this trivially true, so that case is
-// excluded rather than letting a content mistake open the gate.
-export function areAllReadingQuestionsAnswered(
-  content: ReadingPartContent,
-  answers: ReadingAnswerMap,
-): boolean {
-  const questions = listReadingQuestions(content);
-
-  return (
-    questions.length > 0 &&
-    questions.every((question) => Boolean(answers[question.id]))
-  );
-}
+// EXAM-16 had one and the split screen used it to hold Next disabled
+// until all 11 questions were answered. EXAM-17 removed both, because a
+// learner who cannot answer one question was trapped on the last screen
+// of the part with no way to finish it. A blank is a valid way to leave a
+// question, it is counted as incorrect by buildReadingReviewRows, and it
+// is counted separately as a blank by summarizeReadingReviewRows.
+//
+// countAnsweredReadingQuestions above is what a screen wants instead: it
+// reports progress without gating anything.
 
 // Store a selection, leaving the other answers alone.
 //

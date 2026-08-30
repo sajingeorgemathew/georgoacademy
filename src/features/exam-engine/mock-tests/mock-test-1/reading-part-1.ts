@@ -71,9 +71,13 @@ import type {
 // the answers. The Reading Part 1 route strips it with
 // withoutReadingAnswerKey before rendering, the same way every Listening
 // route strips its own, so nothing here reaches the question screen.
-// EXAM-16 marks nothing, so the key is read by nobody yet. EXAM-17 must
-// read it on the server, beside this file, and send back finished review
-// rows rather than the key itself.
+//
+// EXAM-17 reads it, and reads it in exactly one place: markReadingPartOne
+// in the actions.ts beside the Reading Part 1 route, which imports this
+// module on the server, marks the answers the browser sent, and returns
+// finished review rows rather than the key itself. The key was checked
+// again against the source document during that ticket and no mismatch
+// was found, so nothing below changed.
 const ANSWER_KEY: ReadingAnswerKeyEntry[] = [
   // recently moved to Vancouver.
   { questionId: "reading-part-1-q1", correctOptionId: "reading-part-1-q1-d", source: "document" },
