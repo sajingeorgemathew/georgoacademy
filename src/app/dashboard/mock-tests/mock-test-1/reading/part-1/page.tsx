@@ -44,10 +44,13 @@ export const metadata: Metadata = {
 // practice score everywhere it appears, and no CELPIP level and no
 // estimated Reading band is shown.
 //
-// The route is not linked from anywhere. The Mock Test 1 dashboard card
-// is untouched and still points at Listening only, so Reading Part 1 is
-// reachable from a typed URL and nothing else until it is ready to be
-// offered.
+// The route is not in navigation. EXAM-18 gave it one link, an Internal
+// preview card in the Mock tests section of the dashboard, because an
+// exam mode route carries no preview label of its own and pasting the URL
+// was the only way in. That card is dressed as an internal build link and
+// says so: dashed tinted panel, Internal preview badge, secondary button.
+// The student facing Mock Test 1 card beside it is untouched and still
+// offers Listening only. Nothing anywhere offers a Reading test.
 //
 // The content is licensed Toronto Academy material, so the route sits
 // under /dashboard where the layout auth guard covers it, and the page

@@ -34,6 +34,11 @@
 // part intro and the completion screen both state that nothing is saved
 // and no score is produced.
 //
+// EXAM-18 added the Reading Part 2 route on the same reasoning, and with
+// one more reason of its own: Part 2's left column is a tall course
+// brochure image, and a diagram that has to be read to answer eight
+// questions cannot be squeezed into a dashboard content column.
+//
 // A trailing slash is tolerated because a typed URL can carry one. Query
 // strings and hashes never reach usePathname, so they need no handling.
 //
@@ -42,6 +47,7 @@
 export const EXAM_MODE_ROUTES: readonly string[] = [
   "/dashboard/mock-tests/mock-test-1/listening",
   "/dashboard/mock-tests/mock-test-1/reading/part-1",
+  "/dashboard/mock-tests/mock-test-1/reading/part-2",
 ];
 
 // Whether a pathname is one of the exam mode routes.

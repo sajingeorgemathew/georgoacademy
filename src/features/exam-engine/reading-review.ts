@@ -113,7 +113,23 @@ function findOptionText(
 //   sentence it completes is in the letter, and repeating anything here
 //   would be inventing a stem the source does not have, so the row says
 //   which blank it is instead.
+// - A whole question, added by EXAM-18 for Reading Part 2 questions 6 to
+//   8, prints as it stands. There is no blank in it, so there is nothing
+//   to mark with dots.
+//
+// The whole question case is handled here rather than left to the ticket
+// that builds the Part 2 review, because without it a whole question
+// would fall through to the reply blank branch below and print "Blank in
+// the written response." against a question that is not a blank and has
+// no reply. Nothing calls this with a Part 2 question yet: EXAM-18 builds
+// no Reading Part 2 review and no Reading Part 2 score. This is the
+// shared helper being made correct for a shape that now exists, not the
+// review being started.
 export function formatReadingQuestionText(question: ReadingQuestion): string {
+  if (question.text) {
+    return question.text;
+  }
+
   if (!question.textBefore) {
     return readingReviewCopy.responseBlankQuestionText;
   }
