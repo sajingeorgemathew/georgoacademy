@@ -18,10 +18,21 @@
 //
 // This list holds routes, not prefixes, and matching is exact. That is the
 // point: /dashboard/mock-tests/mock-test-1/listening is the test a learner
-// sits, and the six part routes under it are internal development routes
-// that keep their dashboard chrome, their preview headings and their
-// prototype notices. Adding one of them here would silently turn a
-// development route into something that looks like a real test.
+// sits, and the six Listening part routes under it are internal
+// development routes that keep their dashboard chrome, their preview
+// headings and their prototype notices. Adding one of them here would
+// silently turn a development route into something that looks like a real
+// test.
+//
+// The Reading Part 1 route is the exception, added by EXAM-16, and it is
+// an exception on purpose. A Reading part is a split screen with a
+// scrolling passage on one side and a scrolling question column on the
+// other, and that screen cannot be judged, or used, inside the dashboard
+// content column. Its ticket asks for a locked exam surface with no
+// sidebar and no preview label, so it gets one. What the Listening part
+// routes say in a preview notice, it says on the screens themselves: the
+// part intro and the completion screen both state that nothing is saved
+// and no score is produced.
 //
 // A trailing slash is tolerated because a typed URL can carry one. Query
 // strings and hashes never reach usePathname, so they need no handling.
@@ -30,6 +41,7 @@
 
 export const EXAM_MODE_ROUTES: readonly string[] = [
   "/dashboard/mock-tests/mock-test-1/listening",
+  "/dashboard/mock-tests/mock-test-1/reading/part-1",
 ];
 
 // Whether a pathname is one of the exam mode routes.
