@@ -596,6 +596,35 @@ export const examReading = {
   passageSignOff: "flex min-w-0 flex-col",
   passageSignOffLine: "text-[13px] leading-6 text-academy-navy/85",
 
+  // Left column: a diagram rather than prose (EXAM-18).
+  //
+  // Reading Part 2 is answered from a course brochure image. The figure
+  // fills the column width and the picture keeps its own aspect ratio, so
+  // a tall brochure scrolls inside the column rather than being squashed
+  // to fit it. h-auto with an explicit width is what stops the picture
+  // distorting, and the column already scrolls on its own.
+  //
+  // Layout shift is handled on the element rather than here. The content
+  // file carries the picture's intrinsic width and height, the screen
+  // puts them on the img, and the browser reserves the right box from the
+  // ratio before the file arrives. So nothing jumps when it loads, and no
+  // hard coded aspect ratio in this recipe can go stale if the asset is
+  // ever replaced.
+  passageFigure: "flex w-full min-w-0 flex-col gap-1.5",
+  passageImage:
+    "block h-auto w-full min-w-0 rounded-sm border border-academy-line bg-academy-navy-soft/35",
+  passageCaption: "text-[11px] leading-4 text-academy-navy/60",
+
+  // Right column: header lines above an email response (EXAM-18).
+  //
+  // The subject and the two addresses, one line each, quieted and ruled
+  // off from the message body so they read as an email header rather than
+  // as the first paragraph of the message.
+  responseHeader:
+    "flex min-w-0 flex-col border-b border-academy-line pb-2",
+  responseHeaderLine:
+    "text-[12px] leading-5 text-academy-navy/70 [overflow-wrap:anywhere]",
+
   // Right column: one or more question panels stacked.
   panelStack: "flex min-w-0 flex-col gap-5",
   panel: "flex min-w-0 flex-col gap-2",

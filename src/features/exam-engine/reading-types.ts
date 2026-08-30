@@ -67,12 +67,31 @@ export type ReadingOption = {
 // The two are not separate types because they are marked identically, sit
 // in the same answer map, and would otherwise force every consumer to
 // switch on a discriminator that changes nothing but one line of layout.
+// EXAM-18 added a third shape to the two above, because Reading Part 2
+// asks three whole questions rather than three sentence stems:
+//
+// - A whole question, questions 6 to 8 in Part 2, is a complete sentence
+//   ending in a question mark, for example "What is Gerry's relationship
+//   to Charlie?". It has no blank anywhere in it, so splitting it around
+//   one would mean inventing a stem the source document does not have. It
+//   is stored whole, in text, and the list prints it with no blank drawn.
+//
+// text and textBefore are mutually exclusive in practice: a question is
+// either a stem with a blank in it or a whole sentence without one. They
+// are two optional fields rather than a discriminated union for the same
+// reason the first two shapes share one type: the difference changes one
+// line of layout and nothing else, and a discriminator would force every
+// consumer to switch on it.
 export type ReadingQuestion = {
   id: string;
   // Position inside the part, counting from 1 and continuous across the
   // groups. Reading Part 1 runs 1 to 11, so its second group starts at 7.
   // Display only, and it is also what the reply text points at.
   number: number;
+  // A whole question, printed as it stands with no blank drawn. Set on a
+  // question the source document writes as a complete sentence, which is
+  // Reading Part 2 questions 6 to 8.
+  text?: string;
   // Stem text up to the blank. Unset for a question whose sentence lives
   // in the response text rather than in the question.
   textBefore?: string;
@@ -92,6 +111,36 @@ export type ReadingQuestion = {
 // nothing more structured is needed on the left hand side.
 export type ReadingPassageParagraph = string;
 
+// A picture on the passage side of the split screen (EXAM-18).
+//
+// Reading Part 2 is the diagram part: what the questions are answered
+// from is a course brochure image, not prose, and the source document
+// gives it as one Cloudinary URL rather than as text. So the left column
+// needs a picture, and this is the shape it takes.
+//
+// alt is required rather than optional. A decorative picture would be one
+// thing, but this one is the passage: a learner who cannot see it cannot
+// answer the part, so there is no case where an empty alt is right and no
+// reason to let a content file forget one.
+// width and height are the file's intrinsic pixel size, and they are
+// required for the same reason alt is. They go on the img element, so the
+// browser reserves the right box from the ratio before the file arrives
+// and the question column beside it does not jump when it loads. A
+// content file that has the URL has the file, so there is no case where
+// the size is unknowable.
+export type ReadingPassageImage = {
+  url: string;
+  // Read in place of the picture. Describes what the diagram holds, from
+  // the diagram itself.
+  alt: string;
+  // Intrinsic pixel width of the file, for the reserved box.
+  width: number;
+  // Intrinsic pixel height of the file, for the reserved box.
+  height: number;
+  // Optional line under the picture, for example naming what it is.
+  caption?: string;
+};
+
 // The passage on the left of the split screen.
 //
 // heading and signOff exist because Reading Part 1 is correspondence: a
@@ -99,12 +148,19 @@ export type ReadingPassageParagraph = string;
 // either into the first or last paragraph would print them as running
 // prose. Both are optional, so a Reading part whose passage is an article
 // rather than a letter simply omits them.
+//
+// image is the EXAM-18 addition, for the diagram part. A passage can be
+// prose, a picture, or both: Reading Part 2 is a picture and passes an
+// empty paragraphs list, and Reading Part 1 is prose and passes no image.
 export type ReadingPassage = {
   // Small label above the passage, for example "Message".
   label?: string;
   // Salutation line, for example "Dear Scott,".
   heading?: string;
   paragraphs: ReadingPassageParagraph[];
+  // The diagram or picture the part is answered from. Unset on a text
+  // only part.
+  image?: ReadingPassageImage;
   // Closing lines, for example ["Cheers,", "Jim"]. One line each, so the
   // name sits under the sign off rather than beside it.
   signOff?: string[];
@@ -134,7 +190,17 @@ export type ReadingResponseParagraph = {
 // Same three fields as ReadingPassage, because it is the same kind of
 // object, a letter, with the one difference that its paragraphs carry
 // blanks.
+//
+// headerLines is the EXAM-18 addition. Reading Part 2's response is an
+// email rather than a letter, and the source document prints three header
+// lines above the salutation, the subject and the two addresses. They are
+// one line each, above heading, so the email reads as an email rather
+// than as a letter with an odd first paragraph. Reading Part 1's reply is
+// a letter and leaves it unset.
 export type ReadingResponse = {
+  // Message header lines, for example ["Subject: Language Courses"]. One
+  // line each, printed above heading.
+  headerLines?: string[];
   heading?: string;
   paragraphs: ReadingResponseParagraph[];
   signOff?: string[];
@@ -279,10 +345,18 @@ export type ReadingAnswerMap = Readonly<Record<string, string>>;
 // still builds on request. There is no part-end kind: the score screen is
 // where a Reading part stops, and it carries the restart and the way back
 // to the dashboard itself.
+// EXAM-18 added "diagram", the Part 2 working screen. It is the same
+// split as "correspondence" with a picture on the left instead of prose,
+// and it is a separate kind rather than a flag on the existing one so a
+// prototype switching on the screen has to say which of the two it draws.
+// The two share ReadingTwoColumnLayout, ReadingQuestionPanel and
+// ReadingQuestionList underneath.
 export type ReadingScreen =
   | { kind: "part-intro"; id: string }
   // The split screen: passage on the left, question groups on the right.
   | { kind: "correspondence"; id: string }
+  // The split screen with a diagram on the left. Reading Part 2.
+  | { kind: "diagram"; id: string }
   // Practice score for the part.
   | { kind: "score"; id: string }
   // Question by question review, opened from the score screen.

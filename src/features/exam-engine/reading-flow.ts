@@ -22,6 +22,13 @@
 // buildListeningViewpointsFlow grew from EXAM-13 to EXAM-14, rather than
 // by rewriting this function. The EXAM-16 ending is still one call away.
 //
+// EXAM-18 added a second option for the middle screen, taskScreen, and
+// took the EXAM-16 ending for Reading Part 2. Part 2 is answered from a
+// diagram rather than from prose, and its review and score are not built
+// yet, so its flow is three screens: the part intro, the diagram split,
+// and the completion screen. Everything else in this file is shared with
+// Part 1 untouched.
+//
 // House style: normal hyphens only, no long hyphens or em dashes.
 
 import type {
@@ -44,23 +51,36 @@ import type {
 // it cannot calculate.
 export type ReadingFlowEnding = "score" | "complete";
 
+// Which working screen the part is answered on (EXAM-18).
+//
+// "correspondence" is the prose split, a message on the left. "diagram"
+// is the same split with a picture on the left, which is what Reading
+// Part 2 is answered from. Both are one screen holding every question in
+// the part, so this changes what the middle screen draws and nothing
+// about the shape of the flow.
+export type ReadingTaskScreen = "correspondence" | "diagram";
+
 export type ReadingFlowOptions = {
   ending?: ReadingFlowEnding;
+  taskScreen?: ReadingTaskScreen;
 };
 
 // Build the screen order for a Reading part.
 //
-// ending defaults to "score", so Mock Test 1 Reading Part 1 gets its four
-// screen flow without passing anything.
+// ending defaults to "score" and taskScreen to "correspondence", so Mock
+// Test 1 Reading Part 1 gets its four screen flow without passing
+// anything. Reading Part 2 asks for both options: a diagram screen,
+// because its passage is a picture, and the "complete" ending, because
+// EXAM-18 builds no review and no score for it.
 export function buildReadingFlow(
   content: ReadingPartContent,
   options: ReadingFlowOptions = {},
 ): ReadingScreen[] {
-  const { ending = "score" } = options;
+  const { ending = "score", taskScreen = "correspondence" } = options;
 
   const screens: ReadingScreen[] = [
     { kind: "part-intro", id: `${content.sectionId}-intro` },
-    { kind: "correspondence", id: `${content.sectionId}-questions` },
+    { kind: taskScreen, id: `${content.sectionId}-questions` },
   ];
 
   if (ending === "complete") {

@@ -20,6 +20,12 @@ import type {
 // because the only difference between them is whether the group carries a
 // response.
 //
+// EXAM-18 reuses it for Reading Part 2 unchanged in shape: the email with
+// its five blanks is a completion group and the three questions after it
+// are a plain group, which is exactly the pair this component already
+// draws. The one addition is the email header, headerLines on the
+// response, which Part 1's letter does not have.
+//
 // A panel is a label, an instruction line from the source document, the
 // response if there is one, and the question list. It is not an ExamPanel:
 // the answer column is already a tinted pane, and a bordered box drawn
@@ -62,6 +68,20 @@ export function ReadingQuestionPanel({
 
       {group.response ? (
         <div className={examReading.response}>
+          {/* Email header lines, added by EXAM-18 for Reading Part 2.
+              The subject and the two addresses print as plain text and
+              never as mailto links: extracted-links.md records that they
+              are passage text rather than real addresses. */}
+          {group.response.headerLines ? (
+            <div className={examReading.responseHeader}>
+              {group.response.headerLines.map((line) => (
+                <span key={line} className={examReading.responseHeaderLine}>
+                  {line}
+                </span>
+              ))}
+            </div>
+          ) : null}
+
           {group.response.heading ? (
             <p className={examReading.passageHeading}>
               {group.response.heading}

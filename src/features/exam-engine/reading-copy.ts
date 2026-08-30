@@ -38,6 +38,10 @@ export const readingCopy = {
   // Split screen column labels.
   passageColumnLabel: "Reading passage",
   questionsColumnLabel: "Questions",
+  // Left column label on the diagram part (EXAM-18). Reading Part 2 is
+  // answered from a picture rather than from prose, so calling that
+  // column "Reading passage" would describe the wrong thing.
+  diagramColumnLabel: "Diagram",
 
   // Question list.
   //
@@ -98,6 +102,55 @@ export const readingCopy = {
   part1PageDescription:
     "Internal prototype of Mock Test 1 Reading Part 1, Reading Correspondence.",
   part1ExamRegionLabel: "Mock Test 1 - Reading Part 1",
+
+  // Reading Part 2 (EXAM-18).
+  //
+  // Part 2 closes on the EXAM-16 completion screen rather than on a score,
+  // because its review and its score are the next ticket. So it needs its
+  // own heading and its own restart label, and it reuses
+  // partCompletePendingReview and partCompleteNotice above unchanged: both
+  // say what is true of this part too.
+  partTwoIntroFormatLabel: "Diagram, email and drop-down questions",
+  partTwoCompleteHeading: "Reading Part 2 complete",
+  partTwoRestartLabel: "Restart Reading Part 2",
+  part2PageTitle: "Mock Test 1 - Reading Part 2 - Toronto Academy of Education",
+  part2PageDescription:
+    "Internal prototype of Mock Test 1 Reading Part 2, Reading to Apply a Diagram.",
+  part2ExamRegionLabel: "Mock Test 1 - Reading Part 2",
+
+  // Dashboard internal preview cards (EXAM-18).
+  //
+  // Wording for the two temporary cards that sit beside the Listening
+  // test card on the dashboard, so a Reading route can be opened without
+  // typing its URL. These are internal build links and the wording has to
+  // keep saying so, which is why every one of them carries the badge and
+  // why neither description offers a Reading test:
+  //
+  // - The badge is the first thing on the card, and it says the word
+  //   prototype rather than a status a learner could read as a release.
+  // - Each description names what the part is and what it does not do
+  //   yet. Part 2 says its review and its score are not built.
+  // - Neither line mentions a score, a CELPIP level or a Reading band,
+  //   and nothing here claims a full Reading section exists. It does not.
+  //   One part of four is built, plus one more without its review.
+  //
+  // These strings go when the real Reading entry point ships, along with
+  // the cards themselves.
+  dashboardPreviewBadgeLabel: "Internal preview",
+  dashboardPartOneCardTitle: "Mock Test 1 - Reading Part 1",
+  dashboardPartOneCardDescription:
+    "Reading Correspondence prototype with local answers and practice review.",
+  dashboardPartOneCardSectionLabel: "Reading",
+  dashboardPartOneCardPartLabel: "Part 1",
+  dashboardPartOneCardQuestionsLabel: "11 questions",
+  dashboardPartOneCardCtaLabel: "Open Reading Part 1",
+  dashboardPartTwoCardTitle: "Mock Test 1 - Reading Part 2",
+  dashboardPartTwoCardDescription:
+    "Reading to Apply a Diagram prototype with local answers. Review and score are added next.",
+  dashboardPartTwoCardSectionLabel: "Reading",
+  dashboardPartTwoCardPartLabel: "Part 2",
+  dashboardPartTwoCardQuestionsLabel: "8 questions",
+  dashboardPartTwoCardCtaLabel: "Open Reading Part 2",
 } as const;
 
 // Screen position line, for example Screen 2 of 3.

@@ -21,7 +21,7 @@ import type {
 // top of the part, so leaving the screen and coming back shows what was
 // chosen before.
 //
-// It draws two shapes of question, which is the one thing that makes it
+// It draws three shapes of question, which is the one thing that makes it
 // more than the Listening dropdown list:
 //
 // - A stem question prints its sentence in the header strip, with the
@@ -29,6 +29,11 @@ import type {
 // - A blank inside a reply prints nothing but "Question 7". Its sentence
 //   is in the reply above the list, so repeating anything here would be
 //   inventing a stem the source does not have.
+// - A whole question, added by EXAM-18 for Reading Part 2 questions 6 to
+//   8, prints its sentence and draws no blank at all. The source writes
+//   those as complete questions ending in a question mark, so there is no
+//   blank to draw and splitting one around an invented gap would be
+//   inventing source text.
 //
 // Layout decisions carried over from ListeningDropdownQuestionList,
 // because they were right there for the same reasons:
@@ -72,7 +77,11 @@ export function ReadingQuestionList({
                 {question.number}.
               </span>
 
-              {question.textBefore ? (
+              {question.text ? (
+                // A whole question. No blank is drawn, because the source
+                // document writes it as a complete sentence.
+                question.text
+              ) : question.textBefore ? (
                 <>
                   {question.textBefore}{" "}
                   <span
