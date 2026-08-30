@@ -294,6 +294,13 @@ outstanding. The screen already accepts `requireAllAnswered={false}` for a
 section flow that has to let a learner leave a question blank and take the
 zero, which is what the full Listening route does.
 
+> Superseded by EXAM-17. That gate was wrong and was removed: a learner
+> who cannot answer a question was trapped on the last working screen of
+> the part with no way to finish it. Next is no longer gated on the
+> answers at all, and `allAnswered`, `requireAllAnswered` and
+> `areAllReadingQuestionsAnswered` no longer exist. See section 5 of
+> docs/product/reading-part-1-review-score.md.
+
 ---
 
 ## 8. Answer key status

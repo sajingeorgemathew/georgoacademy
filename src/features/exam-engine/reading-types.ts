@@ -268,13 +268,105 @@ export type ReadingAnswerMap = Readonly<Record<string, string>>;
 // screen however many questions the part holds, which is what makes a
 // Reading part so much shorter a flow than a Listening one.
 //
-// answer-review, score and part-end are deliberately absent. EXAM-16 does
-// not build a Reading review or a Reading score, so there is no kind here
-// that nothing can render. EXAM-17 adds them, the way EXAM-14 added them
-// to the viewpoints union.
+// EXAM-17 added score and answer-review, the way EXAM-14 added the
+// closing screens to the viewpoints union. The score comes first and the
+// review is opened from it, which is the order the Reading ticket asks
+// for and the reverse of the Listening one: a Reading part is answered on
+// one screen, so the learner has just read all 11 questions and wants the
+// result, not a second pass over the same list before they can see it.
+//
+// part-complete is kept for the EXAM-16 ending, which buildReadingFlow
+// still builds on request. There is no part-end kind: the score screen is
+// where a Reading part stops, and it carries the restart and the way back
+// to the dashboard itself.
 export type ReadingScreen =
   | { kind: "part-intro"; id: string }
   // The split screen: passage on the left, question groups on the right.
   | { kind: "correspondence"; id: string }
-  // Closing screen for a part whose review and score are not built yet.
+  // Practice score for the part.
+  | { kind: "score"; id: string }
+  // Question by question review, opened from the score screen.
+  | { kind: "answer-review"; id: string }
+  // Closing screen for a part whose review and score are not wanted.
   | { kind: "part-complete"; id: string };
+
+// Outcome of one question, as the review screen prints it (EXAM-17).
+//
+// Three values and no fourth. Reading Part 1 has a complete answer key
+// printed in the source document, so "answer key pending", which the
+// Listening review carries as a fourth status, has no case to cover here:
+// a Reading part whose key is incomplete is a content bug rather than a
+// state a learner should be shown. buildReadingReviewRows says so in the
+// note above resolveCorrectOptionId.
+//
+// "blank" is a status of its own even though a blank counts as incorrect
+// in the score. The two facts are different: the count has to treat a
+// blank as a wrong answer for the percentage to mean anything, and the
+// learner has to be told they left it empty rather than chose wrongly.
+export type ReadingReviewStatus = "correct" | "incorrect" | "blank";
+
+// One row of the answer review, one per question, in part order.
+//
+// The row carries text as well as ids, so the review screen renders
+// strings and never looks anything up in the content object. That is what
+// lets the whole row be built on the server, beside the answer key, and
+// sent down finished.
+//
+// Nulls rather than undefined throughout, so a row keeps every field it
+// was born with once it has been serialized across the server boundary.
+// An absent field would arrive as absent and read the same as a field
+// nobody set, which is a distinction worth not having to make.
+export type ReadingReviewRow = {
+  questionId: string;
+  // Position in the part, counting from 1.
+  questionNumber: number;
+  // The question as the review prints it: the stem for questions 1 to 6,
+  // and a short line naming the reply blank for questions 7 to 11, which
+  // print no stem of their own. Never empty.
+  questionText: string;
+  // What the learner chose. Null on a blank.
+  selectedOptionId: string | null;
+  selectedOptionText: string | null;
+  // The correct option. Null only where a part has no usable key for the
+  // question, which Mock Test 1 Reading Part 1 never hits.
+  correctOptionId: string | null;
+  correctOptionText: string | null;
+  isCorrect: boolean;
+  isBlank: boolean;
+  // Short reason the option is correct, when the source document gives
+  // one. Mock Test 1 gives none for Reading, so this is null throughout
+  // that part. Nothing invents one and no AI writes one.
+  explanation: string | null;
+};
+
+// Practice result for one Reading part (EXAM-17).
+//
+// Every count is a plain number rather than a nullable one, unlike the
+// Listening summary. Listening was built while its answer keys were still
+// being transcribed, so it had to be able to withhold a score; Reading
+// Part 1 ships with a complete key, and a summary that could hide its
+// numbers would be a state no screen could reach.
+//
+// percentage is the whole percent of questions answered correctly, so a
+// blank drags it down exactly as a wrong answer does.
+export type ReadingScoreSummary = {
+  totalQuestions: number;
+  answeredCount: number;
+  correctCount: number;
+  incorrectCount: number;
+  blankCount: number;
+  percentage: number;
+};
+
+// A marked Reading part: everything the score and review screens need,
+// and nothing else (EXAM-17).
+//
+// This is what the server action returns. The rows carry the correct
+// option text for questions the learner has now finished, which is the
+// point at which showing it is fair, and the summary carries the counts.
+// Neither carries the answer key itself, so nothing here lets a caller
+// work out an answer it was not given.
+export type ReadingMarkedPart = {
+  rows: ReadingReviewRow[];
+  summary: ReadingScoreSummary;
+};

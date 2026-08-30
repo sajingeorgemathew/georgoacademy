@@ -50,21 +50,27 @@ import type {
 // holds no state: the answers are owned by the prototype above it, so
 // leaving the screen and coming back shows what was chosen before.
 //
-// Next is gated on every question having an answer by default, which is
-// what allAnswered carries, and the count under the panels says how many
-// are left. A section flow that has to let a learner leave a question
-// blank will turn the gate off through requireAllAnswered, the way the
-// full Listening route does.
+// Next is never gated on the answers (EXAM-17 fix). A learner may leave
+// any question blank and still leave the screen, which is how the real
+// test behaves and how the full Listening route already behaves: nothing
+// there blocks on an unanswered question either.
+//
+// The screen used to take allAnswered and requireAllAnswered and hold
+// Next disabled until all 11 questions were answered, which trapped a
+// learner who could not answer one of them on the last screen of the
+// part with no way forward. Both props are gone rather than defaulted
+// off, so the gate cannot come back by a caller forgetting to opt out.
+//
+// The count under the panels still says how many are answered, and the
+// hint beside it says plainly that a blank is counted as incorrect, so
+// leaving one is an informed choice rather than an accident. Marking
+// treats a blank as incorrect, which buildReadingReviewRows and
+// summarizeReadingReviewRows do without any help from this screen.
 
 export type ReadingCorrespondenceScreenProps = {
   content: ReadingPartContent;
   answers: ReadingAnswerMap;
   onSelectOption: (questionId: string, optionId: string) => void;
-  // Whether every question has an answer. Passed in rather than worked
-  // out here, so the rule that gates Next lives in one place.
-  allAnswered: boolean;
-  // Whether Next waits for every question to be answered.
-  requireAllAnswered?: boolean;
   // What the countdown resets on. Pass the flow screen id, so the window
   // belongs to the screen and no selection made on it starts a new one.
   timerScreenKey?: string;
@@ -81,8 +87,6 @@ export function ReadingCorrespondenceScreen({
   content,
   answers,
   onSelectOption,
-  allAnswered,
-  requireAllAnswered = true,
   timerScreenKey,
   onTimeExpire,
   metaText,
@@ -112,7 +116,6 @@ export function ReadingCorrespondenceScreen({
       }
       metaText={metaText}
       onNext={onNext}
-      nextDisabled={requireAllAnswered && !allAnswered}
       onBack={onBack}
       showBack={showBack}
       // The split manages its own edges and fills the canvas.
@@ -169,8 +172,8 @@ export function ReadingCorrespondenceScreen({
 
             <p className={examReading.progressNote}>
               {formatReadingAnsweredCount(answeredCount, questions.length)}
-              {requireAllAnswered && !allAnswered
-                ? ` ${readingCopy.answerAllHint}`
+              {answeredCount < questions.length
+                ? ` ${readingCopy.blanksAllowedHint}`
                 : null}
             </p>
           </div>

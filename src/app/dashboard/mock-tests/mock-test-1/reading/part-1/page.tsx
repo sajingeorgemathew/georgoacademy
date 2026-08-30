@@ -6,6 +6,7 @@ import { ReadingPartOnePrototype } from "@/components/exam/reading/ReadingPartOn
 import { readingCopy } from "@/features/exam-engine/reading-copy";
 import { withoutReadingAnswerKey } from "@/features/exam-engine/reading-flow";
 import { readingPart1 } from "@/features/exam-engine/mock-tests/mock-test-1/reading-part-1";
+import { markReadingPartOne } from "./actions";
 
 export const metadata: Metadata = {
   title: readingCopy.part1PageTitle,
@@ -13,11 +14,12 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-// Mock Test 1 Reading Part 1 prototype (EXAM-16).
+// Mock Test 1 Reading Part 1 prototype (EXAM-16, marking and closing
+// screens added by EXAM-17).
 //
-// The three screen sequence for Reading Part 1: the part intro, the split
-// screen holding the message and all 11 questions, and the completion
-// screen.
+// The four screen sequence for Reading Part 1: the part intro, the split
+// screen holding the message and all 11 questions, the practice score,
+// and the answer review opened from it.
 //
 // This route runs in exam mode. It is listed in
 // src/features/navigation/exam-mode-routes.ts, so the dashboard shell
@@ -37,8 +39,10 @@ export const metadata: Metadata = {
 //
 // Because the exam surface carries no preview label, the caveats are said
 // where a learner meets them. The part intro screen's notice says answers
-// are held on the screen, nothing is saved, and no score is produced, and
-// the completion screen repeats it.
+// are held on the screen and nothing is saved, and the score screen and
+// the answer review both repeat it. The result is named a Toronto Academy
+// practice score everywhere it appears, and no CELPIP level and no
+// estimated Reading band is shown.
 //
 // The route is not linked from anywhere. The Mock Test 1 dashboard card
 // is untouched and still points at Listening only, so Reading Part 1 is
@@ -60,9 +64,13 @@ export const metadata: Metadata = {
 // key is stripped here, on the server, before the content crosses the
 // boundary.
 //
-// There is no actions.ts beside this file, because EXAM-16 marks nothing.
-// EXAM-17 adds one, and the key must be read there, on the server, the
-// way markListeningPartSix reads the Part 6 key.
+// markReadingPartOne, in actions.ts beside this file, is where the key is
+// read, the way markListeningPartSix reads the Part 6 key. The prototype
+// holds the learner's answers in local state and sends them to the
+// action, and the action returns finished review rows and a practice
+// score. So the key crosses the boundary in neither direction: not down
+// with the content, and not back up inside a result. Nothing is saved,
+// there is no attempt row and there is no migration.
 
 export default async function MockTest1ReadingPartOnePage() {
   const supabase = await createSupabaseServerClient();
@@ -81,7 +89,10 @@ export default async function MockTest1ReadingPartOnePage() {
 
   return (
     <ExamModeViewport label={readingCopy.part1ExamRegionLabel}>
-      <ReadingPartOnePrototype content={learnerContent} />
+      <ReadingPartOnePrototype
+        content={learnerContent}
+        markAnswers={markReadingPartOne}
+      />
     </ExamModeViewport>
   );
 }

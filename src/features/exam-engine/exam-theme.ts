@@ -42,6 +42,7 @@ import type {
   ExamTimerState,
 } from "./exam-shell-types";
 import type { ListeningReviewStatus } from "./listening-review-types";
+import type { ReadingReviewStatus } from "./reading-types";
 
 // Outer page, centred container, and the framed test window.
 //
@@ -786,6 +787,106 @@ export const examSectionReview = {
   breakdownTitle:
     "text-[11px] font-semibold uppercase tracking-[0.06em] text-academy-navy/55",
 } as const;
+
+// Reading practice score card (EXAM-17).
+//
+// The same bordered strip of readings examScore draws for Listening, with
+// one addition the Reading result needs: a headline row carrying the
+// percentage at the top of the card, above the four counts, because the
+// Reading score screen has no separate score heading of its own to carry
+// it.
+//
+// It is written out rather than importing examScore, for the reason
+// examReadingQuestion gives above: the two cards hold different readings,
+// and a token block named for Listening, read by Reading, is a rename
+// away from being wrong in both places. What they share is the look, and
+// the look is four class strings.
+//
+// No shadow, no artwork, no pill and no seal. This is a practice result,
+// and nothing on it should be mistakeable for an official score report.
+export const examReadingScore = {
+  card: "flex min-w-0 flex-col gap-3 rounded-sm border border-academy-line bg-academy-navy-soft/35 px-4 py-3.5",
+  // Percentage on the left, the sentence saying what it means on the
+  // right, with a rule under the pair.
+  headline:
+    "flex min-w-0 flex-wrap items-baseline gap-x-4 gap-y-1 border-b border-academy-line pb-3",
+  headlineBlock: "flex min-w-0 flex-col gap-0.5",
+  headlineValue:
+    "text-2xl font-semibold leading-8 tabular-nums text-academy-navy",
+  headlineMessage:
+    "min-w-0 text-[13px] leading-5 text-academy-navy/85 sm:ml-auto sm:text-right",
+  grid: "grid min-w-0 grid-cols-2 gap-x-4 gap-y-3 sm:grid-cols-4",
+  item: "flex min-w-0 flex-col gap-0.5",
+  label:
+    "text-[11px] font-semibold uppercase tracking-[0.06em] text-academy-navy/55",
+  value: "text-sm font-semibold leading-5 tabular-nums text-academy-navy",
+  // The two notes under the readings: what a blank did to the score, and
+  // that this is not an official CELPIP result.
+  note: "text-[11px] leading-4 text-academy-navy/60",
+} as const;
+
+// Reading answer review card (EXAM-17).
+//
+// One card per question rather than a row in a table, which is where this
+// parts company with the Listening review.
+//
+// A Listening review row is a number and two short options, so four
+// columns fit and a table is the right shape for it. A Reading Part 1 row
+// is a full sentence stem plus two option texts that are themselves
+// sentences, and 11 of those in a four column table would be a wall of
+// wrapped prose with a horizontal scrollbar under it. The card keeps the
+// question on its own line at full width and puts the two answers side by
+// side underneath, so a long stem costs height instead of legibility.
+//
+// It is the same boxed block examReadingQuestion draws on the question
+// screen: a bordered item, a tinted header strip carrying the number and
+// the question, and the content in the body under it. A learner reviewing
+// question 7 should recognise the box they answered it in.
+export const examReadingReview = {
+  list: "flex min-w-0 flex-col gap-2",
+  card: "min-w-0 overflow-hidden rounded-sm border border-academy-line bg-academy-paper",
+  header:
+    "flex min-w-0 flex-wrap items-baseline gap-x-3 gap-y-1 border-b border-academy-line bg-academy-navy-soft/60 px-3 py-2",
+  number:
+    "shrink-0 text-[11px] font-semibold uppercase tracking-[0.06em] tabular-nums text-academy-navy/55",
+  question: "min-w-0 flex-1 text-[13px] leading-6 text-academy-navy",
+  // Status word at the end of the header strip. A word, not a badge, so a
+  // column of 11 of them stays quiet.
+  status:
+    "ml-auto shrink-0 text-[11px] font-semibold uppercase tracking-[0.06em]",
+  // The two answers, stacked on a narrow screen and side by side from the
+  // small breakpoint up.
+  body: "flex min-w-0 flex-col gap-2 px-3 py-2.5 sm:flex-row sm:gap-4",
+  answer: "flex min-w-0 flex-1 flex-col gap-0.5",
+  answerLabel:
+    "text-[11px] font-semibold uppercase tracking-[0.06em] text-academy-navy/55",
+  answerText: "text-[13px] leading-5 text-academy-navy/85",
+  // Used for "No answer selected", so a blank reads as empty rather than
+  // as something the learner chose.
+  answerTextEmpty: "text-[13px] leading-5 text-academy-navy/45",
+  // The correct answer is the thing being looked up, so it carries a
+  // little more weight than the answer beside it.
+  answerTextCorrect:
+    "text-[13px] font-semibold leading-5 text-academy-navy",
+  // Explanation strip under the answers, when the source gives one. Mock
+  // Test 1 Reading publishes none, so this draws nothing there.
+  explanation:
+    "border-t border-academy-line/70 px-3 py-2 text-[11px] leading-4 text-academy-navy/70",
+} as const;
+
+// Status colours for a Reading review card.
+//
+// blank is the same quiet navy as an unanswered Listening row rather than
+// the red an incorrect answer carries. A blank is counted as incorrect in
+// the score, which the score screen says out loud, but on the card it is
+// a statement about what was left empty and does not need a second red
+// mark to make the point.
+export const examReadingReviewStatusTones: Record<ReadingReviewStatus, string> =
+  {
+    correct: "text-academy-blue",
+    incorrect: "text-academy-red",
+    blank: "text-academy-navy/55",
+  };
 
 // Shared body text tones inside the canvas. Exam copy runs tighter than
 // dashboard copy, so these sit a step below the marketing scale.
