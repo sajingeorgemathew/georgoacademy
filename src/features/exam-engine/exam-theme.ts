@@ -570,6 +570,97 @@ export const examListeningChoice = {
   progressNote: "text-[11px] leading-4 text-academy-navy/60",
 } as const;
 
+// Reading split screen (EXAM-16).
+//
+// Screen type 8: the passage on the left with its own scrollbar, the
+// question panels on the right with theirs. The split itself is
+// examTwoColumn above, which already draws the divider and the answer
+// side wash, so nothing here repeats it. What is here is what goes
+// inside the two columns.
+//
+// Reading prose runs at leading-6 rather than the leading-5 the rest of
+// the exam canvas uses. A Listening screen prints a sentence at a time
+// and a Reading screen prints four paragraphs of a letter, and a passage
+// set at question density is a passage nobody wants to read.
+//
+// The passage is a letter, so the salutation and the sign off are their
+// own lines rather than being folded into the first and last paragraphs.
+export const examReading = {
+  // Left column: the passage.
+  passage: "flex min-w-0 flex-col gap-3",
+  passageHeading: "text-[13px] font-semibold leading-6 text-academy-navy",
+  passageParagraph: "text-[13px] leading-6 text-academy-navy/85",
+  // Sign off lines sit together with no gap between them, so the name
+  // reads as being under the closing rather than as a new paragraph.
+  passageSignOff: "flex min-w-0 flex-col",
+  passageSignOffLine: "text-[13px] leading-6 text-academy-navy/85",
+
+  // Right column: one or more question panels stacked.
+  panelStack: "flex min-w-0 flex-col gap-5",
+  panel: "flex min-w-0 flex-col gap-2",
+  panelLabel:
+    "text-[11px] font-semibold uppercase tracking-[0.06em] text-academy-navy/55",
+  panelInstruction: "text-[12px] leading-5 text-academy-navy/70",
+
+  // The written reply a completion group is answered inside. A plain
+  // white box on the blue answer column, so the letter reads as a
+  // document sitting on the answer side rather than as more chrome.
+  response:
+    "flex min-w-0 flex-col gap-3 rounded-sm border border-academy-line bg-academy-paper px-3 py-3",
+
+  // A numbered blank inside the reply.
+  //
+  // Two states. Unanswered draws the number and quieted underscores, the
+  // way the question list draws a blank in a stem. Answered replaces the
+  // underscores with the chosen option text on the answer column wash, so
+  // the letter can be read back as a finished response. Both keep the
+  // number, because the number is how the reply and the list below it
+  // point at each other.
+  responseBlank: "text-academy-navy/45",
+  responseBlankFilled:
+    "rounded-sm bg-academy-blue-soft px-1 font-semibold text-academy-navy",
+  responseBlankNumber: "font-semibold tabular-nums text-academy-navy/70",
+
+  // Answered count under the question column, beside Next being
+  // unavailable.
+  progressNote: "text-[11px] leading-4 text-academy-navy/60",
+} as const;
+
+// Reading question list (EXAM-16).
+//
+// The same boxed completion block the second EXAM-15F QA pass settled on
+// for Listening Parts 4 to 6: a bordered item, a tinted header strip
+// carrying the number and the statement, and the select in the body under
+// it. Reading and Listening answer the same kind of question here, so
+// they should look like one screen type rather than two.
+//
+// It is written out rather than importing examListeningDropdown, for one
+// reason that matters and one that follows from it. Reading has a
+// question shape Listening does not: the blanks inside a reply print no
+// statement at all, only a number, so the header strip has a second form.
+// And a token block named for Listening, read by Reading, is a rename
+// away from being wrong in both places.
+//
+// The select is capped rather than full width, for the same reason as on
+// the Listening screens: option text here is a sentence fragment, so a
+// control stretched across the column would put its value a long way from
+// the statement it completes.
+export const examReadingQuestion = {
+  list: "flex min-w-0 flex-col gap-2",
+  item: "min-w-0 overflow-hidden rounded-sm border border-academy-line bg-academy-paper",
+  statement:
+    "block w-full min-w-0 border-b border-academy-line bg-academy-navy-soft/60 px-3 py-2 text-[13px] leading-6 text-academy-navy",
+  number: "mr-2 font-semibold tabular-nums text-academy-navy/55",
+  // The blank in a statement. Underscores come from the source document,
+  // so they are drawn rather than replaced, just quieted.
+  blank: "px-0.5 tracking-tight text-academy-navy/45",
+  // The control sits in the body of the box, under the statement strip.
+  control: "min-w-0 p-2",
+  select: `h-8 w-full min-w-0 max-w-md rounded-sm border border-academy-line bg-academy-paper px-2 text-[13px] leading-5 text-academy-navy ${focus.ring}`,
+  // Shown while the question has no answer.
+  selectEmpty: "text-academy-navy/55",
+} as const;
+
 // Listening answer review and practice score screens (EXAM-04).
 //
 // The review table is result table chrome, not a dashboard list: hairline
