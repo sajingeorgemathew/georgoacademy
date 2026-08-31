@@ -42,6 +42,12 @@ export const readingCopy = {
   // answered from a picture rather than from prose, so calling that
   // column "Reading passage" would describe the wrong thing.
   diagramColumnLabel: "Diagram",
+  // Left column label on the paragraph matching part (EXAM-20). Reading
+  // Part 3's left column is a set of labelled paragraphs a learner scans
+  // rather than a passage read straight through, and the source document
+  // names the part "Reading for Information", so the column says
+  // Information.
+  informationColumnLabel: "Information",
 
   // Question list.
   //
@@ -118,6 +124,26 @@ export const readingCopy = {
     "Internal prototype of Mock Test 1 Reading Part 2, Reading to Apply a Diagram.",
   part2ExamRegionLabel: "Mock Test 1 - Reading Part 2",
 
+  // Reading Part 3 (EXAM-20).
+  //
+  // Part 3 closes on the EXAM-16 completion screen, the way Part 2 did
+  // before EXAM-19 gave it a score, because its review and its score are
+  // the next ticket. So it needs its own heading and its own restart
+  // label, and it reuses partCompletePendingReview and
+  // partCompleteNotice above unchanged: both say what is true of this
+  // part too.
+  //
+  // The format label names what the learner is given rather than the
+  // part title, the way the Part 1 and Part 2 labels do. Nine statements
+  // are matched to lettered paragraphs, so it says so.
+  partThreeIntroFormatLabel: "Labelled paragraphs and paragraph matching",
+  partThreeCompleteHeading: "Reading Part 3 complete",
+  partThreeRestartLabel: "Restart Reading Part 3",
+  part3PageTitle: "Mock Test 1 - Reading Part 3 - Toronto Academy of Education",
+  part3PageDescription:
+    "Internal prototype of Mock Test 1 Reading Part 3, Reading for Information.",
+  part3ExamRegionLabel: "Mock Test 1 - Reading Part 3",
+
   // Dashboard internal preview cards (EXAM-18).
   //
   // Wording for the two temporary cards that sit beside the Listening
@@ -133,6 +159,8 @@ export const readingCopy = {
   // - Neither line mentions a score, a CELPIP level or a Reading band,
   //   and nothing here claims a full Reading section exists. It does not.
   //   One part of four is built, plus one more without its review.
+  //
+  // EXAM-20 added a third card, for Reading Part 3, on the same terms.
   //
   // These strings go when the real Reading entry point ships, along with
   // the cards themselves.
@@ -151,6 +179,17 @@ export const readingCopy = {
   dashboardPartTwoCardPartLabel: "Part 2",
   dashboardPartTwoCardQuestionsLabel: "8 questions",
   dashboardPartTwoCardCtaLabel: "Open Reading Part 2",
+
+  // Reading Part 3's card (EXAM-20). Same shape as the two above, and
+  // the description says what is missing rather than what is coming: the
+  // part answers, and it does not mark.
+  dashboardPartThreeCardTitle: "Mock Test 1 - Reading Part 3",
+  dashboardPartThreeCardDescription:
+    "Reading for Information prototype with local answers. No review or score yet.",
+  dashboardPartThreeCardSectionLabel: "Reading",
+  dashboardPartThreeCardPartLabel: "Part 3",
+  dashboardPartThreeCardQuestionsLabel: "9 questions",
+  dashboardPartThreeCardCtaLabel: "Open Reading Part 3",
 } as const;
 
 // Screen position line, for example Screen 2 of 3.

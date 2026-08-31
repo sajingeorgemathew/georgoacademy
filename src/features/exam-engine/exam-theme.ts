@@ -596,6 +596,25 @@ export const examReading = {
   passageSignOff: "flex min-w-0 flex-col",
   passageSignOffLine: "text-[13px] leading-6 text-academy-navy/85",
 
+  // Left column: labelled paragraphs rather than running prose
+  // (EXAM-20).
+  //
+  // Reading Part 3 is answered by naming a paragraph, so the label has to
+  // be findable at a glance while scanning. It is drawn as a marker in
+  // its own narrow column beside the text rather than run into the first
+  // sentence, which keeps the letters in a straight vertical line down
+  // the left edge and keeps the paragraph text on one comfortable
+  // measure.
+  //
+  // The gap between sections is the stack's gap, so nothing here draws
+  // rules or boxes: a bordered card per paragraph would make five
+  // containers out of one article.
+  passageSections: "flex min-w-0 flex-col gap-4",
+  passageSection: "flex min-w-0 gap-2.5",
+  passageSectionLabel:
+    "w-4 shrink-0 text-[13px] font-semibold leading-6 tabular-nums text-academy-navy",
+  passageSectionBody: "flex min-w-0 flex-col gap-2",
+
   // Left column: a diagram rather than prose (EXAM-18).
   //
   // Reading Part 2 is answered from a course brochure image. The figure
