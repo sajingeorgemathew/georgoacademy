@@ -23,11 +23,12 @@
 // by rewriting this function. The EXAM-16 ending is still one call away.
 //
 // EXAM-18 added a second option for the middle screen, taskScreen, and
-// took the EXAM-16 ending for Reading Part 2. Part 2 is answered from a
-// diagram rather than from prose, and its review and score are not built
-// yet, so its flow is three screens: the part intro, the diagram split,
-// and the completion screen. Everything else in this file is shared with
-// Part 1 untouched.
+// took the EXAM-16 ending for Reading Part 2, which was answered from a
+// diagram but had no review and no score yet. EXAM-19 built both, so
+// Part 2 now takes the default ending and differs from Part 1 by its
+// working screen alone. Everything else in this file is shared with
+// Part 1 untouched, and the EXAM-16 ending is still one call away for
+// whatever needs it next.
 //
 // House style: normal hyphens only, no long hyphens or em dashes.
 
@@ -69,9 +70,11 @@ export type ReadingFlowOptions = {
 //
 // ending defaults to "score" and taskScreen to "correspondence", so Mock
 // Test 1 Reading Part 1 gets its four screen flow without passing
-// anything. Reading Part 2 asks for both options: a diagram screen,
-// because its passage is a picture, and the "complete" ending, because
-// EXAM-18 builds no review and no score for it.
+// anything. Reading Part 2 asks for one option, a diagram screen, because
+// its passage is a picture; it takes the same four screen flow otherwise.
+// No caller asks for the "complete" ending now that EXAM-19 has given
+// Part 2 a score, but it stays because a part built without a key would
+// need it.
 export function buildReadingFlow(
   content: ReadingPartContent,
   options: ReadingFlowOptions = {},

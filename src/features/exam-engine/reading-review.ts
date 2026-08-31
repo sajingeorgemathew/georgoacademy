@@ -48,6 +48,7 @@ import type {
   ReadingAnswerMap,
   ReadingPartContent,
   ReadingQuestion,
+  ReadingReviewOptions,
   ReadingReviewRow,
   ReadingReviewStatus,
 } from "./reading-types";
@@ -125,13 +126,19 @@ function findOptionText(
 // no Reading Part 2 review and no Reading Part 2 score. This is the
 // shared helper being made correct for a shape that now exists, not the
 // review being started.
-export function formatReadingQuestionText(question: ReadingQuestion): string {
+export function formatReadingQuestionText(
+  question: ReadingQuestion,
+  // EXAM-19: what to call a question that prints no stem at all. Part 1
+  // leaves it unset and keeps the written reply wording; Part 2 passes
+  // the email wording, because that is where its blanks are.
+  blankQuestionText: string = readingReviewCopy.responseBlankQuestionText,
+): string {
   if (question.text) {
     return question.text;
   }
 
   if (!question.textBefore) {
-    return readingReviewCopy.responseBlankQuestionText;
+    return blankQuestionText;
   }
 
   const head = `${question.textBefore} ...`;
@@ -163,8 +170,11 @@ export function resolveReadingReviewStatus(
 export function buildReadingReviewRows(
   content: ReadingPartContent,
   answers: ReadingAnswerMap,
+  options: ReadingReviewOptions = {},
 ): ReadingReviewRow[] {
   const keyIndex = indexAnswerKey(content.answerKey);
+  const blankQuestionText =
+    options.blankQuestionText ?? readingReviewCopy.responseBlankQuestionText;
 
   return listReadingQuestions(content).map((question, index) => {
     const entry = keyIndex.get(question.id);
@@ -187,7 +197,7 @@ export function buildReadingReviewRows(
       // number is display data from the content. Fall back to the
       // position in the part so a row is never numbered zero.
       questionNumber: question.number || index + 1,
-      questionText: formatReadingQuestionText(question),
+      questionText: formatReadingQuestionText(question, blankQuestionText),
       selectedOptionId,
       selectedOptionText: findOptionText(question, selectedOptionId),
       correctOptionId,

@@ -6,6 +6,7 @@ import { ReadingPartTwoPrototype } from "@/components/exam/reading/ReadingPartTw
 import { readingCopy } from "@/features/exam-engine/reading-copy";
 import { withoutReadingAnswerKey } from "@/features/exam-engine/reading-flow";
 import { readingPart2 } from "@/features/exam-engine/mock-tests/mock-test-1/reading-part-2";
+import { markReadingPartTwo } from "./actions";
 
 export const metadata: Metadata = {
   title: readingCopy.part2PageTitle,
@@ -13,13 +14,14 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-// Mock Test 1 Reading Part 2 prototype (EXAM-18).
+// Mock Test 1 Reading Part 2 prototype (EXAM-18, marking and closing
+// screens added by EXAM-19).
 //
-// The three screen sequence for Reading Part 2: the part intro, the split
-// screen holding the course brochure and all 8 questions, and the
-// completion screen. There is no score screen and no answer review on
-// this route, which is where it stops short of the Reading Part 1 route
-// beside it. Those are the next ticket.
+// The four screen sequence for Reading Part 2: the part intro, the split
+// screen holding the course brochure and all 8 questions, the practice
+// score, and the answer review opened from it. EXAM-18 stopped at a
+// completion screen; this route now goes as far as the Reading Part 1
+// route beside it.
 //
 // This route runs in exam mode. It is listed in
 // src/features/navigation/exam-mode-routes.ts, so the dashboard shell
@@ -39,27 +41,27 @@ export const metadata: Metadata = {
 //
 // Because the exam surface carries no preview label, the caveats are said
 // where a learner meets them. The part intro screen's notice says answers
-// are held on the screen and nothing is saved, and the completion screen
-// repeats it and says plainly that the review and the score are not built
-// yet. No score, no CELPIP level and no estimated Reading band appears
-// anywhere on this route, because none of them exists for this part.
+// are held on the screen and nothing is saved, and the score screen and
+// the answer review both repeat it. The result is named a Toronto Academy
+// practice score everywhere it appears, and no CELPIP level and no
+// estimated Reading band is shown. A band is a reading of the whole
+// section and this is one part of four, so there is nothing honest to
+// show yet.
 //
 // The route is not in navigation. EXAM-18 gave it one link, an Internal
 // preview card in the Mock tests section of the dashboard, because an
 // exam mode route carries no preview label of its own and pasting the URL
 // was the only way in. That card is dressed as an internal build link and
-// says so: dashed tinted panel, Internal preview badge, secondary button,
-// and a description that states the review and the score are not built.
+// says so: dashed tinted panel, Internal preview badge, secondary button.
 // The student facing Mock Test 1 card beside it is untouched and still
 // offers Listening only. Nothing anywhere offers a Reading test.
 //
 // The content is licensed Toronto Academy material, so the route sits
 // under /dashboard where the layout auth guard covers it, and the page
 // verifies the session again close to the content. No API route, no
-// server action, no service role, and no write. Answers are held in the
-// browser for the length of the visit and nothing is saved, to a
-// database, to localStorage or to a cookie. The page carries robots
-// noindex.
+// service role, and no write. Answers are held in the browser for the
+// length of the visit and nothing is saved, to a database, to
+// localStorage or to a cookie. The page carries robots noindex.
 //
 // withoutReadingAnswerKey is the same precaution the Reading Part 1 route
 // and every Listening route take, and for the same reason. Reading Part 2
@@ -69,12 +71,13 @@ export const metadata: Metadata = {
 // the flight data. The key is stripped here, on the server, before the
 // content crosses the boundary.
 //
-// There is no actions.ts beside this file, unlike the Reading Part 1
-// route. Nothing marks a Part 2 attempt in this ticket, so there is
-// nothing for the browser to send and nothing for a server action to
-// return. The next ticket adds one, and it should read the key the way
-// markReadingPartOne does: on the server, importing the content module
-// directly, returning finished review rows rather than the key itself.
+// markReadingPartTwo, in actions.ts beside this file, is where the key is
+// read, the way markReadingPartOne reads the Part 1 key. The prototype
+// holds the learner's answers in local state and sends them to the
+// action, and the action returns finished review rows and a practice
+// score. So the key crosses the boundary in neither direction: not down
+// with the content, and not back up inside a result. Nothing is saved,
+// there is no attempt row and there is no migration.
 
 export default async function MockTest1ReadingPartTwoPage() {
   const supabase = await createSupabaseServerClient();
@@ -93,7 +96,10 @@ export default async function MockTest1ReadingPartTwoPage() {
 
   return (
     <ExamModeViewport label={readingCopy.part2ExamRegionLabel}>
-      <ReadingPartTwoPrototype content={learnerContent} />
+      <ReadingPartTwoPrototype
+        content={learnerContent}
+        markAnswers={markReadingPartTwo}
+      />
     </ExamModeViewport>
   );
 }

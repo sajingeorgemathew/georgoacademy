@@ -364,6 +364,8 @@ export const readingPart2: ReadingPartContent = {
   ],
 
   // Stored, and stripped by the route before the content reaches the
-  // browser. Nothing in EXAM-18 reads it.
+  // browser. The only reader is markReadingPartTwo, the EXAM-19 server
+  // action, which runs where this module lives and returns finished
+  // review rows rather than the key itself.
   answerKey: ANSWER_KEY,
 };

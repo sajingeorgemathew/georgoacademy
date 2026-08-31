@@ -444,3 +444,22 @@ export type ReadingMarkedPart = {
   rows: ReadingReviewRow[];
   summary: ReadingScoreSummary;
 };
+
+
+// How a part wants its unstemmed questions named in the review (EXAM-19).
+//
+// Reading parts 1 and 2 both hold questions that print no stem of their
+// own, because the sentence each one completes lives in a body of text
+// beside the drop-down. The review still has to name the row, and the
+// honest name depends on which body of text that is: a written reply in
+// Part 1, an email message in Part 2. Inventing a stem from the
+// surrounding sentence is not an option, because the source document
+// does not carry one and this codebase does not write question text.
+//
+// So the caller says which line to use, and the default keeps the
+// Part 1 wording that shipped in EXAM-17. Everything else about marking
+// is content driven and needs no options at all, which is why this is
+// one field rather than a settings object.
+export type ReadingReviewOptions = {
+  blankQuestionText?: string;
+};
