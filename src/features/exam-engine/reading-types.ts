@@ -392,6 +392,16 @@ export type ReadingAnswerMap = Readonly<Record<string, string>>;
 // reasoning. It is the split again, with labelled paragraphs A to E on
 // the left and nine statements on the right, each answered by naming one
 // of those labels. It shares the same three components underneath.
+// EXAM-22 added "viewpoints", the Part 4 working screen, on the same
+// reasoning again. It is the split with a website article on the left and
+// two panels on the right, five sentence stems about the article and a
+// reader comment holding five numbered blanks. Structurally it is the
+// closest of the four to "correspondence", because both are prose on the
+// left and a body of text with blanks on the right, and it is still a
+// kind of its own rather than a reuse of that one: a prototype switching
+// on the screen should have to say which part it is drawing, and the two
+// left columns are a letter and an article, which are not the same thing
+// to label or to read.
 export type ReadingScreen =
   | { kind: "part-intro"; id: string }
   // The split screen: passage on the left, question groups on the right.
@@ -401,6 +411,10 @@ export type ReadingScreen =
   // The split screen with labelled paragraphs on the left, answered by
   // naming one of them. Reading Part 3.
   | { kind: "information"; id: string }
+  // The split screen with a website article on the left, answered by
+  // completing sentences about it and blanks in a reader comment.
+  // Reading Part 4.
+  | { kind: "viewpoints"; id: string }
   // Practice score for the part.
   | { kind: "score"; id: string }
   // Question by question review, opened from the score screen.
