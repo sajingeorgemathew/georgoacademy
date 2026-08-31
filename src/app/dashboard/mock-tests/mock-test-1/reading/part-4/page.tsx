@@ -6,6 +6,7 @@ import { ReadingPartFourPrototype } from "@/components/exam/reading/ReadingPartF
 import { readingCopy } from "@/features/exam-engine/reading-copy";
 import { withoutReadingAnswerKey } from "@/features/exam-engine/reading-flow";
 import { readingPart4 } from "@/features/exam-engine/mock-tests/mock-test-1/reading-part-4";
+import { markReadingPartFour } from "./actions";
 
 export const metadata: Metadata = {
   title: readingCopy.part4PageTitle,
@@ -13,13 +14,14 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-// Mock Test 1 Reading Part 4 prototype (EXAM-22).
+// Mock Test 1 Reading Part 4 prototype (EXAM-22, marking and closing
+// screens added by EXAM-23).
 //
-// The three screen sequence for Reading Part 4: the part intro, the split
-// screen holding the website article and all 10 questions, and the
-// completion screen. There is no practice score and no answer review
-// here, which is where the Reading Part 2 and Part 3 routes both started;
-// EXAM-23 is what takes this one the rest of the way.
+// The four screen sequence for Reading Part 4: the part intro, the split
+// screen holding the website article and all 10 questions, the practice
+// score, and the answer review opened from it. EXAM-22 stopped at a
+// completion screen; this route now goes as far as the Reading Part 1,
+// Part 2 and Part 3 routes beside it.
 //
 // This route runs in exam mode. It is listed in
 // src/features/navigation/exam-mode-routes.ts, so the dashboard shell
@@ -41,11 +43,12 @@ export const metadata: Metadata = {
 //
 // Because the exam surface carries no preview label, the caveats are said
 // where a learner meets them. The part intro screen's notice says answers
-// are held on the screen and nothing is saved, and the completion screen
-// repeats it and says plainly that the review and the score are the next
-// ticket. Nothing here shows a score, a CELPIP level or an estimated
-// Reading band. A band is a reading of the whole section, and no part of
-// this route marks anything at all.
+// are held on the screen and nothing is saved, and the score screen and
+// the answer review both repeat it. The result is named a Toronto Academy
+// practice score everywhere it appears, and no CELPIP level and no
+// estimated Reading band is shown. A band is a reading of the whole
+// section and this is one part of four, so there is nothing honest to
+// show yet.
 //
 // The route is not in navigation. It has one link, an Internal preview
 // card in the Mock tests section of the dashboard, beside the Part 1,
@@ -69,13 +72,14 @@ export const metadata: Metadata = {
 // could read them out of the flight data. The key is stripped here, on
 // the server, before the content crosses the boundary.
 //
-// There is no actions.ts beside this file, because nothing is marked yet.
-// EXAM-23 should add one, holding a markReadingPartFour that reads the
-// key from the content module on the server, the way markReadingPartOne,
-// markReadingPartTwo and markReadingPartThree read theirs. Until then the
-// key is stored and never read, and it crosses the boundary in neither
-// direction. Nothing is saved, there is no attempt row and there is no
-// migration.
+// markReadingPartFour, in actions.ts beside this file, is where the key
+// is read, the way markReadingPartOne, markReadingPartTwo and
+// markReadingPartThree read theirs. The prototype holds the learner's
+// answers in local state and sends them to the action, and the action
+// returns finished review rows and a practice score. So the key crosses
+// the boundary in neither direction: not down with the content, and not
+// back up inside a result. Nothing is saved, there is no attempt row and
+// there is no migration.
 
 export default async function MockTest1ReadingPartFourPage() {
   const supabase = await createSupabaseServerClient();
@@ -94,7 +98,10 @@ export default async function MockTest1ReadingPartFourPage() {
 
   return (
     <ExamModeViewport label={readingCopy.part4ExamRegionLabel}>
-      <ReadingPartFourPrototype content={learnerContent} />
+      <ReadingPartFourPrototype
+        content={learnerContent}
+        markAnswers={markReadingPartFour}
+      />
     </ExamModeViewport>
   );
 }
