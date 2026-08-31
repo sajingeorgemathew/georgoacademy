@@ -37,8 +37,16 @@
 // option values. EXAM-21 then built its review and its score, so Part 3
 // takes the default ending too and now differs from Parts 1 and 2 by its
 // working screen alone. Nothing in this file changed for that at all: the
-// prototype simply stopped asking for the "complete" ending, which is
-// still one call away for whatever needs it next.
+// prototype simply stopped asking for the "complete" ending.
+//
+// EXAM-22 is what needed it after that, and it is the same story a part
+// later. Reading Part 4 takes the "viewpoints" working screen and the
+// EXAM-16 ending, so its flow is three screens: the part intro, the split
+// screen holding all 10 questions, and the completion screen. Again the
+// only change here is one new option value, and again the "complete"
+// ending is what a part built ahead of its review needs. EXAM-23 should
+// drop that option from the Part 4 prototype and change nothing in this
+// file.
 //
 // House style: normal hyphens only, no long hyphens or em dashes.
 
@@ -68,10 +76,17 @@ export type ReadingFlowEnding = "score" | "complete";
 // is the same split with a picture on the left, which is what Reading
 // Part 2 is answered from. "information" is the EXAM-20 addition, the
 // split with labelled paragraphs A to E on the left, which is what
-// Reading Part 3 is answered from. All three are one screen holding every
-// question in the part, so this changes what the middle screen draws and
-// nothing about the shape of the flow.
-export type ReadingTaskScreen = "correspondence" | "diagram" | "information";
+// Reading Part 3 is answered from. "viewpoints" is the EXAM-22 addition,
+// the split with a website article on the left and a reader comment among
+// the panels on the right, which is what Reading Part 4 is answered from.
+// All four are one screen holding every question in the part, so this
+// changes what the middle screen draws and nothing about the shape of the
+// flow.
+export type ReadingTaskScreen =
+  | "correspondence"
+  | "diagram"
+  | "information"
+  | "viewpoints";
 
 export type ReadingFlowOptions = {
   ending?: ReadingFlowEnding;
@@ -84,12 +99,13 @@ export type ReadingFlowOptions = {
 // Test 1 Reading Part 1 gets its four screen flow without passing
 // anything. Reading Part 2 asks for one option, a diagram screen, because
 // its passage is a picture; it takes the same four screen flow otherwise.
-// EXAM-19 gave Part 2 a score and EXAM-21 gave Part 3 one, so no caller
-// asks for the "complete" ending today. It stays because it is the thing
-// a part built ahead of its confirmed answer key needs, which is exactly
-// the case EXAM-20 used it for. Reading Part 3 asks for the "information"
-// task screen, because its passage is labelled paragraphs rather than a
-// letter or a picture, and takes the default ending otherwise.
+// EXAM-19 gave Part 2 a score and EXAM-21 gave Part 3 one. Reading Part 3
+// asks for the "information" task screen, because its passage is labelled
+// paragraphs rather than a letter or a picture, and takes the default
+// ending otherwise. Reading Part 4, added by EXAM-22, asks for both
+// options: the "viewpoints" task screen, and the "complete" ending,
+// because its review and its score are the next ticket. That is the same
+// pair EXAM-20 asked for and the reason the "complete" ending was kept.
 export function buildReadingFlow(
   content: ReadingPartContent,
   options: ReadingFlowOptions = {},

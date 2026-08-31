@@ -45,6 +45,12 @@
 // statements on the right, so both columns have to be on screen at once
 // for the part to be answerable at all.
 //
+// EXAM-22 added the Reading Part 4 route, which completes the four. Its
+// own reason is length: a five paragraph article on the left, and on the
+// right five sentence stems and a reader comment holding five more
+// blanks. Both columns have to scroll independently, which is exactly
+// what a dashboard content column cannot give them.
+//
 // A trailing slash is tolerated because a typed URL can carry one. Query
 // strings and hashes never reach usePathname, so they need no handling.
 //
@@ -55,6 +61,7 @@ export const EXAM_MODE_ROUTES: readonly string[] = [
   "/dashboard/mock-tests/mock-test-1/reading/part-1",
   "/dashboard/mock-tests/mock-test-1/reading/part-2",
   "/dashboard/mock-tests/mock-test-1/reading/part-3",
+  "/dashboard/mock-tests/mock-test-1/reading/part-4",
 ];
 
 // Whether a pathname is one of the exam mode routes.

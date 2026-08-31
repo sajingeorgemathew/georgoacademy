@@ -48,6 +48,12 @@ export const readingCopy = {
   // names the part "Reading for Information", so the column says
   // Information.
   informationColumnLabel: "Information",
+  // Left column label on the viewpoints part (EXAM-22). Reading Part 4's
+  // left column is a website article carrying several people's views on
+  // one proposal, and the second panel on the right is a body of prose
+  // too, so naming this column "Reading passage" would not say which of
+  // the two a learner is being pointed at.
+  articleColumnLabel: "Article",
 
   // Question list.
   //
@@ -144,6 +150,27 @@ export const readingCopy = {
     "Internal prototype of Mock Test 1 Reading Part 3, Reading for Information.",
   part3ExamRegionLabel: "Mock Test 1 - Reading Part 3",
 
+  // Reading Part 4 (EXAM-22).
+  //
+  // Part 4 closes on the EXAM-16 completion screen rather than on a
+  // score, because its review and its score are the next ticket. That is
+  // where Parts 2 and 3 both started. So it needs its own heading and its
+  // own restart label, and it reuses partCompletePendingReview and
+  // partCompleteNotice above unchanged: both say what is true of this
+  // part too.
+  //
+  // The format label names what the learner is given rather than the part
+  // title, the way the three labels above do. Part 4 is an article, a
+  // reader comment with blanks in it, and drop-downs against both, so it
+  // says so.
+  partFourIntroFormatLabel: "Article, reader comment and drop-down questions",
+  partFourCompleteHeading: "Reading Part 4 complete",
+  partFourRestartLabel: "Restart Reading Part 4",
+  part4PageTitle: "Mock Test 1 - Reading Part 4 - Toronto Academy of Education",
+  part4PageDescription:
+    "Internal prototype of Mock Test 1 Reading Part 4, Reading for Viewpoints.",
+  part4ExamRegionLabel: "Mock Test 1 - Reading Part 4",
+
   // Dashboard internal preview cards (EXAM-18).
   //
   // Wording for the two temporary cards that sit beside the Listening
@@ -163,6 +190,9 @@ export const readingCopy = {
   // EXAM-20 added a third card, for Reading Part 3, on the same terms.
   // EXAM-21 gave that part its review and its score, so its description
   // now reads like the other two rather than naming what is missing.
+  // EXAM-22 added a fourth card, for Reading Part 4, and its description
+  // does name what is missing, because that part has no review and no
+  // score yet.
   //
   // These strings go when the real Reading entry point ships, along with
   // the cards themselves.
@@ -193,6 +223,19 @@ export const readingCopy = {
   dashboardPartThreeCardPartLabel: "Part 3",
   dashboardPartThreeCardQuestionsLabel: "9 questions",
   dashboardPartThreeCardCtaLabel: "Open Reading Part 3",
+
+  // Reading Part 4's card (EXAM-22). Same shape as the three above, and
+  // the description says what is missing rather than implying it is
+  // there: the part answers locally and its review and its score are the
+  // next ticket, which is exactly what the Part 2 and Part 3 descriptions
+  // said before those parts got theirs.
+  dashboardPartFourCardTitle: "Mock Test 1 - Reading Part 4",
+  dashboardPartFourCardDescription:
+    "Reading for Viewpoints prototype with local answers. No review and no score yet.",
+  dashboardPartFourCardSectionLabel: "Reading",
+  dashboardPartFourCardPartLabel: "Part 4",
+  dashboardPartFourCardQuestionsLabel: "10 questions",
+  dashboardPartFourCardCtaLabel: "Open Reading Part 4",
 } as const;
 
 // Screen position line, for example Screen 2 of 3.
