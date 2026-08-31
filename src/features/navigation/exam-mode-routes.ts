@@ -39,6 +39,12 @@
 // brochure image, and a diagram that has to be read to answer eight
 // questions cannot be squeezed into a dashboard content column.
 //
+// EXAM-20 added the Reading Part 3 route, again on the same reasoning and
+// again with one more reason of its own: Part 3 is answered by scanning
+// back and forth between five lettered paragraphs on the left and nine
+// statements on the right, so both columns have to be on screen at once
+// for the part to be answerable at all.
+//
 // A trailing slash is tolerated because a typed URL can carry one. Query
 // strings and hashes never reach usePathname, so they need no handling.
 //
@@ -48,6 +54,7 @@ export const EXAM_MODE_ROUTES: readonly string[] = [
   "/dashboard/mock-tests/mock-test-1/listening",
   "/dashboard/mock-tests/mock-test-1/reading/part-1",
   "/dashboard/mock-tests/mock-test-1/reading/part-2",
+  "/dashboard/mock-tests/mock-test-1/reading/part-3",
 ];
 
 // Whether a pathname is one of the exam mode routes.

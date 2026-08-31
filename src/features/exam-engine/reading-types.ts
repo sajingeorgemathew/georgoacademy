@@ -111,6 +111,38 @@ export type ReadingQuestion = {
 // nothing more structured is needed on the left hand side.
 export type ReadingPassageParagraph = string;
 
+// One labelled section of a passage (EXAM-20).
+//
+// Reading Part 3 is the paragraph matching part: its passage is not four
+// paragraphs of running prose but four labelled paragraphs, A to D, plus
+// a fixed fifth entry E that is not a paragraph at all but the option a
+// learner picks when the information is in none of them. Every question
+// in the part is answered by naming one of those labels, so the label is
+// content rather than decoration: it is the thing being selected, and a
+// learner who cannot tell where paragraph B ends and C begins cannot
+// answer the part.
+//
+// So a section is a label and the paragraphs under it, rather than a
+// string with "A." typed on the front. The label stays a separate field
+// for two reasons: the screen can draw it as a marker beside the text
+// instead of running it into the first sentence, and nothing has to
+// parse a paragraph to find out what it is called.
+//
+// paragraphs is a list rather than a single string because a labelled
+// section is a section, not a paragraph. Mock Test 1 gives each of A to E
+// exactly one paragraph, so every list here has one entry, and a part
+// whose paragraph B runs to two would need no type change.
+//
+// This is an addition beside ReadingPassage.paragraphs rather than a
+// replacement for it. Reading Parts 1 and 2 have no labelled sections and
+// are untouched by it.
+export type ReadingPassageSection = {
+  // The label the questions point at, for example "A". Short by nature:
+  // it is drawn as a marker beside the text.
+  label: string;
+  paragraphs: ReadingPassageParagraph[];
+};
+
 // A picture on the passage side of the split screen (EXAM-18).
 //
 // Reading Part 2 is the diagram part: what the questions are answered
@@ -158,6 +190,11 @@ export type ReadingPassage = {
   // Salutation line, for example "Dear Scott,".
   heading?: string;
   paragraphs: ReadingPassageParagraph[];
+  // Labelled paragraphs, for a part whose questions name one of them.
+  // The EXAM-20 addition, set on Reading Part 3 and unset everywhere
+  // else. A passage carries prose, a picture, labelled sections, or any
+  // combination: Part 3 is sections and passes an empty paragraphs list.
+  sections?: ReadingPassageSection[];
   // The diagram or picture the part is answered from. Unset on a text
   // only part.
   image?: ReadingPassageImage;
@@ -351,12 +388,19 @@ export type ReadingAnswerMap = Readonly<Record<string, string>>;
 // prototype switching on the screen has to say which of the two it draws.
 // The two share ReadingTwoColumnLayout, ReadingQuestionPanel and
 // ReadingQuestionList underneath.
+// EXAM-20 added "information", the Part 3 working screen, on the same
+// reasoning. It is the split again, with labelled paragraphs A to E on
+// the left and nine statements on the right, each answered by naming one
+// of those labels. It shares the same three components underneath.
 export type ReadingScreen =
   | { kind: "part-intro"; id: string }
   // The split screen: passage on the left, question groups on the right.
   | { kind: "correspondence"; id: string }
   // The split screen with a diagram on the left. Reading Part 2.
   | { kind: "diagram"; id: string }
+  // The split screen with labelled paragraphs on the left, answered by
+  // naming one of them. Reading Part 3.
+  | { kind: "information"; id: string }
   // Practice score for the part.
   | { kind: "score"; id: string }
   // Question by question review, opened from the score screen.

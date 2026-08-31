@@ -45,10 +45,10 @@ import { readingCopy } from "@/features/exam-engine/reading-copy";
 // the route itself: nothing is saved, media can be replayed, the timer is
 // static, and the practice score is not an official CELPIP score.
 //
-// EXAM-18 added the two Reading cards beside it, because both Reading
-// routes run in exam mode, an exam mode route carries no dashboard chrome
-// and no preview label, and so the only way to open one was to paste its
-// URL. They are internal build links and they are dressed as internal
+// EXAM-18 added the Reading cards beside it, and EXAM-20 added a third
+// for Reading Part 3, because every Reading route runs in exam mode, an
+// exam mode route carries no dashboard chrome and no preview label, and
+// so the only way to open one was to paste its URL. They are internal build links and they are dressed as internal
 // build links, following the rule ExamShellPreviewLink set: a tinted
 // panel with a dashed rule rather than the solid one, an Internal preview
 // badge where the Available pill sits, and a secondary button rather than
@@ -57,10 +57,11 @@ import { readingCopy } from "@/features/exam-engine/reading-copy";
 //
 // What these cards deliberately do not say, because none of it is true
 // yet: that a Reading test exists, that a full Reading section exists, or
-// that either part produces a score, a CELPIP level or a Reading band.
-// Two of the four Reading parts are built and one of those two has no
-// review yet. Remove these cards, and their wording in reading-copy.ts,
-// once the assembled Reading section has its own student facing card.
+// that any part produces a CELPIP level or a Reading band. Three of the
+// four Reading parts are built and one of those three has no review and
+// no score yet, which its own description says. Remove these cards, and
+// their wording in reading-copy.ts, once the assembled Reading section
+// has its own student facing card.
 
 const LISTENING_TEST_HREF = "/dashboard/mock-tests/mock-test-1/listening";
 
@@ -71,12 +72,12 @@ const CARD_META = [
   listeningCopy.fullSectionCardQuestionsLabel,
 ];
 
-// The two Reading preview cards differ only in their wording and their
-// href, so they are one list and one renderer rather than two near
+// The three Reading preview cards differ only in their wording and their
+// href, so they are one list and one renderer rather than three near
 // identical blocks of markup.
 //
 // The question counts are read off the built parts rather than invented:
-// Reading Part 1 asks 11 questions and Reading Part 2 asks 8.
+// Reading Part 1 asks 11 questions, Part 2 asks 8, and Part 3 asks 9.
 const READING_PREVIEW_CARDS = [
   {
     href: "/dashboard/mock-tests/mock-test-1/reading/part-1",
@@ -99,6 +100,17 @@ const READING_PREVIEW_CARDS = [
       readingCopy.dashboardPartTwoCardQuestionsLabel,
     ],
     ctaLabel: readingCopy.dashboardPartTwoCardCtaLabel,
+  },
+  {
+    href: "/dashboard/mock-tests/mock-test-1/reading/part-3",
+    title: readingCopy.dashboardPartThreeCardTitle,
+    description: readingCopy.dashboardPartThreeCardDescription,
+    meta: [
+      readingCopy.dashboardPartThreeCardSectionLabel,
+      readingCopy.dashboardPartThreeCardPartLabel,
+      readingCopy.dashboardPartThreeCardQuestionsLabel,
+    ],
+    ctaLabel: readingCopy.dashboardPartThreeCardCtaLabel,
   },
 ];
 

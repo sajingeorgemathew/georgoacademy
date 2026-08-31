@@ -30,6 +30,12 @@
 // Part 1 untouched, and the EXAM-16 ending is still one call away for
 // whatever needs it next.
 //
+// EXAM-20 is what needed it next. Reading Part 3 takes the "information"
+// working screen and the EXAM-16 ending, so its flow is three screens:
+// the part intro, the split screen holding all 9 statements, and the
+// completion screen. Nothing in this file changed for it beyond two new
+// option values.
+//
 // House style: normal hyphens only, no long hyphens or em dashes.
 
 import type {
@@ -56,10 +62,12 @@ export type ReadingFlowEnding = "score" | "complete";
 //
 // "correspondence" is the prose split, a message on the left. "diagram"
 // is the same split with a picture on the left, which is what Reading
-// Part 2 is answered from. Both are one screen holding every question in
-// the part, so this changes what the middle screen draws and nothing
-// about the shape of the flow.
-export type ReadingTaskScreen = "correspondence" | "diagram";
+// Part 2 is answered from. "information" is the EXAM-20 addition, the
+// split with labelled paragraphs A to E on the left, which is what
+// Reading Part 3 is answered from. All three are one screen holding every
+// question in the part, so this changes what the middle screen draws and
+// nothing about the shape of the flow.
+export type ReadingTaskScreen = "correspondence" | "diagram" | "information";
 
 export type ReadingFlowOptions = {
   ending?: ReadingFlowEnding;
@@ -72,9 +80,12 @@ export type ReadingFlowOptions = {
 // Test 1 Reading Part 1 gets its four screen flow without passing
 // anything. Reading Part 2 asks for one option, a diagram screen, because
 // its passage is a picture; it takes the same four screen flow otherwise.
-// No caller asks for the "complete" ending now that EXAM-19 has given
-// Part 2 a score, but it stays because a part built without a key would
-// need it.
+// EXAM-19 gave Part 2 a score, so no caller asked for the "complete"
+// ending for a while. EXAM-20 asks for it again: Reading Part 3 is built
+// here as a question experience only, with its review and its score left
+// to the next ticket, which is exactly the case that ending exists for.
+// Part 3 also asks for the "information" task screen, because its passage
+// is labelled paragraphs rather than a letter or a picture.
 export function buildReadingFlow(
   content: ReadingPartContent,
   options: ReadingFlowOptions = {},
