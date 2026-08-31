@@ -40,13 +40,22 @@
 // prototype simply stopped asking for the "complete" ending.
 //
 // EXAM-22 is what needed it after that, and it is the same story a part
-// later. Reading Part 4 takes the "viewpoints" working screen and the
-// EXAM-16 ending, so its flow is three screens: the part intro, the split
-// screen holding all 10 questions, and the completion screen. Again the
-// only change here is one new option value, and again the "complete"
-// ending is what a part built ahead of its review needs. EXAM-23 should
-// drop that option from the Part 4 prototype and change nothing in this
-// file.
+// later. Reading Part 4 took the "viewpoints" working screen and the
+// EXAM-16 ending, so its flow was three screens: the part intro, the
+// split screen holding all 10 questions, and the completion screen. Again
+// the only change here was one new option value, and again the "complete"
+// ending is what a part built ahead of its review needs. EXAM-23 then
+// built Part 4's review and its score, so it takes the default ending too
+// and now differs from Parts 1, 2 and 3 by its working screen alone.
+// Nothing in this file changed for that at all: the prototype simply
+// stopped asking for the "complete" ending, which is exactly what
+// happened for Part 3 a ticket earlier.
+//
+// So all four Reading parts now take the default ending, and no caller
+// asks for "complete" today. It stays anyway, for the same reason it was
+// kept twice already: the next Reading part built ahead of a confirmed
+// answer key needs it, and nothing is gained by deleting an ending that
+// costs four lines.
 //
 // House style: normal hyphens only, no long hyphens or em dashes.
 
@@ -102,10 +111,13 @@ export type ReadingFlowOptions = {
 // EXAM-19 gave Part 2 a score and EXAM-21 gave Part 3 one. Reading Part 3
 // asks for the "information" task screen, because its passage is labelled
 // paragraphs rather than a letter or a picture, and takes the default
-// ending otherwise. Reading Part 4, added by EXAM-22, asks for both
+// ending otherwise. Reading Part 4, added by EXAM-22, asked for both
 // options: the "viewpoints" task screen, and the "complete" ending,
-// because its review and its score are the next ticket. That is the same
-// pair EXAM-20 asked for and the reason the "complete" ending was kept.
+// because its review and its score were the next ticket. That was the
+// same pair EXAM-20 asked for and the reason the "complete" ending was
+// kept. EXAM-23 built both, so Part 4 now asks for the "viewpoints" task
+// screen alone and takes the default ending like the three parts before
+// it.
 export function buildReadingFlow(
   content: ReadingPartContent,
   options: ReadingFlowOptions = {},

@@ -150,14 +150,14 @@ export const readingCopy = {
     "Internal prototype of Mock Test 1 Reading Part 3, Reading for Information.",
   part3ExamRegionLabel: "Mock Test 1 - Reading Part 3",
 
-  // Reading Part 4 (EXAM-22).
+  // Reading Part 4 (EXAM-22, closing screens added by EXAM-23).
   //
-  // Part 4 closes on the EXAM-16 completion screen rather than on a
-  // score, because its review and its score are the next ticket. That is
-  // where Parts 2 and 3 both started. So it needs its own heading and its
-  // own restart label, and it reuses partCompletePendingReview and
-  // partCompleteNotice above unchanged: both say what is true of this
-  // part too.
+  // Part 4 closed on the EXAM-16 completion screen until EXAM-23 gave it
+  // a practice score and an answer review, which is the same move EXAM-19
+  // made for Part 2 and EXAM-21 made for Part 3. The completion heading
+  // and the restart label below both stay: the restart label is what the
+  // score screen's restart button says, and the heading still names the
+  // screen buildReadingFlow can build for this part on request.
   //
   // The format label names what the learner is given rather than the part
   // title, the way the three labels above do. Part 4 is an article, a
@@ -190,9 +190,9 @@ export const readingCopy = {
   // EXAM-20 added a third card, for Reading Part 3, on the same terms.
   // EXAM-21 gave that part its review and its score, so its description
   // now reads like the other two rather than naming what is missing.
-  // EXAM-22 added a fourth card, for Reading Part 4, and its description
-  // does name what is missing, because that part has no review and no
-  // score yet.
+  // EXAM-22 added a fourth card, for Reading Part 4, and EXAM-23 gave
+  // that part its review and its score, so its description now reads like
+  // the other three rather than naming what is missing.
   //
   // These strings go when the real Reading entry point ships, along with
   // the cards themselves.
@@ -224,14 +224,13 @@ export const readingCopy = {
   dashboardPartThreeCardQuestionsLabel: "9 questions",
   dashboardPartThreeCardCtaLabel: "Open Reading Part 3",
 
-  // Reading Part 4's card (EXAM-22). Same shape as the three above, and
-  // the description says what is missing rather than implying it is
-  // there: the part answers locally and its review and its score are the
-  // next ticket, which is exactly what the Part 2 and Part 3 descriptions
-  // said before those parts got theirs.
+  // Reading Part 4's card (EXAM-22, description updated by EXAM-23).
+  // Same shape as the three above, and now the same claim: the part
+  // answers and it marks, locally, with no CELPIP level and no Reading
+  // band anywhere behind it.
   dashboardPartFourCardTitle: "Mock Test 1 - Reading Part 4",
   dashboardPartFourCardDescription:
-    "Reading for Viewpoints prototype with local answers. No review and no score yet.",
+    "Reading for Viewpoints prototype with local answers and practice review.",
   dashboardPartFourCardSectionLabel: "Reading",
   dashboardPartFourCardPartLabel: "Part 4",
   dashboardPartFourCardQuestionsLabel: "10 questions",
@@ -369,6 +368,28 @@ export const readingReviewCopy = {
   // through to a line naming a blank.
   partThreeScoreTitle: "Reading Part 3 practice score",
   partThreeReviewTitle: "Reading Part 3 answer review",
+
+  // The question text a Reading Part 4 comment blank prints in the review
+  // (EXAM-23). Questions 6 to 10 sit inside the reader comment under the
+  // article, so neither of the two lines above would point a learner at
+  // the right body of text: Part 1's names a written reply and Part 2's
+  // names an email message, and this part has neither. The marking action
+  // passes this one in, the way markReadingPartTwo passes its own.
+  commentBlankQuestionText: "Blank in the reader comment.",
+
+  // Titles for the Reading Part 4 closing screens (EXAM-23). Two lines
+  // again, and nothing else, for the same reason: everything else on
+  // those screens is part neutral and reused as it stands.
+  //
+  // These are the fourth near identical pair, which is the point
+  // docs/product/reading-part-3-review-score.md named as the moment to
+  // build buildReadingReviewCopy and one shared pair of screens. That
+  // move is deliberately not made here: it would mean editing three live
+  // routes' components to land a fourth part, and this ticket is asked
+  // not to change Reading Parts 1 to 3. It is written up as the first
+  // thing EXAM-24 should consider instead.
+  partFourScoreTitle: "Reading Part 4 practice score",
+  partFourReviewTitle: "Reading Part 4 answer review",
 } as const;
 
 // Status labels for a review card. Short, plain, and not a badge.

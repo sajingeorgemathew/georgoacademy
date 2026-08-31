@@ -89,11 +89,16 @@ import type {
 // 1, Part 2 and Part 3 routes and every Listening route strip their own,
 // so nothing here reaches the question screen.
 //
-// EXAM-23 is what should read it, and it should read it the way
-// markReadingPartOne, markReadingPartTwo and markReadingPartThree read
-// theirs: on the server, in an action beside the route, importing this
-// module directly rather than trusting anything the browser sends. What
-// crosses back to the browser is finished review rows, never the key.
+// EXAM-23 is what reads it, and it reads it the way markReadingPartOne,
+// markReadingPartTwo and markReadingPartThree read theirs:
+// markReadingPartFour, in actions.ts beside the route, runs on the server
+// and imports this module directly rather than trusting anything the
+// browser sends. What crosses back to the browser is finished review
+// rows, never the key.
+//
+// The key is unchanged by EXAM-23. Every entry was re-checked against the
+// source document's PART04 table while the marking was wired up and no
+// mismatch was found, so this list is byte for byte what EXAM-22 shipped.
 const ANSWER_KEY: ReadingAnswerKeyEntry[] = [
   // strengthen economic ties.
   { questionId: "reading-part-4-q1", correctOptionId: "reading-part-4-q1-a", source: "document" },
