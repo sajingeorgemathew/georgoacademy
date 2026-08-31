@@ -28,9 +28,10 @@
 // buildParagraphOptions stamps them onto each statement with ids of its
 // own. So there is one place the option list is edited, the answer key
 // still points at a real option on a real question, and
-// ReadingQuestionList, ReadingQuestionPanel and the EXAM-21 marking that
-// follows all read the part exactly as they read Parts 1 and 2. Nothing
-// shared had to learn about option sets for one part.
+// ReadingQuestionList, ReadingQuestionPanel and the EXAM-21 marking all
+// read the part exactly as they read Parts 1 and 2. Nothing shared had to
+// learn about option sets for one part, and markReadingPartThree needed
+// no Part 3 branch of its own.
 //
 // Notes on the source material, all deliberate:
 //
@@ -117,12 +118,11 @@ function buildParagraphOptions(questionId: string): ReadingOption[] {
 // 1 and Part 2 routes and every Listening route strip their own, so
 // nothing here reaches the question screen.
 //
-// Nothing reads this key yet. EXAM-20 builds no review and no score for
-// Reading Part 3, so the key is stored and stripped and that is all. The
-// next ticket is where it is read, and it should be read the way
-// markReadingPartOne and markReadingPartTwo read theirs: on the server,
-// in a server action beside the route, importing this module directly
-// rather than trusting anything the browser sends.
+// EXAM-21 is what reads it, and it reads it the way markReadingPartOne
+// and markReadingPartTwo read theirs: on the server, in
+// markReadingPartThree in actions.ts beside the route, importing this
+// module directly rather than trusting anything the browser sends. What
+// crosses back to the browser is finished review rows, never the key.
 const ANSWER_KEY: ReadingAnswerKeyEntry[] = [
   // C
   { questionId: "reading-part-3-q1", correctOptionId: "reading-part-3-q1-c", source: "document" },
@@ -299,8 +299,8 @@ export const readingPart3: ReadingPartContent = {
   ],
 
   // Stored, and stripped by the route before the content reaches the
-  // browser. Nothing reads it yet: EXAM-20 builds no marking for this
-  // part. EXAM-21 is where a server action beside the route should read
-  // it, the way markReadingPartOne and markReadingPartTwo read theirs.
+  // browser. It is read on the server only, by markReadingPartThree in
+  // actions.ts beside the route, the way markReadingPartOne and
+  // markReadingPartTwo read theirs.
   answerKey: ANSWER_KEY,
 };
