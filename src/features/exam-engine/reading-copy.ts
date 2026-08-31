@@ -146,7 +146,7 @@ export const readingCopy = {
   dashboardPartOneCardCtaLabel: "Open Reading Part 1",
   dashboardPartTwoCardTitle: "Mock Test 1 - Reading Part 2",
   dashboardPartTwoCardDescription:
-    "Reading to Apply a Diagram prototype with local answers. Review and score are added next.",
+    "Reading to Apply a Diagram prototype with local answers and practice review.",
   dashboardPartTwoCardSectionLabel: "Reading",
   dashboardPartTwoCardPartLabel: "Part 2",
   dashboardPartTwoCardQuestionsLabel: "8 questions",
@@ -258,6 +258,21 @@ export const readingReviewCopy = {
   // 11 have no stem of their own, so the row names the blank instead of
   // inventing a sentence the source does not have.
   responseBlankQuestionText: "Blank in the written response.",
+
+  // The same line for a Reading Part 2 blank (EXAM-19). Questions 1 to 5
+  // sit inside the email on the right rather than a written reply, so
+  // the neutral line above would point a learner at the wrong text. The
+  // marking action passes this one in, the way the Part 2 screens pass
+  // their own titles in below.
+  emailBlankQuestionText: "Blank in the email message.",
+
+  // Titles for the Reading Part 2 closing screens (EXAM-19). Everything
+  // else on those screens is part neutral and reused as it stands: the
+  // subtitles, the four summary labels, the practice result note, the
+  // blank note, the two answer labels, both notices and the status
+  // words. Only the three lines that name the part are written twice.
+  partTwoScoreTitle: "Reading Part 2 practice score",
+  partTwoReviewTitle: "Reading Part 2 answer review",
 } as const;
 
 // Status labels for a review card. Short, plain, and not a badge.

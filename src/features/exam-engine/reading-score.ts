@@ -33,6 +33,7 @@ import type {
   ReadingAnswerMap,
   ReadingMarkedPart,
   ReadingPartContent,
+  ReadingReviewOptions,
   ReadingReviewRow,
   ReadingScoreSummary,
 } from "./reading-types";
@@ -80,8 +81,11 @@ export function summarizeReadingReviewRows(
 export function buildReadingScoreSummary(
   content: ReadingPartContent,
   answers: ReadingAnswerMap,
+  options: ReadingReviewOptions = {},
 ): ReadingScoreSummary {
-  return summarizeReadingReviewRows(buildReadingReviewRows(content, answers));
+  return summarizeReadingReviewRows(
+    buildReadingReviewRows(content, answers, options),
+  );
 }
 
 // Mark a whole Reading part in one pass: the review rows and the summary
@@ -94,8 +98,13 @@ export function buildReadingScoreSummary(
 export function markReadingPart(
   content: ReadingPartContent,
   answers: ReadingAnswerMap,
+  // EXAM-19: the only thing a part gets to say about its own marking.
+  // Reading Part 2 uses it to name its blanks after the email they sit
+  // in. The counting below is identical for every Reading part and
+  // takes no options, which is the point of one shared marker.
+  options: ReadingReviewOptions = {},
 ): ReadingMarkedPart {
-  const rows = buildReadingReviewRows(content, answers);
+  const rows = buildReadingReviewRows(content, answers, options);
 
   return {
     rows,
