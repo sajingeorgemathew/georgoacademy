@@ -124,14 +124,14 @@ export const readingCopy = {
     "Internal prototype of Mock Test 1 Reading Part 2, Reading to Apply a Diagram.",
   part2ExamRegionLabel: "Mock Test 1 - Reading Part 2",
 
-  // Reading Part 3 (EXAM-20).
+  // Reading Part 3 (EXAM-20, closing screens added by EXAM-21).
   //
-  // Part 3 closes on the EXAM-16 completion screen, the way Part 2 did
-  // before EXAM-19 gave it a score, because its review and its score are
-  // the next ticket. So it needs its own heading and its own restart
-  // label, and it reuses partCompletePendingReview and
-  // partCompleteNotice above unchanged: both say what is true of this
-  // part too.
+  // Part 3 closed on the EXAM-16 completion screen until EXAM-21 gave it
+  // a practice score and an answer review, the way EXAM-19 gave Part 2
+  // its own. The completion heading and the restart label below both
+  // stay: the restart label is what the score screen's restart button
+  // says, and the heading still names the screen buildReadingFlow can
+  // build for this part on request.
   //
   // The format label names what the learner is given rather than the
   // part title, the way the Part 1 and Part 2 labels do. Nine statements
@@ -161,6 +161,8 @@ export const readingCopy = {
   //   One part of four is built, plus one more without its review.
   //
   // EXAM-20 added a third card, for Reading Part 3, on the same terms.
+  // EXAM-21 gave that part its review and its score, so its description
+  // now reads like the other two rather than naming what is missing.
   //
   // These strings go when the real Reading entry point ships, along with
   // the cards themselves.
@@ -180,12 +182,13 @@ export const readingCopy = {
   dashboardPartTwoCardQuestionsLabel: "8 questions",
   dashboardPartTwoCardCtaLabel: "Open Reading Part 2",
 
-  // Reading Part 3's card (EXAM-20). Same shape as the two above, and
-  // the description says what is missing rather than what is coming: the
-  // part answers, and it does not mark.
+  // Reading Part 3's card (EXAM-20, description updated by EXAM-21).
+  // Same shape as the two above, and now the same claim: the part
+  // answers and it marks, locally, with no CELPIP level and no Reading
+  // band anywhere behind it.
   dashboardPartThreeCardTitle: "Mock Test 1 - Reading Part 3",
   dashboardPartThreeCardDescription:
-    "Reading for Information prototype with local answers. No review or score yet.",
+    "Reading for Information prototype with local answers and practice review.",
   dashboardPartThreeCardSectionLabel: "Reading",
   dashboardPartThreeCardPartLabel: "Part 3",
   dashboardPartThreeCardQuestionsLabel: "9 questions",
@@ -312,6 +315,17 @@ export const readingReviewCopy = {
   // words. Only the three lines that name the part are written twice.
   partTwoScoreTitle: "Reading Part 2 practice score",
   partTwoReviewTitle: "Reading Part 2 answer review",
+
+  // Titles for the Reading Part 3 closing screens (EXAM-21). Two lines
+  // again, and nothing else, for the same reason: everything else on
+  // those screens is part neutral and reused as it stands.
+  //
+  // Part 3 needs no blank question text beside these, unlike Part 2. Its
+  // nine questions are whole statements that each carry their own text,
+  // so formatReadingQuestionText prints the statement and never falls
+  // through to a line naming a blank.
+  partThreeScoreTitle: "Reading Part 3 practice score",
+  partThreeReviewTitle: "Reading Part 3 answer review",
 } as const;
 
 // Status labels for a review card. Short, plain, and not a badge.

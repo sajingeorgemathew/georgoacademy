@@ -30,11 +30,15 @@
 // Part 1 untouched, and the EXAM-16 ending is still one call away for
 // whatever needs it next.
 //
-// EXAM-20 is what needed it next. Reading Part 3 takes the "information"
-// working screen and the EXAM-16 ending, so its flow is three screens:
+// EXAM-20 is what needed it next. Reading Part 3 took the "information"
+// working screen and the EXAM-16 ending, so its flow was three screens:
 // the part intro, the split screen holding all 9 statements, and the
 // completion screen. Nothing in this file changed for it beyond two new
-// option values.
+// option values. EXAM-21 then built its review and its score, so Part 3
+// takes the default ending too and now differs from Parts 1 and 2 by its
+// working screen alone. Nothing in this file changed for that at all: the
+// prototype simply stopped asking for the "complete" ending, which is
+// still one call away for whatever needs it next.
 //
 // House style: normal hyphens only, no long hyphens or em dashes.
 
@@ -80,12 +84,12 @@ export type ReadingFlowOptions = {
 // Test 1 Reading Part 1 gets its four screen flow without passing
 // anything. Reading Part 2 asks for one option, a diagram screen, because
 // its passage is a picture; it takes the same four screen flow otherwise.
-// EXAM-19 gave Part 2 a score, so no caller asked for the "complete"
-// ending for a while. EXAM-20 asks for it again: Reading Part 3 is built
-// here as a question experience only, with its review and its score left
-// to the next ticket, which is exactly the case that ending exists for.
-// Part 3 also asks for the "information" task screen, because its passage
-// is labelled paragraphs rather than a letter or a picture.
+// EXAM-19 gave Part 2 a score and EXAM-21 gave Part 3 one, so no caller
+// asks for the "complete" ending today. It stays because it is the thing
+// a part built ahead of its confirmed answer key needs, which is exactly
+// the case EXAM-20 used it for. Reading Part 3 asks for the "information"
+// task screen, because its passage is labelled paragraphs rather than a
+// letter or a picture, and takes the default ending otherwise.
 export function buildReadingFlow(
   content: ReadingPartContent,
   options: ReadingFlowOptions = {},
