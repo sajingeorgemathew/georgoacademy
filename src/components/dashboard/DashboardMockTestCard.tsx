@@ -11,10 +11,16 @@ import {
 } from "@/features/exam-engine/reading-copy";
 import { countReadingSectionQuestions } from "@/features/exam-engine/reading-section-flow";
 import {
+  formatSpeakingDuration,
+  speakingMockCopy,
+} from "@/features/exam-engine/speaking-mock-copy";
+import { sumSpeakingResponseSeconds } from "@/features/exam-engine/speaking-mock-timing";
+import {
   formatWritingWordTarget,
   writingMockCopy,
 } from "@/features/exam-engine/writing-mock-copy";
 import { mockTest1ReadingSection } from "@/features/exam-engine/mock-tests/mock-test-1/reading-section";
+import { mockTest1SpeakingSection } from "@/features/exam-engine/mock-tests/mock-test-1/speaking-section";
 import { mockTest1WritingSection } from "@/features/exam-engine/mock-tests/mock-test-1/writing-section";
 
 // Mock test entry point on the learner dashboard (EXAM-15A, Reading
@@ -41,10 +47,12 @@ import { mockTest1WritingSection } from "@/features/exam-engine/mock-tests/mock-
 //   /dashboard/mock-tests/mock-test-1/listening
 //   /dashboard/mock-tests/mock-test-1/reading
 //   /dashboard/mock-tests/mock-test-1/writing
+//   /dashboard/mock-tests/mock-test-1/speaking
 //
-// EXAM-25 added the third. It follows the same rule as the other two: one
-// card per section a learner can sit end to end, and no card for a screen
-// inside one. There are no individual Writing task cards for the same
+// EXAM-25 added the third and EXAM-27 added the fourth. Both follow the
+// same rule as the first two: one card per section a learner can sit end
+// to end, and no card for a screen inside one. There are no individual
+// Writing task cards and no individual Speaking task cards, for the same
 // reason there are no Reading part cards.
 //
 // These routes lost their card and kept working. They are the way to
@@ -88,9 +96,12 @@ import { mockTest1WritingSection } from "@/features/exam-engine/mock-tests/mock-
 // throughout, and a card dressed as a released module would be claiming
 // otherwise.
 //
-// What neither card says, because none of it is true yet: that a full
-// all-skills Mock Test 1 exists, or that any of this produces an official
-// CELPIP result. Two sections of four are built.
+// What none of the cards says, because none of it is true yet: that a
+// full all-skills Mock Test 1 exists, or that any of this produces an
+// official CELPIP result. All four sections now have a route, and they
+// are still four separate runs rather than one test: there is no
+// all-skills flow, Writing gives a practice estimate rather than a score,
+// and Speaking gives neither yet.
 
 const LISTENING_TEST_HREF = "/dashboard/mock-tests/mock-test-1/listening";
 
@@ -159,7 +170,35 @@ const WRITING_CARD_META = [
     : []),
 ];
 
-// The slash separated facts line, shared by both cards so the Reading one
+// The Speaking card (EXAM-27).
+//
+// A fourth internal build link, dressed exactly as the Reading and
+// Writing ones: a tinted panel with a dashed rule, an Internal preview
+// badge, and a secondary button. It has more reason to carry that badge
+// than either of them, because the Speaking run has no transcription, no
+// review, no score and no saved recording at all, which is what the
+// description says out loud.
+//
+// No individual Speaking task cards. The eight tasks are screens inside
+// this one run and are not reachable on their own, so there is nothing to
+// link to and nothing that would be useful if there were.
+const SPEAKING_TEST_HREF = "/dashboard/mock-tests/mock-test-1/speaking";
+
+// The total recording time across the eight tasks, summed off the content
+// rather than written down, so the card and the eight countdowns cannot
+// disagree.
+const SPEAKING_RESPONSE_TIME = formatSpeakingDuration(
+  sumSpeakingResponseSeconds(mockTest1SpeakingSection),
+);
+
+// The Speaking facts line. Tasks 1 to 8, and the summed speaking time.
+const SPEAKING_CARD_META = [
+  speakingMockCopy.dashboardCardSectionLabel,
+  speakingMockCopy.dashboardCardTasksLabel,
+  SPEAKING_RESPONSE_TIME,
+];
+
+// The slash separated facts line, shared by every card so the Reading one
 // reads the same way as the Listening one.
 function CardMetaList({ items }: { items: readonly string[] }) {
   return (
@@ -191,11 +230,15 @@ export function DashboardMockTestCard() {
         description={listeningCopy.mockTestsDescription}
       />
 
-      {/* Three across from the large breakpoint, two below it. EXAM-25
-          added the third card and the third column with it: two cards in
-          a two column grid plus one on its own row reads as an
-          afterthought rather than as a third section. */}
-      <div className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      {/* Two across from the small breakpoint, and two across at every
+          width above it: four cards in two even rows.
+          EXAM-25 made this a three column grid because there were three
+          cards and one of them would otherwise have been stranded on a
+          row of its own. EXAM-27 adds the fourth, which removes that
+          reason, and four columns were tried and dropped: inside the
+          dashboard content column they leave each card about 215px wide,
+          which breaks "Mock Test 1 - Reading Test" over four lines. */}
+      <div className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2">
         <AppCard as="article" padding="compact" className="flex flex-col">
           <div className="flex items-start justify-between gap-3">
             <h3 className={cx(text.heading, "min-w-0 text-lg")}>
@@ -282,6 +325,39 @@ export function DashboardMockTestCard() {
               size="md"
             >
               {writingMockCopy.dashboardCardCtaLabel}
+            </AppButtonLink>
+          </div>
+        </AppCard>
+
+        <AppCard
+          as="article"
+          variant="subtle"
+          padding="compact"
+          className="flex flex-col border-dashed border-academy-navy/25"
+        >
+          <div className="flex items-start justify-between gap-3">
+            <h3 className={cx(text.heading, "min-w-0 text-lg")}>
+              {speakingMockCopy.dashboardCardTitle}
+            </h3>
+
+            <AppStatusBadge tone="neutral" className="shrink-0">
+              {speakingMockCopy.dashboardPreviewBadgeLabel}
+            </AppStatusBadge>
+          </div>
+
+          <p className={cx("mt-3 text-sm leading-6", text.secondary)}>
+            {speakingMockCopy.dashboardCardDescription}
+          </p>
+
+          <CardMetaList items={SPEAKING_CARD_META} />
+
+          <div className="mt-auto pt-5">
+            <AppButtonLink
+              href={SPEAKING_TEST_HREF}
+              variant="secondary"
+              size="md"
+            >
+              {speakingMockCopy.dashboardCardCtaLabel}
             </AppButtonLink>
           </div>
         </AppCard>

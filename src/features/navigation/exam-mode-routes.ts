@@ -72,6 +72,21 @@
 // hint under the editor and the completion screen all state that nothing
 // is saved and nothing is scored.
 //
+// EXAM-27 added the Speaking section route, which completes the four
+// sections. It needs the locked surface for a reason none of the others
+// have: a learner on a Speaking task screen is talking out loud into a
+// microphone against a countdown, and every piece of dashboard chrome on
+// that screen is something to look at instead of the picture they are
+// describing. Its two clocks and its Stop recording button also have to
+// stay on screen while the prompt column scrolls, which is what the
+// locked viewport gives and a dashboard content column does not.
+//
+// Its own ticket asks for no preview label on the exam surface, so what
+// the Listening part routes say in a preview notice it says on the
+// screens themselves: the intro notice, the line under every recorder and
+// the completion screen all state that nothing is saved, nothing is
+// uploaded and nothing is scored.
+//
 // A trailing slash is tolerated because a typed URL can carry one. Query
 // strings and hashes never reach usePathname, so they need no handling.
 //
@@ -85,6 +100,7 @@ export const EXAM_MODE_ROUTES: readonly string[] = [
   "/dashboard/mock-tests/mock-test-1/reading/part-3",
   "/dashboard/mock-tests/mock-test-1/reading/part-4",
   "/dashboard/mock-tests/mock-test-1/writing",
+  "/dashboard/mock-tests/mock-test-1/speaking",
 ];
 
 // Whether a pathname is one of the exam mode routes.
