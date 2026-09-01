@@ -51,6 +51,17 @@
 // blanks. Both columns have to scroll independently, which is exactly
 // what a dashboard content column cannot give them.
 //
+// EXAM-24 added the full Reading section route, which is the Reading twin
+// of the full Listening route at the top of the list. It is the run a
+// learner sits rather than a part a developer checks, so it needs the
+// locked exam surface at least as much as the four part routes do: it
+// carries the same two scrolling columns for four parts running, and its
+// score and review screens must not sit inside a dashboard content column
+// with a breadcrumb trail above them.
+//
+// The four part routes stay listed beside it. They are unchanged by that
+// ticket and are still the way to check one part on its own.
+//
 // A trailing slash is tolerated because a typed URL can carry one. Query
 // strings and hashes never reach usePathname, so they need no handling.
 //
@@ -58,6 +69,7 @@
 
 export const EXAM_MODE_ROUTES: readonly string[] = [
   "/dashboard/mock-tests/mock-test-1/listening",
+  "/dashboard/mock-tests/mock-test-1/reading",
   "/dashboard/mock-tests/mock-test-1/reading/part-1",
   "/dashboard/mock-tests/mock-test-1/reading/part-2",
   "/dashboard/mock-tests/mock-test-1/reading/part-3",

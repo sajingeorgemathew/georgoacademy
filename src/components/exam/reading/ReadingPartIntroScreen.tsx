@@ -36,6 +36,16 @@ function formatMinutes(seconds: number): string {
   return `${minutes} ${minutes === 1 ? "minute" : "minutes"}`;
 }
 
+// EXAM-24 added noticeText, and nothing else. The four part routes pass
+// none and are unchanged: it defaults to the part wording they already
+// printed.
+//
+// The full Reading section passes its own, because the part wording is
+// wrong inside a section run in two ways. It opens "Internal prototype.",
+// which is a label the section's exam surface must not carry, and it
+// promises "a practice score is shown at the end of the part", which is
+// exactly what the section removes: a part there hands straight over to
+// the next one and the only result is at the end of the section.
 export type ReadingPartIntroScreenProps = {
   content: ReadingPartContent;
   questionCount: number;
@@ -45,6 +55,8 @@ export type ReadingPartIntroScreenProps = {
   // Replaces the whole detail list, for a part whose facts are not the
   // usual three.
   details?: ExamSectionIntroDetail[];
+  // Quiet note under the instruction list. Defaults to the part wording.
+  noticeText?: string;
   metaText?: string;
   onNext?: () => void;
   onBack?: () => void;
@@ -56,6 +68,7 @@ export function ReadingPartIntroScreen({
   questionCount,
   formatLabel = readingCopy.partIntroFormatLabel,
   details,
+  noticeText = readingCopy.partIntroNotice,
   metaText,
   onNext,
   onBack,
@@ -72,7 +85,7 @@ export function ReadingPartIntroScreen({
       title={content.title}
       subtitle={content.subtitle ?? readingCopy.partIntroSubtitle}
       instructions={content.instructions}
-      noticeText={readingCopy.partIntroNotice}
+      noticeText={noticeText}
       metaText={metaText}
       onNext={onNext}
       onBack={onBack}

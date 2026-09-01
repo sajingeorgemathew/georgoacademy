@@ -30,12 +30,31 @@ import type { ReadingScoreSummary } from "@/features/exam-engine/reading-types";
 // Presentational only. Every number arrives on the summary, which was
 // counted on the server, and nothing here calculates anything.
 
+// EXAM-24 added the two note overrides below, and nothing else. The four
+// part score screens pass neither and are unchanged: both default to the
+// readingReviewCopy lines they already printed.
+//
+// The full Reading section score screen passes both, because its notes
+// have to say something the part notes cannot. The part note ends "No
+// CELPIP Reading level is estimated from one part.", which is true on a
+// part screen and would be a lie under a section score that shows an
+// estimated band; the section note says what that estimate is worth
+// instead. Overriding two strings is what let the section reuse this card
+// whole rather than fork a second one that counts the same five readings.
 export type ReadingScoreSummaryCardProps = {
   summary: ReadingScoreSummary;
+  // Sentence under the readings saying the result is not an official
+  // CELPIP score. Defaults to the part wording.
+  practiceResultNote?: string;
+  // Sentence saying how blanks were counted. Printed only when there is a
+  // blank to explain. Defaults to the part wording.
+  blankNote?: string;
 };
 
 export function ReadingScoreSummaryCard({
   summary,
+  practiceResultNote = readingReviewCopy.practiceResultNote,
+  blankNote = readingReviewCopy.blankNote,
 }: ReadingScoreSummaryCardProps) {
   const {
     totalQuestions,
@@ -102,12 +121,10 @@ export function ReadingScoreSummaryCard({
           answered everything is not told about a rule that did not
           affect them. */}
       {blankCount > 0 ? (
-        <p className={examReadingScore.note}>{readingReviewCopy.blankNote}</p>
+        <p className={examReadingScore.note}>{blankNote}</p>
       ) : null}
 
-      <p className={examReadingScore.note}>
-        {readingReviewCopy.practiceResultNote}
-      </p>
+      <p className={examReadingScore.note}>{practiceResultNote}</p>
     </div>
   );
 }

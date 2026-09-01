@@ -4,10 +4,16 @@ import { AppSectionHeader } from "@/components/app/AppSectionHeader";
 import { AppStatusBadge } from "@/components/app/AppStatusBadge";
 import { cx, text } from "@/features/design/design-tokens";
 import { listeningCopy } from "@/features/exam-engine/listening-copy";
-import { readingCopy } from "@/features/exam-engine/reading-copy";
+import {
+  formatReadingSectionGroupCount,
+  readingCopy,
+  readingSectionCopy,
+} from "@/features/exam-engine/reading-copy";
+import { countReadingSectionQuestions } from "@/features/exam-engine/reading-section-flow";
+import { mockTest1ReadingSection } from "@/features/exam-engine/mock-tests/mock-test-1/reading-section";
 
 // Mock test entry point on the learner dashboard (EXAM-15A, Reading
-// internal preview cards added by EXAM-18).
+// internal preview cards added by EXAM-18, cut back to one by EXAM-24).
 //
 // This replaces ExamShellPreviewLink, which grew one dashed "Internal
 // preview" card per ticket until nine of them sat on the dashboard: the
@@ -16,10 +22,19 @@ import { readingCopy } from "@/features/exam-engine/reading-copy";
 // internal build steps that a learner had no reason to see, and the one
 // that mattered was last in the list and dressed the same as the rest.
 //
-// So the dashboard shows one student facing card, for the route that
-// runs the whole Listening section:
+// The Reading cards went the same way. EXAM-18, EXAM-20 and EXAM-22 each
+// added a part card, because every Reading route runs in exam mode, an
+// exam mode route carries no dashboard chrome and no preview label, and
+// so the only way to open one was to paste its URL. By the time the
+// fourth arrived there were five Reading cards beside the Listening one,
+// and four of the five were internal build steps rather than the thing a
+// learner opens.
+//
+// So the dashboard shows two cards, one per built section, for the two
+// routes that run a whole section:
 //
 //   /dashboard/mock-tests/mock-test-1/listening
+//   /dashboard/mock-tests/mock-test-1/reading
 //
 // These routes lost their card and kept working. They are the way to
 // check a single part during development, and they open normally when
@@ -33,9 +48,15 @@ import { readingCopy } from "@/features/exam-engine/reading-copy";
 //   /dashboard/mock-tests/mock-test-1/listening/part-4
 //   /dashboard/mock-tests/mock-test-1/listening/part-5
 //   /dashboard/mock-tests/mock-test-1/listening/part-6
+//   /dashboard/mock-tests/mock-test-1/reading/part-1
+//   /dashboard/mock-tests/mock-test-1/reading/part-2
+//   /dashboard/mock-tests/mock-test-1/reading/part-3
+//   /dashboard/mock-tests/mock-test-1/reading/part-4
 //
 // Nothing was deleted to hide them. They are simply not linked from
-// anywhere, and they all carry robots noindex already.
+// anywhere, and they all carry robots noindex already. The four Reading
+// part routes are still listed in exam-mode-routes.ts, so a typed URL
+// still opens the locked exam surface it always did.
 //
 // The Listening card is deliberately styled as a real practice module
 // card rather than an internal note: solid panel, a plain Available pill,
@@ -45,27 +66,34 @@ import { readingCopy } from "@/features/exam-engine/reading-copy";
 // the route itself: nothing is saved, media can be replayed, the timer is
 // static, and the practice score is not an official CELPIP score.
 //
-// EXAM-18 added the Reading cards beside it, EXAM-20 added a third for
-// Reading Part 3 and EXAM-22 a fourth for Reading Part 4, because every
-// Reading route runs in exam mode, an
-// exam mode route carries no dashboard chrome and no preview label, and
-// so the only way to open one was to paste its URL. They are internal build links and they are dressed as internal
-// build links, following the rule ExamShellPreviewLink set: a tinted
-// panel with a dashed rule rather than the solid one, an Internal preview
-// badge where the Available pill sits, and a secondary button rather than
-// the navy call to action. The layout underneath is the Listening card's
-// layout, so the three read as one section rather than as two designs.
+// The Reading card beside it is still dressed as an internal build link,
+// following the rule ExamShellPreviewLink set: a tinted panel with a
+// dashed rule rather than the solid one, an Internal preview badge where
+// the Available pill sits, and a secondary button rather than the navy
+// call to action. The layout underneath is the Listening layout, so the
+// two read as one section rather than as two designs. It stays a preview
+// card because the Reading run keeps the prototype behaviour its ticket
+// left in place, no strict section timing and a Back button that works
+// throughout, and a card dressed as a released module would be claiming
+// otherwise.
 //
-// What these cards deliberately do not say, because none of it is true
-// yet: that a Reading test exists, that a full Reading section exists, or
-// that any part produces a CELPIP level or a Reading band. All four
-// Reading parts now answer, and the fourth has no review and no score
-// yet, which its own description says. Four separate parts are not a
-// Reading section and nothing here claims otherwise. Remove these cards,
-// and their wording in reading-copy.ts, once the assembled Reading
-// section has its own student facing card.
+// What neither card says, because none of it is true yet: that a full
+// all-skills Mock Test 1 exists, or that any of this produces an official
+// CELPIP result. Two sections of four are built.
 
 const LISTENING_TEST_HREF = "/dashboard/mock-tests/mock-test-1/listening";
+
+// The full Reading section question count, for example "38 questions".
+//
+// Counted from the four content files at module load rather than written
+// down, so the card and the score denominator can never disagree. It is
+// safe to read the content here because this is a server component and
+// the only thing that crosses to the browser is the finished string: the
+// answer keys inside that content object are never rendered and never
+// passed as a prop.
+const READING_SECTION_QUESTION_COUNT = formatReadingSectionGroupCount(
+  countReadingSectionQuestions(mockTest1ReadingSection),
+);
 
 // Short facts under the description. Plain text, not controls.
 const CARD_META = [
@@ -74,62 +102,17 @@ const CARD_META = [
   listeningCopy.fullSectionCardQuestionsLabel,
 ];
 
-// The four Reading preview cards differ only in their wording and their
-// href, so they are one list and one renderer rather than four near
-// identical blocks of markup.
-//
-// The question counts are read off the built parts rather than invented:
-// Reading Part 1 asks 11 questions, Part 2 asks 8, Part 3 asks 9 and
-// Part 4 asks 10.
-const READING_PREVIEW_CARDS = [
-  {
-    href: "/dashboard/mock-tests/mock-test-1/reading/part-1",
-    title: readingCopy.dashboardPartOneCardTitle,
-    description: readingCopy.dashboardPartOneCardDescription,
-    meta: [
-      readingCopy.dashboardPartOneCardSectionLabel,
-      readingCopy.dashboardPartOneCardPartLabel,
-      readingCopy.dashboardPartOneCardQuestionsLabel,
-    ],
-    ctaLabel: readingCopy.dashboardPartOneCardCtaLabel,
-  },
-  {
-    href: "/dashboard/mock-tests/mock-test-1/reading/part-2",
-    title: readingCopy.dashboardPartTwoCardTitle,
-    description: readingCopy.dashboardPartTwoCardDescription,
-    meta: [
-      readingCopy.dashboardPartTwoCardSectionLabel,
-      readingCopy.dashboardPartTwoCardPartLabel,
-      readingCopy.dashboardPartTwoCardQuestionsLabel,
-    ],
-    ctaLabel: readingCopy.dashboardPartTwoCardCtaLabel,
-  },
-  {
-    href: "/dashboard/mock-tests/mock-test-1/reading/part-3",
-    title: readingCopy.dashboardPartThreeCardTitle,
-    description: readingCopy.dashboardPartThreeCardDescription,
-    meta: [
-      readingCopy.dashboardPartThreeCardSectionLabel,
-      readingCopy.dashboardPartThreeCardPartLabel,
-      readingCopy.dashboardPartThreeCardQuestionsLabel,
-    ],
-    ctaLabel: readingCopy.dashboardPartThreeCardCtaLabel,
-  },
-  {
-    href: "/dashboard/mock-tests/mock-test-1/reading/part-4",
-    title: readingCopy.dashboardPartFourCardTitle,
-    description: readingCopy.dashboardPartFourCardDescription,
-    meta: [
-      readingCopy.dashboardPartFourCardSectionLabel,
-      readingCopy.dashboardPartFourCardPartLabel,
-      readingCopy.dashboardPartFourCardQuestionsLabel,
-    ],
-    ctaLabel: readingCopy.dashboardPartFourCardCtaLabel,
-  },
+// The Reading facts line. Parts 1 to 4, and the counted total.
+const READING_CARD_META = [
+  readingSectionCopy.dashboardCardSectionLabel,
+  readingSectionCopy.dashboardCardPartsLabel,
+  READING_SECTION_QUESTION_COUNT,
 ];
 
-// The slash separated facts line, shared by both kinds of card so the
-// Reading cards read the same way as the Listening one.
+const READING_TEST_HREF = "/dashboard/mock-tests/mock-test-1/reading";
+
+// The slash separated facts line, shared by both cards so the Reading one
+// reads the same way as the Listening one.
 function CardMetaList({ items }: { items: readonly string[] }) {
   return (
     <ul
@@ -185,37 +168,38 @@ export function DashboardMockTestCard() {
           </div>
         </AppCard>
 
-        {READING_PREVIEW_CARDS.map((card) => (
-          <AppCard
-            key={card.href}
-            as="article"
-            variant="subtle"
-            padding="compact"
-            className="flex flex-col border-dashed border-academy-navy/25"
-          >
-            <div className="flex items-start justify-between gap-3">
-              <h3 className={cx(text.heading, "min-w-0 text-lg")}>
-                {card.title}
-              </h3>
+        <AppCard
+          as="article"
+          variant="subtle"
+          padding="compact"
+          className="flex flex-col border-dashed border-academy-navy/25"
+        >
+          <div className="flex items-start justify-between gap-3">
+            <h3 className={cx(text.heading, "min-w-0 text-lg")}>
+              {readingSectionCopy.dashboardCardTitle}
+            </h3>
 
-              <AppStatusBadge tone="neutral" className="shrink-0">
-                {readingCopy.dashboardPreviewBadgeLabel}
-              </AppStatusBadge>
-            </div>
+            <AppStatusBadge tone="neutral" className="shrink-0">
+              {readingCopy.dashboardPreviewBadgeLabel}
+            </AppStatusBadge>
+          </div>
 
-            <p className={cx("mt-3 text-sm leading-6", text.secondary)}>
-              {card.description}
-            </p>
+          <p className={cx("mt-3 text-sm leading-6", text.secondary)}>
+            {readingSectionCopy.dashboardCardDescription}
+          </p>
 
-            <CardMetaList items={card.meta} />
+          <CardMetaList items={READING_CARD_META} />
 
-            <div className="mt-auto pt-5">
-              <AppButtonLink href={card.href} variant="secondary" size="md">
-                {card.ctaLabel}
-              </AppButtonLink>
-            </div>
-          </AppCard>
-        ))}
+          <div className="mt-auto pt-5">
+            <AppButtonLink
+              href={READING_TEST_HREF}
+              variant="secondary"
+              size="md"
+            >
+              {readingSectionCopy.dashboardCardCtaLabel}
+            </AppButtonLink>
+          </div>
+        </AppCard>
       </div>
     </section>
   );
