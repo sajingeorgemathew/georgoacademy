@@ -1022,6 +1022,121 @@ export const examWriting = {
   completeHeading: "text-[13px] font-semibold leading-5 text-academy-navy",
 } as const;
 
+// Writing AI review and practice estimate (EXAM-26).
+//
+// The result screen is long, and long is the problem it has to solve. One
+// review carries an overall estimate, two task cards, eight criterion
+// rows, two lists, up to eight corrections and two full rewrites, and a
+// wall of that is a wall whatever colour it is painted.
+//
+// So the shape is a stack of bordered task cards, each one an internal
+// stack of small labelled blocks, built from the same recipes the rest of
+// the engine uses: examReview for the criterion table, examScreenBody for
+// the actions, examBandCard for the headline reading. What is added below
+// is only what a review needs and no screen before it did.
+//
+// Three decisions worth stating:
+//
+// - **The estimate is a reading, not a certificate.** The overall level
+//   uses the same bordered strip the Listening band card uses, with no
+//   seal, no ribbon and no colour, because nothing on a practice estimate
+//   should be mistakeable for an official score report.
+// - **A rewrite keeps its paragraphs.** Both rewrite blocks are set with
+//   whitespace-pre-line, so the model's paragraph breaks survive into the
+//   page. A 200 word email rendered as one block would be unreadable and
+//   would also be wrong: paragraphing is one of the things being marked.
+// - **A correction is a pair, not a sentence.** The learner's words and
+//   the stronger version sit in two labelled halves, so a reader can see
+//   the change rather than parse a description of it.
+export const examWritingReview = {
+  // Result screen column, capped so a review does not run the full width
+  // of a wide canvas.
+  stack: "mx-auto flex w-full min-w-0 max-w-3xl flex-col gap-4",
+
+  // Practice-only disclaimer. Bordered rather than quiet, because it is
+  // the sentence that stops the reading above it being taken for an
+  // official score, and it has to be seen.
+  disclaimer:
+    "flex min-w-0 flex-col gap-0.5 rounded-sm border border-academy-line bg-academy-navy-soft/35 px-3 py-2.5",
+  disclaimerLabel:
+    "text-[11px] font-semibold uppercase tracking-[0.06em] text-academy-navy/55",
+  disclaimerText: "text-[12px] leading-5 text-academy-navy/80",
+
+  // One task card.
+  cardList: "flex min-w-0 flex-col gap-4",
+  card: "min-w-0 overflow-hidden rounded-sm border border-academy-line bg-academy-paper",
+  cardHeader:
+    "flex min-w-0 flex-wrap items-baseline gap-x-3 gap-y-1 border-b border-academy-line bg-academy-navy-soft/60 px-3 py-2",
+  cardTitle: "min-w-0 flex-1 text-[13px] font-semibold leading-5 text-academy-navy",
+  cardLevel:
+    "ml-auto shrink-0 text-[13px] font-semibold leading-5 text-academy-navy",
+  cardLevelLabel:
+    "block text-[11px] font-normal uppercase tracking-[0.06em] text-academy-navy/55",
+  cardBody: "flex min-w-0 flex-col gap-3.5 px-3 py-3",
+
+  // Word count row at the top of a card body.
+  metaRow: "flex min-w-0 flex-wrap items-baseline gap-x-5 gap-y-1",
+  metaItem: "flex min-w-0 items-baseline gap-1.5 text-[11px] leading-4",
+  metaLabel: "font-semibold uppercase tracking-[0.06em] text-academy-navy/55",
+  metaValue: "font-semibold tabular-nums text-academy-navy",
+  // Within or outside the word target. A word rather than a badge, and
+  // outside is quiet navy rather than red: the target is guidance from
+  // the prompt, so missing it is a note, not a mark.
+  metaFlag: "text-[11px] font-semibold leading-4 text-academy-navy/70",
+
+  // A labelled block inside a card body.
+  section: "flex min-w-0 flex-col gap-1.5",
+  sectionTitle:
+    "text-[11px] font-semibold uppercase tracking-[0.06em] text-academy-navy/55",
+  sectionText: "text-[13px] leading-6 text-academy-navy/85",
+
+  // What worked and what held it back, side by side from the small
+  // breakpoint up.
+  feedbackSplit: "flex min-w-0 flex-col gap-3 sm:flex-row sm:gap-4",
+  feedbackBlock: "flex min-w-0 flex-1 flex-col gap-1",
+
+  // Plain bullet list, for missing prompt points and template warnings.
+  list: "flex min-w-0 list-disc flex-col gap-1 pl-5",
+  listItem: "text-[13px] leading-6 text-academy-navy/85",
+
+  // Corrections. One bordered row per correction, each holding the two
+  // labelled halves and the criterion it belongs to.
+  mistakeList: "flex min-w-0 flex-col gap-1.5",
+  mistakeRow:
+    "flex min-w-0 flex-col gap-1.5 rounded-sm border border-academy-line bg-academy-navy-soft/25 px-2.5 py-2",
+  mistakePair: "flex min-w-0 flex-col gap-1.5 sm:flex-row sm:gap-4",
+  mistakeHalf: "flex min-w-0 flex-1 flex-col gap-0.5",
+  mistakeLabel:
+    "text-[11px] font-semibold uppercase tracking-[0.06em] text-academy-navy/55",
+  mistakeOriginal: "text-[13px] leading-5 text-academy-navy/70 line-through",
+  mistakeCorrection: "text-[13px] font-semibold leading-5 text-academy-navy",
+  mistakeCriterion: "text-[11px] leading-4 text-academy-navy/55",
+
+  // A rewrite or a model response. The prose keeps its paragraph breaks.
+  rewrite:
+    "flex min-w-0 flex-col gap-1.5 rounded-sm border border-academy-line bg-academy-paper px-3 py-2.5",
+  rewriteHeader:
+    "flex min-w-0 flex-wrap items-baseline gap-x-3 gap-y-0.5 border-b border-academy-line pb-1.5",
+  rewriteTitle: "text-[13px] font-semibold leading-5 text-academy-navy",
+  rewriteTarget:
+    "ml-auto shrink-0 text-[11px] font-semibold uppercase tracking-[0.06em] text-academy-navy/55",
+  rewriteIntro: "text-[11px] leading-4 text-academy-navy/60",
+  rewriteBody:
+    "whitespace-pre-line text-[13px] leading-6 text-academy-navy/85",
+
+  // Shown in place of the criterion table, the corrections and the two
+  // rewrites on a task that was left blank.
+  insufficient:
+    "flex min-w-0 flex-col gap-1 rounded-sm border border-academy-line bg-academy-navy-soft/35 px-3 py-2.5",
+  insufficientHeading:
+    "text-[13px] font-semibold leading-5 text-academy-navy",
+  insufficientText: "text-[12px] leading-5 text-academy-navy/75",
+
+  // Quiet line under the Submit for AI Review button.
+  submitStack: "flex min-w-0 flex-col gap-2",
+  submitHint: "text-[11px] leading-4 text-academy-navy/60",
+} as const;
+
 // Shared body text tones inside the canvas. Exam copy runs tighter than
 // dashboard copy, so these sit a step below the marketing scale.
 export const examText = {

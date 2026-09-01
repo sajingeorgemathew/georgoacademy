@@ -1,11 +1,12 @@
 import { ExamButton } from "../ExamButton";
 import { ExamInstructionRow } from "../ExamInstructionRow";
 import { ExamShell } from "../ExamShell";
+import { WritingAiReviewButton } from "./WritingAiReviewButton";
 import {
   examReview,
   examScreenBody,
-  examText,
   examWriting,
+  examWritingReview,
 } from "@/features/exam-engine/exam-theme";
 import {
   formatWritingWordCount,
@@ -14,23 +15,30 @@ import {
 import type { WritingMockCopy } from "@/features/exam-engine/writing-mock-copy";
 import type { WritingTaskSummary } from "@/features/exam-engine/writing-mock-types";
 
-// Writing section completion screen (EXAM-25).
+// Writing section completion screen (EXAM-25, extended by EXAM-26).
 //
-// The last screen of the run. It says the section is finished, reports
-// what was typed for each task, states plainly that the AI review and the
-// estimated band are the next build, and offers a restart and a way back
-// to the dashboard.
+// The end of the writing, and the point where the review is offered. It
+// says the section is finished, reports what was typed for each task, and
+// offers three things: the AI review, a restart, and a way back to the
+// dashboard.
 //
-// What it reports is word counts and, for the survey task, the position
-// that was chosen. That is everything this prototype honestly knows about
-// a response. There is no score, no band, no feedback and no percentage,
-// because Writing is judged against descriptors rather than a key and
-// nothing has judged it. A pending block with a greyed out number in it
-// would suggest a result is a moment away, and it is a ticket away.
+// What it reports on its own is word counts and, for the survey task, the
+// position that was chosen. That is everything the screen knows before a
+// review has been asked for. It still shows no level and no band of its
+// own: the estimate belongs to the result screen, after a review has
+// actually happened, and a number on this screen would be a number
+// nothing produced.
 //
-// The pending review line is a plain sentence rather than a disabled
-// button, which is the rule ListeningPartCompleteScreen set: a greyed out
-// control says "press this in a moment", and there is nothing behind it.
+// EXAM-25 ended this screen with a plain sentence saying the review was
+// the next build, on the rule ListeningPartCompleteScreen set: a greyed
+// out control says "press this in a moment", and there was nothing behind
+// it. There is something behind it now, so the sentence is gone and the
+// control is real. The rule is unchanged and this is what it always
+// pointed at.
+//
+// The review is offered rather than forced. A learner can read their two
+// word counts and leave without pressing it, which is why every control
+// this screen had is still on it.
 //
 // Return to dashboard is a link so it keeps middle click and open in a
 // new tab. Restart is a handler, because clearing the writing held on the
@@ -52,6 +60,18 @@ export type WritingSectionCompleteScreenProps = {
   // Clears the writing and returns to the first screen. Omit to hide the
   // control.
   onRestart?: () => void;
+  // Sends both responses for AI review. Omit to hide the review block
+  // entirely, which is what a caller with no server action wants.
+  onRequestReview?: () => void;
+  // True while a review is in flight, which disables the submit button
+  // and puts it into its pending wording.
+  //
+  // WritingSectionPrototype does not pass it: it draws a separate
+  // processing screen in place of this one while a review runs, so this
+  // screen is never on the page in that state. It is here for a caller
+  // that would rather keep the learner on the completion screen and show
+  // the wait on the button.
+  reviewPending?: boolean;
   copy?: WritingMockCopy;
   metaText?: string;
   onBack?: () => void;
@@ -63,6 +83,8 @@ export function WritingSectionCompleteScreen({
   tasks,
   dashboardHref = "/dashboard",
   onRestart,
+  onRequestReview,
+  reviewPending = false,
   copy = writingMockCopy,
   metaText,
   onBack,
@@ -74,6 +96,12 @@ export function WritingSectionCompleteScreen({
   const showChoiceColumn = tasks.some(
     (task) => task.choiceLabel !== undefined || task.choiceText !== undefined,
   );
+
+  // Whether there is any writing at all to review. It changes the hint
+  // under the submit button and nothing else: the button stays live, and
+  // an empty section still returns a structured no-response result rather
+  // than a dead control with no explanation beside it.
+  const bothResponsesEmpty = tasks.every((task) => task.wordCount === 0);
 
   return (
     <ExamShell
@@ -153,8 +181,32 @@ export function WritingSectionCompleteScreen({
             </table>
           </div>
 
+          {onRequestReview ? (
+            <section className={examWritingReview.section}>
+              <h3 className={examWriting.completeHeading}>
+                {copy.reviewHeading}
+              </h3>
+
+              <p className={examWritingReview.sectionText}>
+                {copy.reviewIntro}
+              </p>
+
+              <WritingAiReviewButton
+                onSubmit={onRequestReview}
+                pending={reviewPending}
+                bothResponsesEmpty={bothResponsesEmpty}
+                copy={copy}
+              />
+            </section>
+          ) : null}
+
           <div className={examScreenBody.actions}>
-            <ExamButton variant="primary" size="md" href={dashboardHref}>
+            <ExamButton
+              variant="secondary"
+              size="md"
+              href={dashboardHref}
+              uppercase={false}
+            >
               {copy.backToDashboardLabel}
             </ExamButton>
 
@@ -169,8 +221,6 @@ export function WritingSectionCompleteScreen({
               </ExamButton>
             ) : null}
           </div>
-
-          <p className={examText.muted}>{copy.completePendingReview}</p>
 
           <p className={examScreenBody.notice}>{copy.completeNotice}</p>
         </div>

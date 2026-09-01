@@ -1,5 +1,5 @@
-// Learner facing wording for the Mock Test 1 Writing section prototype
-// (EXAM-25).
+// Learner facing wording for the Mock Test 1 Writing section (EXAM-25,
+// extended by EXAM-26).
 //
 // Same rule as exam-copy.ts, listening-copy.ts and reading-copy.ts: all
 // Writing mock test chrome copy lives in one file so the screens say the
@@ -8,11 +8,13 @@
 //
 // Two wording rules this file exists to hold the line on:
 //
-// - Nothing here promises a score. This prototype produces no score, no
-//   estimated band and no AI feedback, so every screen that could imply
-//   one says instead that the review is added next. A screen that said
-//   "your result" with nothing behind it would be a worse prototype than
-//   one that says plainly what it does not do.
+// - Nothing here promises an official result. EXAM-26 added an AI review
+//   and an estimated Writing level, so the screens no longer say a review
+//   is coming later, but every one of them names what it is: a Toronto
+//   Academy practice estimate, AI-supported, and not an official CELPIP
+//   score. The words "official CELPIP score", "official result",
+//   "guaranteed score" and "pass guarantee" appear nowhere in this file
+//   except in the sentences that deny them.
 // - Nothing here names the official test as the thing the learner is
 //   sitting. This is Toronto Academy practice software, which is the rule
 //   docs/product/exam-engine-reference-audit.md section 9 sets out.
@@ -50,15 +52,15 @@ export function buildWritingMockCopy({ testLabel }: { testLabel: string }) {
         text: "Your responses are held on this screen only. Nothing is saved, and leaving or reloading the page clears them.",
       },
       {
-        heading: "No review yet",
-        text: "This prototype does not check your writing. There is no AI review, no score and no estimated band in this version.",
+        heading: "AI review at the end",
+        text: "When you finish both tasks you can send your writing for AI review. You will get feedback on each task and an estimated Writing level for practice.",
       },
     ],
     introNotice:
-      "This is Toronto Academy writing practice, not an official CELPIP test. Nothing you type here is saved or scored, and the AI review is added in the next build.",
+      "This is Toronto Academy writing practice, not an official CELPIP test. The review is AI-supported and gives a practice estimate, not an official CELPIP score. Nothing you type here is saved.",
     introCardTitle: "Writing section",
     introCardSummary:
-      "Both Writing tasks in one run, with a live word count and a countdown on each task. The AI review and the estimated Writing band are added next.",
+      "Both Writing tasks in one run, with a live word count and a countdown on each task, followed by an optional AI review and an estimated Writing level for practice.",
     introTasksLabel: "Tasks",
     introTimeLabel: "Writing time",
     introWordsLabel: "Each response",
@@ -81,8 +83,14 @@ export function buildWritingMockCopy({ testLabel }: { testLabel: string }) {
     // reworded without touching the other three sections.
     taskTimerLabel: "Time remaining",
     // Quiet line under the editor.
+    //
+    // EXAM-26 changed the second half of this sentence and the change
+    // matters. The old wording said the writing was never sent anywhere,
+    // which stopped being true the moment a Submit for AI Review button
+    // existed. It now says where the writing can go and that going there
+    // is the learner's choice.
     editorHint:
-      "Your writing is held on this screen only. It is not saved, not checked and not sent anywhere.",
+      "Your writing is held on this screen only and is not saved. At the end of the section you can choose to send it for AI review.",
     // Accessible name for the editor, and the visible label above it.
     editorLabel: "Your response",
     // Next label on the last task, which the ticket asks to read Finish
@@ -108,23 +116,97 @@ export function buildWritingMockCopy({ testLabel }: { testLabel: string }) {
     completeTaskColumn: "Task",
     completeChoiceColumn: "Option chosen",
     completeNoChoiceValue: "No option chosen",
-    // The pending review line. A plain sentence rather than a disabled
-    // button, following the rule ListeningPartCompleteScreen sets out: a
-    // greyed out control says "press this in a moment", and there is
-    // nothing behind it.
-    completePendingReview:
-      "The AI review and the estimated Writing band are added in the next build. No score is produced for this run.",
     completeNotice:
       "Nothing from this run has been saved. Leaving or restarting clears the writing held on this page.",
     restartLabel: "Restart Writing section",
     backToDashboardLabel: "Return to dashboard",
+
+    // 6. The AI review (EXAM-26).
+    //
+    // The review is offered, never forced. A learner can finish the
+    // section, read their two word counts and leave without ever pressing
+    // the button, which is why the completion screen keeps every control
+    // it had and gains one rather than being replaced by a review screen.
+    reviewHeading: "AI review",
+    reviewIntro:
+      "Send both responses for AI review to get feedback on each task and an estimated Writing level for practice.",
+    reviewSubmitLabel: "Submit for AI Review",
+    reviewSubmitPendingLabel: "Reviewing your writing",
+    // Shown under the button before it is pressed. It says what leaves
+    // the page, which is the one thing a learner should know before
+    // pressing a button that sends their writing somewhere.
+    reviewSubmitHint:
+      "Your two responses are sent for AI review. Nothing is saved and no attempt history is kept.",
+    // Shown in place of the hint when both responses are empty.
+    reviewEmptyHint:
+      "You have not written anything yet. Go back to the tasks and write a response, or submit to see what an empty section reports.",
+
+    // Processing screen.
+    reviewProcessingHeading: "Reviewing your writing",
+    reviewProcessingText:
+      "This usually takes under a minute. Keep this screen open. Your writing is still here and nothing has been lost.",
+    reviewProcessingNotice:
+      "The review is AI-supported and gives a Toronto Academy practice estimate, not an official CELPIP score.",
+
+    // Error screen.
+    reviewFailedHeading: "The review could not be completed",
+    reviewFailedText:
+      "Something went wrong while reviewing your writing. Your responses are still held on this page, so you can try again.",
+    reviewRetryLabel: "Try the review again",
+    reviewBackToResponsesLabel: "Back to your responses",
+
+    // Result screen.
+    reviewResultHeading: "Writing practice result",
+    reviewResultSubtitle:
+      "AI-supported feedback on both tasks, with an estimated Writing level for practice.",
+    reviewOverallLabel: "Estimated Writing level",
+    reviewOverallBasisLabel: "Why this level",
+    // The practice-only disclaimer. The single most important sentence on
+    // the result screen, so it is stated once as a whole sentence rather
+    // than assembled from fragments at the point of use.
+    reviewPracticeDisclaimer:
+      "This is a Toronto Academy practice estimate produced by AI-supported feedback. It is not an official CELPIP score and it does not predict an official result.",
+    reviewPracticeDisclaimerLabel: "Practice estimate",
+    reviewResultNotice:
+      "Nothing from this review has been saved. Leaving or restarting clears the writing and the feedback held on this page.",
+
+    // Task result card.
+    reviewTaskLevelLabel: "Estimated level",
+    reviewTaskWordCountLabel: "Word count",
+    reviewTaskWordRangeLabel: "Word target",
+    reviewWithinRangeLabel: "Within target",
+    reviewOutsideRangeLabel: "Outside target",
+    reviewCriteriaHeading: "Criterion levels",
+    reviewCriterionColumn: "Criterion",
+    reviewCriterionLevelColumn: "Level",
+    reviewCriterionEvidenceColumn: "What your writing shows",
+    reviewCriterionNextColumn: "What the next level needs",
+    reviewSucceededLabel: "What worked",
+    reviewFellShortLabel: "What held it back",
+    reviewMissingPointsLabel: "Prompt points not addressed",
+    reviewTemplateWarningsLabel: "Template language to avoid",
+    reviewTopMistakesHeading: "Top mistakes",
+    reviewMistakeOriginalLabel: "You wrote",
+    reviewMistakeCorrectionLabel: "Stronger",
+    reviewNoMistakesText:
+      "No specific corrections were flagged for this response.",
+    reviewRewriteHeading: "Your response, one level up",
+    reviewRewriteTargetLabel: "Target level",
+    reviewRewriteChangesHeading: "What changed",
+    reviewModelHeading: "Level 11-12 model response",
+    reviewModelIntro:
+      "A fresh response to the same prompt, written at the top of the scale so you can see the distance.",
+    // Insufficient response wording, used for a task left blank.
+    reviewInsufficientLevel: "Insufficient response",
+    reviewInsufficientHeading: "Not enough writing to review",
+    reviewNoResponseSubmitted: "No writing was submitted for this task.",
 
     // Page metadata and the exam region name, for the route.
     pageTitle: testLabel + " - Writing Test - Toronto Academy of Education",
     pageDescription:
       "Internal prototype of the " +
       testLabel +
-      " Writing section, with the Task 1 email and the Task 2 survey response in one run. No AI review and no score.",
+      " Writing section, with the Task 1 email and the Task 2 survey response in one run, followed by an optional AI review and an estimated Writing level for practice.",
     examRegionLabel: testLabel + " - Writing Test",
 
     // Dashboard internal preview card.
@@ -132,10 +214,11 @@ export function buildWritingMockCopy({ testLabel }: { testLabel: string }) {
     // Dressed as an internal build link, the way the Reading card is.
     // What it deliberately does not say: that a full all-skills Mock Test
     // 1 exists, or that any of this produces a CELPIP result. Three
-    // sections of four are built, and this one has no review yet.
+    // sections of four are built, Speaking is not, and the estimate this
+    // one produces is a practice estimate.
     dashboardCardTitle: testLabel + " - Writing Test",
     dashboardCardDescription:
-      "Writing section prototype with Task 1 and Task 2 editors. AI review will be added next.",
+      "Writing section prototype with Task 1 and Task 2 editors, AI review and an estimated Writing level for practice.",
     dashboardCardSectionLabel: "Writing",
     dashboardCardTasksLabel: "Tasks 1-2",
     dashboardCardCtaLabel: "Open Writing Test",
