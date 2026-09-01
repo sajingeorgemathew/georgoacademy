@@ -6,12 +6,16 @@ is done.
 ADMIN-00 produced four design documents and no code. This document turns
 them into the next ticket.
 
-**Status: ADMIN-01 has shipped.** What it actually built, and how that
-differs from the recommendation below, is recorded in
-`docs/admin/admin-01-mock-test-builder-mvp.md`. The short version: it
-built items 1 to 6 and item 10 of the table in section 1, as a structure
-builder, and left items 7 to 9, the question, option and answer key
-editors, to ADMIN-02. Section 7 below is the ADMIN-02 scope.
+**Status: ADMIN-01 and ADMIN-02 have both shipped.** What each actually
+built is recorded in `docs/admin/admin-01-mock-test-builder-mvp.md` and
+`docs/admin/admin-02-question-answer-media-editor.md`.
+
+The short version. ADMIN-01 built items 1 to 6 and item 10 of the table
+in section 1, as a structure builder, and left items 7 to 9 to ADMIN-02.
+ADMIN-02 built items 7 to 9 plus the media link editor, and turned item
+10 into a staff preview of one part rather than a render through the
+learner components. Section 7 below is the ADMIN-02 scope as it was
+planned; section 8 is the ADMIN-03 scope, which is next.
 
 Design documents:
 
@@ -108,19 +112,28 @@ model.
 Each of these is a ticket sized like ADMIN-01, adding one capability to a
 builder that already works.
 
-| Ticket | Adds |
-| --- | --- |
-| ADMIN-02 | Questions, options, answer keys, media links, and the first dynamic preview of objective questions. Scope in section 7. |
-| ADMIN-03 | Timer rules with `source`, `source_note` and `on_expire`. Unblocks a part that runs at exam pace. |
-| ADMIN-04 | Scoring rules and band maps, including the overlapping rows. Unblocks a preview that shows an estimated level. |
-| ADMIN-05 | Validation engine and the issues list. Unblocks `ready_for_review`. |
-| ADMIN-06 | Publishing, unpublishing and archiving, gated on validation. First learner-visible authored test. |
-| ADMIN-07 | Writing and Speaking authoring with rubric attachment. |
-| ADMIN-08 | Student attempt persistence, the four attempt tables. Separate from authoring throughout. |
+This table has been renumbered once, in ADMIN-02. The original sequence
+put Writing and Speaking authoring near the end, at ADMIN-07. It moves to
+ADMIN-03 because the objective editor built in ADMIN-02 is the same shape
+that authoring needs, and building the rubric half while that shape is
+fresh costs less than returning to it after four unrelated tickets.
+
+| Ticket | Adds | Status |
+| --- | --- | --- |
+| ADMIN-01 | Practice tests, sections, parts, structure preview, structure validation. | Shipped, see `docs/admin/admin-01-mock-test-builder-mvp.md` |
+| ADMIN-02 | Questions, options, answer keys, media links, and a staff preview of an authored part. | Shipped, see `docs/admin/admin-02-question-answer-media-editor.md` |
+| ADMIN-03 | Writing and Speaking prompt editor, AI rubric settings, and dynamic learner preview preparation. Scope in section 8. | Next |
+| ADMIN-04 | Timer rules with `source`, `source_note` and `on_expire`. Unblocks a part that runs at exam pace. | Not started |
+| ADMIN-05 | Scoring rules and band maps, including the overlapping rows. Unblocks a preview that shows an estimated level. | Not started |
+| ADMIN-06 | Whole test validation engine and the issues list. Unblocks `internal_preview` for a complete test. | Not started |
+| ADMIN-07 | Publishing, unpublishing and archiving, gated on validation. First learner-visible authored test. | Not started |
+| ADMIN-08 | The dynamic learner runner, reading published content instead of the Mock Test 1 content files. | Not started |
+| ADMIN-09 | Student attempt persistence, the four attempt tables. Separate from authoring throughout. | Not started |
 
 The order is not arbitrary. Each ticket removes one reason a test cannot
-be published, and ADMIN-06 is the first one where a learner sees
-something a developer did not write.
+be published, and ADMIN-07 is the first one where a learner could see
+something a developer did not write. ADMIN-08 is what actually shows it
+to them, and it is the first ticket that touches a learner route at all.
 
 ---
 
@@ -186,10 +199,13 @@ Concrete enough to check.
 | ADMIN-01 MVP scope | Defined above |
 | Production migration created | Yes, in ADMIN-01: `supabase/migrations/013_mock_test_builder_admin_foundation.sql` |
 | SQL applied to hosted Supabase | No, run manually by the user |
-| Learner routes changed | No |
+| Learner routes changed | No, and still no after ADMIN-02 |
 | Listening, Reading, Writing, Speaking flows changed | No |
-| Admin UI built | Yes, in ADMIN-01: structure builder only |
-| Question, option and answer key editors built | No, ADMIN-02 |
+| Admin UI built | Yes: ADMIN-01 structure builder, ADMIN-02 content editor |
+| Question, option and answer key editors built | Yes, in ADMIN-02 |
+| Media link editor built | Yes, in ADMIN-02, URL only and no upload |
+| Second production migration created | Yes, in ADMIN-02: `supabase/migrations/014_mock_test_question_answer_media_editor.sql` |
+| ADMIN-02 SQL applied to hosted Supabase | No, run manually by the user |
 | Student attempts saved | No |
 
 ---
@@ -243,6 +259,95 @@ Validation rules ADMIN-02 turns on, listed at the foot of
 - every media screen references an asset with a real URL
 - every image asset has non-empty alt text
 
-Still out of scope in ADMIN-02: timer rules (ADMIN-03), scoring rules and
-band maps (ADMIN-04), publishing (ADMIN-06), Writing and Speaking rubric
-authoring (ADMIN-07), and student attempt persistence (ADMIN-08).
+Still out of scope in ADMIN-02: timer rules, scoring rules and band maps,
+publishing, Writing and Speaking rubric authoring, and student attempt
+persistence. See the renumbered sequence in section 3.
+
+### What ADMIN-02 actually shipped, against the five items above
+
+Items 1, 3 and 4 shipped as written. Three things came out differently,
+and each is a decision rather than a shortfall.
+
+**Item 2, the shared A to E option set, did not ship.** Reading Part 3
+needs one, and `mock_test_option_sets` is still uncreated. The reason is
+that a shared option set is an optimisation of a model that has to work
+per question first, and building both at once would have meant an option
+row with two possible parents before a single question had been authored
+through the UI. It moves to the ticket that authors Reading Part 3.
+
+**Item 4 shipped without the HEAD verification.** The URL shape is
+checked; the URL is not fetched. A HEAD request turns every save into an
+outbound request to a third party and fails on a Cloudinary asset that is
+still processing, and the shape check catches the mistake that actually
+happens, which is pasting a console path instead of a delivery URL.
+Verifying a link, with `is_verified` and `verified_at`, is still worth
+doing and is still unbuilt.
+
+**Item 5 shipped as a staff preview, not a render through the learner
+components.** The two rules above are why. Rendering an authored part
+through the real learner components means building the read that strips
+the keys, and that read is the front half of the dynamic learner runner,
+which is a ticket of its own. Shipping a half version of it as a preview
+would have put an untested key-stripping path in the codebase months
+before anything called it. So ADMIN-02 previews the part on an admin
+screen, with the keys deliberately shown, and the key-free read is
+prepared in ADMIN-03 as its own piece of work.
+
+The second ADMIN-01 rule above still holds, and holds more strongly than
+planned: the ADMIN-02 preview response contains an answer key, and that
+is safe because the response never leaves an admin route. There is no
+learner-facing read of the new tables to inspect, because there is no
+learner-facing read at all.
+
+The validation rules listed above all shipped, in
+`src/features/admin/mock-test-content-validation.ts` rather than in
+`mock-test-validation.ts`. Structure rules and content rules answer
+different questions and run at different scopes, so they are separate
+modules. Two of the listed rules were not built: the shared option set
+half of "every correct option belongs to that question or its shared
+option set", which has no option sets to check, and "no answer key exists
+for a Writing or Speaking question", which cannot be violated while the
+question type constraint refuses those types outright.
+
+---
+
+## 8. ADMIN-03 scope
+
+ADMIN-02 built the objective half of authoring: questions, options,
+answer keys and media, for Listening and Reading. ADMIN-03 is the other
+half, plus the read that a learner route will eventually need.
+
+| # | Scope item | What it means concretely |
+| --- | --- | --- |
+| 1 | Writing and Speaking prompt editor | Add the Writing and Speaking prompt types to the question type constraint, and give them a form: task instruction, scenario text, word count or recording expectations, and the prep and recording windows the part already carries. |
+| 2 | AI rubric settings | Create `mock_test_ai_rubrics` and attach one per section or per part. Criteria, weightings, the model instruction, and the disclaimer text that keeps an estimated level from reading as an official CELPIP score. |
+| 3 | Dynamic learner preview preparation | The read a learner route will use: scoped to a published test, omitting `internal_notes`, and never touching `mock_test_answer_keys`. A separate query, not a flag on `getPartContent`. |
+
+**Why these three together.** They are the three things standing between
+the builder and a test a learner could sit. One and two finish authoring:
+after them, all four skills can be entered through a form. Three is the
+piece that has to exist before any learner route can read authored
+content at all, and it is deliberately built and reviewed on its own,
+with nothing calling it, rather than arriving inside the ticket that also
+builds the runner.
+
+**Item 3 is the one to be careful with.** It is the read whose failure
+mode is handing a student the answers. Three rules for it:
+
+- It is a new function in a new module, not an argument on
+  `getPartContent`. A flag is a thing a caller can pass wrong; a query
+  that cannot select the key column is not.
+- It selects columns by name and never `*`, so a column added later
+  cannot join a learner payload by default.
+- Its test is an inspection of the serialized payload, not a reading of
+  the code. The existing Listening section already works this way, with
+  `withoutListeningSectionAnswerKeys`, because a client component
+  receives its props as serialized data and a key sent that way is
+  readable in the page payload before a learner has answered anything.
+
+**Still out of scope in ADMIN-03:** timer rules, scoring rules and band
+maps, publishing, the dynamic learner runner itself, student attempt
+persistence, file upload, drag and drop ordering, analytics, payments and
+live classes. No learner route changes in ADMIN-03 either. The last
+learner-route-free ticket is ADMIN-07; ADMIN-08 is the first one that
+touches one.

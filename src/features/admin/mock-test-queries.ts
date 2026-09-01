@@ -57,6 +57,15 @@ function adminClient(session: AdminSession) {
   return getSupabaseAdmin();
 }
 
+// One part with the section and practice test above it. What the
+// ADMIN-02 screens work from, since all four of them are addressed by
+// three ids and need every level to draw a breadcrumb.
+export type MockTestPartContext = {
+  test: Omit<MockTestRow, "internal_notes">;
+  section: MockTestSectionRow;
+  part: MockTestPartRow;
+};
+
 // A row of the admin list, with the counts the table shows.
 export type MockTestListItem = Omit<MockTestRow, "internal_notes"> & {
   sectionCount: number;
@@ -247,6 +256,90 @@ export async function getMockTestSection(
   }
 
   return (data as MockTestSectionRow | null) ?? null;
+}
+
+// One part with the section and practice test above it, which is what
+// every ADMIN-02 screen needs to draw a breadcrumb and a heading.
+//
+// Every id in the URL is checked against its parent, so a part id
+// belonging to a different section, or a section id belonging to a
+// different test, resolves to null rather than opening the wrong
+// content. That matters more here than on the structure screens: the
+// ADMIN-02 routes carry three ids, and a mismatched one would otherwise
+// let a staff member edit a part they navigated to by mistake.
+export async function getMockTestPartContext(
+  session: AdminSession,
+  mockTestId: string,
+  sectionId: string,
+  partId: string,
+): Promise<MockTestPartContext | null> {
+  const supabase = adminClient(session);
+
+  const { data: part, error } = await supabase
+    .from("mock_test_parts")
+    .select(PART_COLUMNS)
+    .eq("id", partId)
+    .eq("section_id", sectionId)
+    .eq("mock_test_id", mockTestId)
+    .maybeSingle();
+
+  if (error) {
+    throw reportAdminReadError(
+      "getMockTestPartContext",
+      error,
+      "That part could not be loaded.",
+      { id: partId },
+    );
+  }
+
+  if (!part) {
+    return null;
+  }
+
+  const [sectionResult, testResult] = await Promise.all([
+    supabase
+      .from("mock_test_sections")
+      .select(SECTION_COLUMNS)
+      .eq("id", sectionId)
+      .eq("mock_test_id", mockTestId)
+      .maybeSingle(),
+    supabase
+      .from("mock_tests")
+      .select(MOCK_TEST_LIST_COLUMNS)
+      .eq("id", mockTestId)
+      .maybeSingle(),
+  ]);
+
+  if (sectionResult.error) {
+    throw reportAdminReadError(
+      "getMockTestPartContext:section",
+      sectionResult.error,
+      "The section that part belongs to could not be loaded.",
+      { id: sectionId },
+    );
+  }
+
+  if (testResult.error) {
+    throw reportAdminReadError(
+      "getMockTestPartContext:test",
+      testResult.error,
+      "The practice test that part belongs to could not be loaded.",
+      { id: mockTestId },
+    );
+  }
+
+  if (!sectionResult.data || !testResult.data) {
+    return null;
+  }
+
+  return {
+    // internal_notes is not selected here. This context is read by the
+    // part detail, question, media and preview screens, and none of them
+    // shows the staff notes on the test.
+    test: testResult.data as Omit<MockTestRow, "internal_notes">,
+    section: sectionResult.data as MockTestSectionRow,
+    part: part as MockTestPartRow,
+  };
 }
 
 // Parts already in a section, so the add part form can suggest the next

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { AppStatusBadge } from "@/components/app/AppStatusBadge";
 import { cx, text } from "@/features/design/design-tokens";
 import type { AdminActionState } from "@/features/admin/admin-action-state";
@@ -80,7 +81,27 @@ export function MockTestPartList({
               </span>
             </summary>
 
-            <div className="border-t border-academy-line px-4 py-5">
+            <div className="space-y-5 border-t border-academy-line px-4 py-5">
+              {/* The way into the ADMIN-02 content editor. It sits inside
+                  the disclosure rather than in the summary row, because a
+                  link inside a summary element is a second control in the
+                  same click target and neither one then behaves the way it
+                  looks. */}
+              <p className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                <Link
+                  href={`/dashboard/admin/mock-tests/${mockTestId}/sections/${sectionId}/parts/${part.id}`}
+                  className={cx(
+                    "text-sm font-semibold underline underline-offset-2 hover:no-underline",
+                    text.accent,
+                  )}
+                >
+                  Open questions and media
+                </Link>
+                <span className={cx("text-xs", text.muted)}>
+                  Questions, options, answer keys and media links.
+                </span>
+              </p>
+
               <MockTestPartForm
                 mode="edit"
                 mockTestId={mockTestId}
