@@ -1137,6 +1137,177 @@ export const examWritingReview = {
   submitHint: "text-[11px] leading-4 text-academy-navy/60",
 } as const;
 
+// Speaking mock test section (EXAM-27).
+//
+// A Speaking task screen is a split like the Writing one, but the two
+// halves hold different things: the prompt and its pictures on the left,
+// and on the right the recorder, the preview player and whatever went
+// wrong. So it borrows examTwoColumn for the split and adds only what a
+// spoken answer needs and no screen before it did.
+//
+// Four decisions worth stating:
+//
+// - **The picture is content, not decoration.** On Tasks 3, 4 and 8 the
+//   picture is the thing being described, so the figure fills its column
+//   and keeps its own aspect ratio, exactly as the Reading Part 2
+//   brochure does. It is never hidden at a small width.
+// - **The recorder is one block, not a toolbar.** The status line, the
+//   controls and the player sit in one bordered panel, so a learner
+//   always knows where the recording lives on the screen and never has to
+//   hunt for the Stop button.
+// - **Recording is announced by a dot, not by red chrome.** A recording
+//   panel turns its status dot red and leaves everything else alone. The
+//   alternative, washing the panel in red, reads as an error, and
+//   recording is the normal case.
+// - **An error is a bordered notice with its own control.** A microphone
+//   failure has to say what happened and offer the one thing that can
+//   help, so it is not a toast and not a red border on the button.
+export const examSpeaking = {
+  // Left column: the prompt and its pictures.
+  prompt: "flex min-w-0 flex-col gap-3",
+  promptLabel:
+    "text-[11px] font-semibold uppercase tracking-[0.06em] text-academy-navy/55",
+  situationParagraph: "text-[13px] leading-6 text-academy-navy/85",
+  // The source's own instruction sentence, which is the task itself.
+  promptInstruction: "text-[13px] font-semibold leading-6 text-academy-navy",
+  promptParagraph: "text-[13px] leading-6 text-academy-navy/85",
+  // The quiet line that says how this screen differs from the source.
+  promptNote:
+    "rounded-sm border border-academy-line bg-academy-navy-soft/35 px-3 py-2 text-[11px] leading-4 text-academy-navy/70",
+
+  // The either or pair on Task 6. The connector is a small caps lead in
+  // above its sentence, which is how the source weights the two.
+  alternativeList: "flex min-w-0 flex-col gap-2",
+  alternativeLead: "text-[13px] font-semibold leading-5 text-academy-navy",
+  alternativeRow:
+    "flex min-w-0 flex-col gap-0.5 rounded-sm border border-academy-line bg-academy-paper px-2.5 py-2",
+  alternativeConnector:
+    "text-[11px] font-semibold uppercase tracking-[0.06em] text-academy-navy/55",
+  alternativeText: "text-[13px] leading-6 text-academy-navy/85",
+
+  // A picture the learner speaks about. The figure sets the width and
+  // leaves the height automatic, so the drawing keeps its shape and
+  // scrolls inside the column rather than being squashed to fit.
+  //
+  // Layout shift is handled on the element rather than here: the content
+  // file carries the picture's intrinsic width and height, the screen
+  // puts them on the img, and the browser reserves the right box from the
+  // ratio before the file arrives.
+  // shrink-0 is load bearing. The exam canvas has a real height inside
+  // the locked viewport, so this column is a flex column that can be
+  // asked to compress, and a compressed flex item squashes the picture
+  // inside it out of shape. Refusing to shrink, and letting the canvas
+  // scroll instead, is what keeps a drawing a drawing.
+  figure: "flex w-full min-w-0 shrink-0 flex-col gap-1.5",
+  // The picture fills its column up to 34rem and no further, centred,
+  // with the height left automatic so it can never be squashed out of
+  // shape.
+  //
+  // 34rem is 544px, which is the width of the largest picture in the
+  // section as the source delivers it. So the two cafe scenes draw at
+  // their own size, the smaller Task 8 drawing is scaled up by about half
+  // rather than by more than twice, and all three end up roughly the same
+  // size on the screen. Left uncapped they would each fill an 800px
+  // column, which upscales a screenshot past the point where the extra
+  // pixels are anything but blur, and pushes the recorder below the fold
+  // on a laptop.
+  //
+  // object-contain is the guarantee rather than the layout: if anything
+  // ever does squeeze the box, the picture letterboxes inside it instead
+  // of distorting. An earlier pass in this ticket did exactly that, by
+  // capping the height of a flex item that was already being stretched to
+  // the column width.
+  image:
+    "mx-auto block h-auto w-full max-w-[34rem] min-w-0 rounded-sm border border-academy-line bg-academy-paper object-contain",
+  caption: "text-[11px] leading-4 text-academy-navy/60",
+  imageFallback:
+    "flex min-w-0 flex-col gap-1 rounded-sm border border-academy-line bg-academy-navy-soft/40 px-3 py-4 text-center",
+  imageFallbackTitle: "text-[12px] font-semibold leading-5 text-academy-navy",
+  imageFallbackText: "text-[11px] leading-4 text-academy-navy/65",
+
+  // Option cards, Task 5. Two across from the small breakpoint up, so the
+  // comparison the task asks for is a comparison on screen as well.
+  cardGrid: "grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2",
+  card: "flex min-w-0 flex-col gap-2 overflow-hidden rounded-sm border border-academy-line bg-academy-paper p-2.5",
+  cardLabel:
+    "text-[11px] font-semibold uppercase tracking-[0.06em] text-academy-navy/55",
+  cardHeading: "text-[13px] font-semibold leading-5 text-academy-navy",
+  cardDetailList: "flex min-w-0 list-disc flex-col gap-0.5 pl-4",
+  cardDetailItem: "text-[12px] leading-5 text-academy-navy/85",
+
+  // Right column: the recorder and everything under it.
+  answerColumn: "flex min-w-0 flex-col gap-4",
+  recorder:
+    "flex min-w-0 flex-col gap-3 rounded-sm border border-academy-line bg-academy-paper p-3",
+  recorderHeading: "text-[13px] font-semibold leading-5 text-academy-navy",
+  recorderHint: "text-[12px] leading-5 text-academy-navy/70",
+  recorderControls: "flex min-w-0 flex-wrap items-center gap-2",
+  recorderNote: "text-[11px] leading-4 text-academy-navy/60",
+
+  // Status line. The dot carries the state and the words repeat it, so
+  // the state is never colour alone.
+  status: "flex min-w-0 items-center gap-2",
+  statusDot: "h-2 w-2 shrink-0 rounded-full",
+  statusDotIdle: "bg-academy-navy/30",
+  statusDotWaiting: "bg-academy-navy/55",
+  statusDotRecording: "bg-academy-red",
+  statusDotRecorded: "bg-academy-blue",
+  statusText: "min-w-0 text-[12px] font-semibold leading-5 text-academy-navy",
+
+  // The preview player.
+  preview: "flex min-w-0 flex-col gap-1.5",
+  previewLabel:
+    "text-[11px] font-semibold uppercase tracking-[0.06em] text-academy-navy/55",
+  previewPlayer: "block h-10 w-full min-w-0",
+  previewMetaRow:
+    "flex min-w-0 flex-wrap items-baseline gap-x-4 gap-y-0.5 text-[11px] leading-4",
+  previewMetaLabel:
+    "font-semibold uppercase tracking-[0.06em] text-academy-navy/50",
+  previewMetaValue: "tabular-nums text-academy-navy/75",
+  previewEmpty: "text-[12px] leading-5 text-academy-navy/60",
+
+  // Something went wrong with the microphone.
+  error:
+    "flex min-w-0 flex-col gap-1.5 rounded-sm border border-academy-red/35 bg-academy-red-soft px-3 py-2.5",
+  errorHeading: "text-[13px] font-semibold leading-5 text-academy-navy",
+  errorText: "text-[12px] leading-5 text-academy-navy/80",
+  errorHint: "text-[11px] leading-4 text-academy-navy/60",
+
+  // The two clocks, shown on the screen as well as in the top bar.
+  //
+  // The top bar strip is thin and holds a preparation reading beside a
+  // recording reading, which is legible but small. Speaking is the one
+  // section where the clock is the instruction, so the same two readings
+  // are repeated in the answer column at a size a speaker can glance at.
+  timerRow: "flex min-w-0 flex-wrap gap-2",
+  timerCard:
+    "flex min-w-0 flex-1 basis-40 flex-col gap-0.5 rounded-sm border border-academy-line bg-academy-navy-soft/40 px-3 py-2",
+  timerCardLabel:
+    "text-[11px] font-semibold uppercase tracking-[0.06em] text-academy-navy/55",
+  timerCardValue: "text-lg font-semibold leading-6 tabular-nums",
+  timerCardNote: "text-[11px] leading-4 text-academy-navy/55",
+
+  // Transition and completion screen stacks, capped so a short table does
+  // not stretch across a full width canvas.
+  completeStack: "mx-auto flex w-full min-w-0 max-w-3xl flex-col gap-4",
+  completeHeading: "text-[13px] font-semibold leading-5 text-academy-navy",
+  completeCount: "text-[13px] leading-5 text-academy-navy/85",
+} as const;
+
+// Tones for the two Speaking clock readings shown inside the canvas.
+//
+// The same four states the top bar reading uses, so an amber clock in the
+// bar is an amber clock on the card. Kept as its own record rather than
+// reusing examTimerStates, because those recipes carry the bar's own text
+// size and this one must not.
+export const examSpeakingTimerStates: Record<ExamTimerState, string> = {
+  normal: "text-academy-navy",
+  warning: "text-academy-amber",
+  urgent: "text-academy-red",
+  expired: "text-academy-red",
+  muted: "text-academy-navy/45",
+};
+
 // Shared body text tones inside the canvas. Exam copy runs tighter than
 // dashboard copy, so these sit a step below the marketing scale.
 export const examText = {
