@@ -6,6 +6,13 @@ is done.
 ADMIN-00 produced four design documents and no code. This document turns
 them into the next ticket.
 
+**Status: ADMIN-01 has shipped.** What it actually built, and how that
+differs from the recommendation below, is recorded in
+`docs/admin/admin-01-mock-test-builder-mvp.md`. The short version: it
+built items 1 to 6 and item 10 of the table in section 1, as a structure
+builder, and left items 7 to 9, the question, option and answer key
+editors, to ADMIN-02. Section 7 below is the ADMIN-02 scope.
+
 Design documents:
 
 - `docs/admin/mock-test-builder-workflow.md`
@@ -103,7 +110,7 @@ builder that already works.
 
 | Ticket | Adds |
 | --- | --- |
-| ADMIN-02 | Media assets: URL field, format validation, HEAD verification, attach to a screen. Unblocks Listening authoring. |
+| ADMIN-02 | Questions, options, answer keys, media links, and the first dynamic preview of objective questions. Scope in section 7. |
 | ADMIN-03 | Timer rules with `source`, `source_note` and `on_expire`. Unblocks a part that runs at exam pace. |
 | ADMIN-04 | Scoring rules and band maps, including the overlapping rows. Unblocks a preview that shows an estimated level. |
 | ADMIN-05 | Validation engine and the issues list. Unblocks `ready_for_review`. |
@@ -177,9 +184,65 @@ Concrete enough to check.
 | Draft SQL | Written, marked DRAFT, outside `supabase/migrations/` |
 | Mock Test 1 to admin model map | Written |
 | ADMIN-01 MVP scope | Defined above |
-| Production migration created | No |
-| SQL applied to hosted Supabase | No |
+| Production migration created | Yes, in ADMIN-01: `supabase/migrations/013_mock_test_builder_admin_foundation.sql` |
+| SQL applied to hosted Supabase | No, run manually by the user |
 | Learner routes changed | No |
 | Listening, Reading, Writing, Speaking flows changed | No |
-| Admin UI built | No |
+| Admin UI built | Yes, in ADMIN-01: structure builder only |
+| Question, option and answer key editors built | No, ADMIN-02 |
 | Student attempts saved | No |
+
+---
+
+## 7. ADMIN-02 scope
+
+ADMIN-01 built the structure: practice tests, sections, parts, basic
+timing values, a structure preview and structure validation. It
+deliberately stopped before anything that carries a right answer.
+
+ADMIN-02 builds that, and it is one vertical slice again.
+
+| # | Scope item | What it means concretely |
+| --- | --- | --- |
+| 1 | Question editor | Create `mock_test_questions` under a part. Prompt for a whole question, or the text either side of a blank for a completion item. Position contiguous from 1. |
+| 2 | Options editor | Create `mock_test_options` under a question, normally four, with text and display order. Plus the shared A to E option set Reading Part 3 needs. |
+| 3 | Answer key editor | Create `mock_test_answer_keys`, selecting the correct option, recording its source, and taking an optional explanation. |
+| 4 | Media link editor | Paste a Cloudinary URL onto a screen or a question, validate its shape, record alt text, and verify it resolves with a HEAD request. Unblocks Listening authoring. |
+| 5 | First dynamic preview of objective questions | Render an authored part through the real learner question components, with the keys stripped before the content leaves the server. |
+
+Tables ADMIN-02 has to create, taken from the ADMIN-00 draft schema:
+`mock_test_questions`, `mock_test_options`, `mock_test_option_sets`,
+`mock_test_answer_keys`, `mock_test_media_assets`, and
+`mock_test_screens` if the dynamic preview needs a materialised screen
+run rather than a part level render.
+
+Two rules ADMIN-01 set that ADMIN-02 has to keep:
+
+**The answer key table gets no policy for authenticated users at all.**
+Not a filtered policy: none. Row level security denies by default when no
+policy matches, so the absence is the enforcement. That is how the four
+ADMIN-01 tables are protected, and the answer key table is the one where
+a mistake hands a learner the answers.
+
+**The preview response contains no answer key.** Verified by inspecting
+the payload, not by trusting the code. The existing Listening section
+already works this way: `withoutListeningSectionAnswerKeys` strips the
+keys before the content reaches the browser, because a client component
+receives its props as serialized data and a key sent that way is readable
+in the page payload before a learner has answered anything.
+
+Validation rules ADMIN-02 turns on, listed at the foot of
+`src/features/admin/mock-test-validation.ts`:
+
+- every objective question has at least two options, normally four
+- no two options on a question share identical text
+- every option has non-empty text
+- every scored objective question has an answer key row
+- every correct option belongs to that question or its shared option set
+- no answer key exists for a Writing or Speaking question
+- every media screen references an asset with a real URL
+- every image asset has non-empty alt text
+
+Still out of scope in ADMIN-02: timer rules (ADMIN-03), scoring rules and
+band maps (ADMIN-04), publishing (ADMIN-06), Writing and Speaking rubric
+authoring (ADMIN-07), and student attempt persistence (ADMIN-08).
