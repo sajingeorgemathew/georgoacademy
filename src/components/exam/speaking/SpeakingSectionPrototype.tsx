@@ -1,8 +1,11 @@
 "use client";
 
-import { Fragment, useMemo, useState } from "react";
+import { Fragment, useMemo, useRef, useState } from "react";
+import { SpeakingEvaluationErrorScreen } from "./SpeakingEvaluationErrorScreen";
+import { SpeakingEvaluationProcessingScreen } from "./SpeakingEvaluationProcessingScreen";
 import { SpeakingSectionCompleteScreen } from "./SpeakingSectionCompleteScreen";
 import { SpeakingSectionIntroScreen } from "./SpeakingSectionIntroScreen";
+import { SpeakingSectionResultScreen } from "./SpeakingSectionResultScreen";
 import { SpeakingTaskScreen } from "./SpeakingTaskScreen";
 import { SpeakingTaskTransitionScreen } from "./SpeakingTaskTransitionScreen";
 import {
@@ -17,33 +20,62 @@ import {
   setSpeakingResponse,
   summarizeSpeakingSection,
 } from "@/features/exam-engine/speaking-mock-flow";
+import { submitSpeakingMockReview } from "@/features/exam-engine/submit-speaking-mock-review";
 import type { SpeakingMockRecording } from "./useSpeakingMockRecorder";
 import type { SpeakingMockCopy } from "@/features/exam-engine/speaking-mock-copy";
+import type {
+  SpeakingMockEvaluation,
+  SpeakingMockEvaluationErrorCode,
+} from "@/features/exam-engine/speaking-mock-evaluation-types";
 import type {
   SpeakingResponseMap,
   SpeakingSectionContent,
 } from "@/features/exam-engine/speaking-mock-types";
 
-// Mock Test 1 Speaking section (EXAM-27).
+// Mock Test 1 Speaking section (EXAM-27, extended by EXAM-28).
 //
 // The whole Speaking section as one run: the section intro, eight task
 // screens, a short transition before each task after the first, and a
 // completion screen. Seventeen screens, built by buildSpeakingSectionFlow
 // from the content rather than typed out here.
 //
-// It owns two pieces of state and nothing else: which screen is showing,
-// and the recordings as one { taskId: SpeakingResponse } map. Both live
-// in local component state. Nothing is written to a database, to
-// localStorage or to a cookie, no Supabase client is imported here, no
-// server action is called, and a page reload starts the section again
-// with nothing recorded.
+// It owns three pieces of state and nothing else:
 //
-// Nothing leaves the browser at all. That is the difference between this
-// component and its Writing counterpart, which sends two strings to a
-// server action for review. This one sends nothing anywhere: there is no
-// fetch, no upload, no transcription and no model call in this ticket,
-// and the completion screen says in words that the review is the next
-// build rather than offering a control with nothing behind it.
+// - which screen is showing
+// - the recordings, as one { taskId: SpeakingResponse } map
+// - the review, as one small state machine
+//
+// All three live in local component state. Nothing is written to a
+// database, to localStorage or to a cookie, and a page reload starts the
+// section again with nothing recorded. The one thing that leaves the
+// browser is the audio, when the learner presses Submit for AI Review,
+// and what comes back is held in the same state as everything else and
+// saved nowhere.
+//
+// EXAM-28 added the review, and it did not add a screen to the flow. The
+// completion screen is still the last of the seventeen, and the review
+// states are drawn in its place while a review is in flight, has failed,
+// or has come back. Adding an eighteenth flow screen would have
+// renumbered every screen in the section ("Screen 1 of 18" on the
+// intro), for a screen that only some runs ever reach. It is the
+// arrangement WritingSectionPrototype already uses.
+//
+// Why the review is a fetch and not a server action. Its Writing
+// counterpart is passed a server action from its page, because a Writing
+// submission is two strings. A Speaking submission is up to eight audio
+// recordings at once, which is past the body size limit a server action
+// carries, so the submission goes to an API route as FormData instead.
+// The header note on that route says the rest. The consequence here is
+// that this component calls submitSpeakingMockReview rather than being
+// handed an action, and that the call cannot be swapped out by the page.
+//
+// Why a changed recording clears a finished review. The review is a
+// judgement of eight particular recordings, so the moment any of them
+// changes it is a judgement of audio that no longer exists. Leaving it
+// on screen would let a learner re-record Task 3, walk forward, and read
+// a level that was estimated from the take they just replaced.
+// Re-recording therefore returns the completion screen to its unreviewed
+// state, with the Submit for AI Review button live again.
 //
 // Why recordings survive navigation. They are keyed by task id rather
 // than by screen position, and this component stays mounted for the whole
@@ -80,10 +112,13 @@ import type {
 //
 // What this component deliberately does not do:
 //
-// - it does not transcribe, review, score or estimate anything. None of
-//   those exist in this ticket
-// - it does not upload. No audio reaches Supabase Storage, an API route
-//   or a server action
+// - it does not transcribe, score or estimate anything itself. It sends
+//   the recordings to one endpoint and renders what comes back. No
+//   prompt, no model name, no API key and no scoring rule exists in the
+//   browser bundle
+// - it does not store audio anywhere. The recordings cross to the server
+//   once, for the length of one review request, and are never written to
+//   Supabase Storage, a database, localStorage or a cookie
 // - it does not gate Next on a missing recording. A learner can walk the
 //   whole section without recording a word and reach a completion screen
 //   that says 0 of 8 tasks recorded, which is the honest reading of what
@@ -104,22 +139,53 @@ import type {
 //
 // House style: normal hyphens only, no long hyphens or em dashes.
 
+// Where the review has got to.
+//
+// "failed" carries our own message and our own code, never a provider's.
+// The server never returns provider text, so there is none to carry. The
+// code reaches the error screen for one decision only: whether a retry
+// is worth offering.
+type ReviewState =
+  | { status: "idle" }
+  | { status: "working" }
+  | { status: "ready"; evaluation: SpeakingMockEvaluation }
+  | { status: "failed"; message?: string; code?: SpeakingMockEvaluationErrorCode };
+
 export type SpeakingSectionPrototypeProps = {
   content: SpeakingSectionContent;
   copy?: SpeakingMockCopy;
-  // Where Return to dashboard goes from the completion screen.
+  // Where Return to dashboard goes from the completion and result
+  // screens.
   dashboardHref?: string;
+  // Set false to run the section with no review at all, which leaves the
+  // completion screen without the Submit for AI Review control. Used
+  // where the flow is being walked through without a server behind it.
+  enableReview?: boolean;
 };
 
 export function SpeakingSectionPrototype({
   content,
   copy = speakingMockCopy,
   dashboardHref,
+  enableReview = true,
 }: SpeakingSectionPrototypeProps) {
   const screens = useMemo(() => buildSpeakingSectionFlow(content), [content]);
 
   const [screenIndex, setScreenIndex] = useState(0);
   const [responses, setResponses] = useState<SpeakingResponseMap>({});
+  const [review, setReview] = useState<ReviewState>({ status: "idle" });
+
+  // Which review request is the current one.
+  //
+  // A learner can submit, go back, re-record a task and submit again
+  // faster than the first reply arrives, and the older reply would then
+  // land on recordings they have already replaced. Every request takes a
+  // number and a reply is dropped unless its number is still the latest.
+  //
+  // A ref rather than state, for the reason WritingSectionPrototype
+  // gives for its own: nothing renders from it, and bumping it has to
+  // take effect immediately rather than at the next render.
+  const reviewRequestId = useRef(0);
 
   const screen = screens[screenIndex];
   const totalScreens = screens.length;
@@ -159,13 +225,65 @@ export function SpeakingSectionPrototype({
         mimeType: recording.mimeType,
       });
     });
+
+    // A review of the previous takes is not a review of these. Any reply
+    // still in flight is dropped as well, so it cannot arrive after the
+    // re-record and re-open a result for audio that has been replaced.
+    reviewRequestId.current += 1;
+    setReview({ status: "idle" });
   };
 
-  // Start the section again from the first screen with nothing recorded.
+  // Send the recordings for review.
+  //
+  // The whole map goes, and the helper decides what that means on the
+  // wire: one audio part per task that has a blob, and one metadata
+  // entry per task either way. The task ids, prompts, pictures and
+  // recording windows are held by the server and are neither sent nor
+  // accepted from here.
+  //
+  // A section with nothing recorded is submitted like any other. What
+  // comes back is a structured no-response result built with no provider
+  // call at all, which is a more useful thing to show than a disabled
+  // button.
+  const requestReview = async () => {
+    reviewRequestId.current += 1;
+    const requestId = reviewRequestId.current;
+
+    setReview({ status: "working" });
+
+    try {
+      const outcome = await submitSpeakingMockReview(content, responses);
+
+      if (reviewRequestId.current !== requestId) {
+        return;
+      }
+
+      setReview(
+        outcome.ok
+          ? { status: "ready", evaluation: outcome.evaluation }
+          : {
+              status: "failed",
+              message: outcome.message,
+              code: outcome.code,
+            },
+      );
+    } catch {
+      if (reviewRequestId.current !== requestId) {
+        return;
+      }
+
+      setReview({ status: "failed" });
+    }
+  };
+
+  // Start the section again from the first screen with nothing recorded
+  // and no review.
   //
   // Every object URL goes first, because the map is about to stop being
   // the only reference to them. Nothing was saved, so there is nothing
-  // else to clear.
+  // else to clear. The request id moves on so a reply still in flight
+  // cannot land on the fresh run and show a review of recordings that
+  // have just been thrown away.
   const restart = () => {
     setResponses((current) => {
       listSpeakingAudioUrls(current).forEach((url) => {
@@ -175,7 +293,17 @@ export function SpeakingSectionPrototype({
       return {};
     });
 
+    reviewRequestId.current += 1;
+    setReview({ status: "idle" });
     setScreenIndex(0);
+  };
+
+  // Leave the review and go back to the completion screen with the
+  // recordings still held. Used by the error screen, so a failed review
+  // is never a dead end.
+  const dismissReview = () => {
+    reviewRequestId.current += 1;
+    setReview({ status: "idle" });
   };
 
   // Back is hidden on the first screen only, because there is nothing
@@ -273,12 +401,64 @@ export function SpeakingSectionPrototype({
       );
     }
 
+    // The completion screen, and the three review states drawn in its
+    // place. The last screen in the flow, so there is no Next, and Back
+    // returns to Task 8 with every recording still playable in all four
+    // states.
+    if (review.status === "working") {
+      return (
+        <SpeakingEvaluationProcessingScreen
+          title={content.title}
+          copy={copy}
+          metaText={metaText}
+          onBack={goBack}
+          showBack={showBack}
+        />
+      );
+    }
+
+    if (review.status === "failed") {
+      return (
+        <SpeakingEvaluationErrorScreen
+          title={content.title}
+          message={review.message}
+          code={review.code}
+          onRetry={() => void requestReview()}
+          onBackToRecordings={dismissReview}
+          dashboardHref={dashboardHref}
+          copy={copy}
+          metaText={metaText}
+          onBack={goBack}
+          showBack={showBack}
+        />
+      );
+    }
+
+    if (review.status === "ready") {
+      return (
+        <SpeakingSectionResultScreen
+          title={content.title}
+          evaluation={review.evaluation}
+          onRestart={restart}
+          dashboardHref={dashboardHref}
+          copy={copy}
+          metaText={metaText}
+          onBack={goBack}
+          showBack={showBack}
+        />
+      );
+    }
+
     return (
       <SpeakingSectionCompleteScreen
         title={content.title}
         tasks={summarizeSpeakingSection(content, responses)}
         dashboardHref={dashboardHref}
         onRestart={restart}
+        // The review block is drawn only where the review is enabled, so
+        // a run with no server behind it shows no control that cannot
+        // work.
+        onRequestReview={enableReview ? () => void requestReview() : undefined}
         copy={copy}
         metaText={metaText}
         onBack={goBack}
@@ -305,5 +485,14 @@ export function SpeakingSectionPrototype({
   // unmounts the recorder, whose cleanup stops the MediaRecorder and
   // releases the microphone, and whose mount guard drops the abandoned
   // audio rather than writing it into a task the learner has left.
-  return <Fragment key={screen.id}>{renderCurrentScreen()}</Fragment>;
+  //
+  // The review status is part of the key as well, because the four
+  // review states share one flow screen. Without it, moving from the
+  // completion screen to a result many times as long would leave the
+  // canvas scrolled to wherever the shorter screen had been left.
+  return (
+    <Fragment key={screen.id + "-" + review.status}>
+      {renderCurrentScreen()}
+    </Fragment>
+  );
 }

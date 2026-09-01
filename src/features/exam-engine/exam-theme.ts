@@ -1294,6 +1294,81 @@ export const examSpeaking = {
   completeCount: "text-[13px] leading-5 text-academy-navy/85",
 } as const;
 
+// Speaking AI review and practice estimate (EXAM-28).
+//
+// The Speaking result screen is the Writing result screen with one more
+// block on every card, so this recipe set is built from that one rather
+// than beside it.
+//
+// That is a deliberate reuse and not a shortcut. The two screens are the
+// same object: an overall estimate in a bordered strip, a disclaimer
+// under it, a stack of bordered task cards, and inside each card a
+// criterion table, a corrections list and two rewrites. Drawing them
+// from two copies of the same forty recipes would mean a spacing fix
+// landing on one screen and not the other, and a learner who runs a
+// Writing section and a Speaking section in one sitting would see the
+// difference.
+//
+// What Speaking adds is the transcript block, which Writing has no need
+// for because a Writing response is already on the screen the learner
+// typed it into. A spoken answer is not visible anywhere until something
+// writes it down, so the transcript is part of the result rather than a
+// reference beside it, and it is drawn as quoted speech: monospace
+// numbers off, paragraph breaks kept, and a quiet note under it saying
+// what an automatic transcript can be relied on for.
+//
+// Three of the Writing recipes are re-pointed rather than reused as they
+// stand, and each is renamed to what it holds here:
+//
+// - the disclaimer strip is used twice on this screen, once for the
+//   practice estimate sentence and once for the audio assessment note,
+//   so the second gets its own names
+// - the insufficient block carries four outcomes here rather than one,
+//   so it is named for the status it reports rather than for one of them
+//
+// Append only. Nothing in examWritingReview, examSpeaking or any
+// Listening or Reading recipe is changed by this block.
+export const examSpeakingReview = {
+  ...examWritingReview,
+
+  // The audio assessment note. The same bordered strip as the practice
+  // disclaimer, because it does the same job: it bounds what the reading
+  // above it claims, and it has to be seen rather than skimmed past.
+  audioNote:
+    "flex min-w-0 flex-col gap-0.5 rounded-sm border border-academy-line bg-academy-navy-soft/35 px-3 py-2.5",
+  audioNoteLabel:
+    "text-[11px] font-semibold uppercase tracking-[0.06em] text-academy-navy/55",
+  audioNoteText: "text-[12px] leading-5 text-academy-navy/80",
+
+  // The transcript of one answer.
+  //
+  // Bordered and inset, so it reads as a quotation of the learner rather
+  // than as more of the review's own prose. whitespace-pre-line keeps
+  // whatever line breaks the transcription produced, and the text sits a
+  // little darker than the surrounding feedback because it is the
+  // evidence the rest of the card argues from.
+  transcript:
+    "flex min-w-0 flex-col gap-1.5 rounded-sm border border-academy-line bg-academy-navy-soft/25 px-3 py-2.5",
+  transcriptHeader:
+    "flex min-w-0 flex-wrap items-baseline gap-x-3 gap-y-0.5 border-b border-academy-line pb-1.5",
+  transcriptTitle: "text-[13px] font-semibold leading-5 text-academy-navy",
+  transcriptDuration:
+    "ml-auto shrink-0 text-[11px] font-semibold uppercase tracking-[0.06em] tabular-nums text-academy-navy/55",
+  transcriptBody:
+    "whitespace-pre-line text-[13px] leading-6 text-academy-navy/85",
+  transcriptEmpty: "text-[12px] leading-5 text-academy-navy/60",
+  transcriptNote: "text-[11px] leading-4 text-academy-navy/55",
+
+  // Shown in place of the criterion table, the corrections and the two
+  // rewrites on a task that produced no reviewable speech. One block for
+  // all three of those outcomes, with its own heading and sentence for
+  // each, which the copy file holds.
+  statusBlock:
+    "flex min-w-0 flex-col gap-1 rounded-sm border border-academy-line bg-academy-navy-soft/35 px-3 py-2.5",
+  statusHeading: "text-[13px] font-semibold leading-5 text-academy-navy",
+  statusText: "text-[12px] leading-5 text-academy-navy/75",
+} as const;
+
 // Tones for the two Speaking clock readings shown inside the canvas.
 //
 // The same four states the top bar reading uses, so an amber clock in the
