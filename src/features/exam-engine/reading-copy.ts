@@ -171,70 +171,24 @@ export const readingCopy = {
     "Internal prototype of Mock Test 1 Reading Part 4, Reading for Viewpoints.",
   part4ExamRegionLabel: "Mock Test 1 - Reading Part 4",
 
-  // Dashboard internal preview cards (EXAM-18).
+  // Dashboard internal preview badge (EXAM-18, cut back by EXAM-24).
   //
-  // Wording for the two temporary cards that sit beside the Listening
-  // test card on the dashboard, so a Reading route can be opened without
-  // typing its URL. These are internal build links and the wording has to
-  // keep saying so, which is why every one of them carries the badge and
-  // why neither description offers a Reading test:
+  // The one Reading card on the dashboard is the full Reading section
+  // card, whose wording lives in readingSectionCopy below. This badge is
+  // what marks it as an internal build link rather than a released
+  // module, and it keeps saying so on purpose: the Reading run still has
+  // the prototype behaviour its ticket left in place, and nothing on the
+  // card claims a CELPIP level, an official Reading band or a full
+  // all-skills Mock Test 1.
   //
-  // - The badge is the first thing on the card, and it says the word
-  //   prototype rather than a status a learner could read as a release.
-  // - Each description names what the part is and what it does not do
-  //   yet. Part 2 says its review and its score are not built.
-  // - Neither line mentions a score, a CELPIP level or a Reading band,
-  //   and nothing here claims a full Reading section exists. It does not.
-  //   One part of four is built, plus one more without its review.
+  // EXAM-18, EXAM-20 and EXAM-22 each added a card for one Reading part,
+  // and their wording lived here beside this badge. EXAM-24 removed those
+  // four cards from the dashboard once the assembled Reading section had
+  // its own card, so the wording went with them. The four part routes
+  // were not touched and still open when their URL is typed.
   //
-  // EXAM-20 added a third card, for Reading Part 3, on the same terms.
-  // EXAM-21 gave that part its review and its score, so its description
-  // now reads like the other two rather than naming what is missing.
-  // EXAM-22 added a fourth card, for Reading Part 4, and EXAM-23 gave
-  // that part its review and its score, so its description now reads like
-  // the other three rather than naming what is missing.
-  //
-  // These strings go when the real Reading entry point ships, along with
-  // the cards themselves.
+  // This string goes when the Reading entry point stops being a preview.
   dashboardPreviewBadgeLabel: "Internal preview",
-  dashboardPartOneCardTitle: "Mock Test 1 - Reading Part 1",
-  dashboardPartOneCardDescription:
-    "Reading Correspondence prototype with local answers and practice review.",
-  dashboardPartOneCardSectionLabel: "Reading",
-  dashboardPartOneCardPartLabel: "Part 1",
-  dashboardPartOneCardQuestionsLabel: "11 questions",
-  dashboardPartOneCardCtaLabel: "Open Reading Part 1",
-  dashboardPartTwoCardTitle: "Mock Test 1 - Reading Part 2",
-  dashboardPartTwoCardDescription:
-    "Reading to Apply a Diagram prototype with local answers and practice review.",
-  dashboardPartTwoCardSectionLabel: "Reading",
-  dashboardPartTwoCardPartLabel: "Part 2",
-  dashboardPartTwoCardQuestionsLabel: "8 questions",
-  dashboardPartTwoCardCtaLabel: "Open Reading Part 2",
-
-  // Reading Part 3's card (EXAM-20, description updated by EXAM-21).
-  // Same shape as the two above, and now the same claim: the part
-  // answers and it marks, locally, with no CELPIP level and no Reading
-  // band anywhere behind it.
-  dashboardPartThreeCardTitle: "Mock Test 1 - Reading Part 3",
-  dashboardPartThreeCardDescription:
-    "Reading for Information prototype with local answers and practice review.",
-  dashboardPartThreeCardSectionLabel: "Reading",
-  dashboardPartThreeCardPartLabel: "Part 3",
-  dashboardPartThreeCardQuestionsLabel: "9 questions",
-  dashboardPartThreeCardCtaLabel: "Open Reading Part 3",
-
-  // Reading Part 4's card (EXAM-22, description updated by EXAM-23).
-  // Same shape as the three above, and now the same claim: the part
-  // answers and it marks, locally, with no CELPIP level and no Reading
-  // band anywhere behind it.
-  dashboardPartFourCardTitle: "Mock Test 1 - Reading Part 4",
-  dashboardPartFourCardDescription:
-    "Reading for Viewpoints prototype with local answers and practice review.",
-  dashboardPartFourCardSectionLabel: "Reading",
-  dashboardPartFourCardPartLabel: "Part 4",
-  dashboardPartFourCardQuestionsLabel: "10 questions",
-  dashboardPartFourCardCtaLabel: "Open Reading Part 4",
 } as const;
 
 // Screen position line, for example Screen 2 of 3.
@@ -424,4 +378,287 @@ export function formatReadingScoreMessage(
   total: number,
 ): string {
   return `You answered ${correct} of ${total} questions correctly.`;
+}
+
+// Wording for the full Reading section screens (EXAM-24).
+//
+// A third object beside readingCopy and readingReviewCopy, for the
+// screens the section owns rather than a part: the section intro, the
+// three part transitions, the full Reading practice score with its
+// breakdown and its estimated band, and the full Reading answer review.
+//
+// It is a separate object rather than more keys on the two above for the
+// reason readingReviewCopy gives about itself: it is obvious at a glance
+// which strings are the ones that must never claim an official result,
+// and the section can be reworded without reading past the part wording.
+//
+// Four wording rules this object exists to hold the line on:
+//
+// - Nothing here claims an official CELPIP score or an official CELPIP
+//   level. The result is named a Toronto Academy practice score every
+//   time it appears, and the note under it says so in a full sentence.
+// - Nothing on a part transition screen says anything about how the
+//   learner did. A transition is a doorway between two parts, and a score
+//   there would be the part level score this ticket exists to remove from
+//   the run.
+// - The estimated band is named an estimate every time it appears, the
+//   overlap in the source chart is stated out loud rather than hidden
+//   behind a single level, and the source note says where the mapping
+//   came from so a teacher can check it.
+// - Nothing here claims that a full all-skills Mock Test 1 exists. It
+//   does not. Two sections of four are built.
+//
+// buildReadingSectionCopy takes the test label, the way
+// buildListeningSectionCopy does, so a second mock test gets its wording
+// from a call rather than from a copy of this file.
+
+export type ReadingSectionCopyOptions = {
+  // The test as a learner names it, for example "Mock Test 1".
+  testLabel: string;
+};
+
+// Wording for one test's full Reading section screens.
+export function buildReadingSectionCopy({
+  testLabel,
+}: ReadingSectionCopyOptions) {
+  return {
+    // Shared chrome.
+    sectionLabel: "Reading",
+    sectionName: "Reading section",
+
+    // 1. Reading section intro screen.
+    //
+    // The instruction lines are held as a list rather than as six fields
+    // so the screen renders them with the EXAM-02 instruction list and
+    // the order lives in one place. None of them states a question count:
+    // the count is a detail row on the intro card and is counted off the
+    // content, so a line here cannot go stale.
+    introScreenTitle: testLabel + " - Reading Test: Instructions",
+    introTitle: "Reading Test",
+    introSubtitle:
+      "Read the following information before the Reading section begins.",
+    introLines: [
+      "This section has 4 parts.",
+      "You will read correspondence, a diagram, an information passage, and a set of viewpoints.",
+      "Each part has its own reading time. Answer all questions.",
+      "You can continue with questions unanswered. Any question left blank is counted as incorrect.",
+      "At the end you will see a practice score, an estimated Reading band, and a full answer review.",
+      "This is Toronto Academy practice, not an official CELPIP test.",
+    ],
+    introNotice:
+      "Your answers are held on this screen only, nothing is saved, and the practice score and estimated band are not an official CELPIP result.",
+    // Quiet note under the instruction list on each part intro screen
+    // inside the section run.
+    //
+    // It replaces readingCopy.partIntroNotice, which is right on a part
+    // route and wrong here twice over: it opens "Internal prototype.",
+    // which is a label this exam surface must not carry, and it promises
+    // a practice score at the end of the part, which is the part level
+    // score the section run removes.
+    partIntroNotice:
+      "Your answers are held on this screen only and nothing is saved. The practice score, the estimated Reading band and the answer review come at the end of the Reading section, not at the end of this part. You can move back and forward between screens and your answers stay as you left them.",
+    introCardTitle: "Reading section",
+    introCardSummary:
+      "Four parts in one run, with the practice score, the estimated Reading band and the answer review at the end rather than after each part.",
+    introPartsLabel: "Parts",
+    introQuestionsLabel: "Questions",
+    introTimeLabel: "Reading time",
+
+    // Part transition screens. No score, no count, and nothing about how
+    // the part that just closed went.
+    transitionHeading: "Part complete",
+    transitionHint:
+      "Take a moment to get ready. Continue when you want the next part.",
+
+    // Marking screen, shown while the server checks the section.
+    //
+    // The wording is about the check, never about the answers. Nothing
+    // here implies a result before one exists.
+    markingHeading: "Checking your answers",
+    markingText:
+      "Your Reading answers are being checked. This takes a moment, and nothing is saved.",
+    markingFailedHeading: "Your answers could not be checked",
+    markingFailedText:
+      "The Reading practice score could not be loaded. Check your connection, confirm you are still signed in, and try again. Your answers are still held on this page.",
+    markingRetryLabel: "Try again",
+
+    // 10. Full Reading practice score.
+    scoreTitle: "Reading practice score",
+    scoreSubtitle: "Your practice result for the whole Reading section.",
+    // The one sentence that stops the percentage above it being read as
+    // an official result. It sits with the number rather than elsewhere
+    // on the screen, so the two are never separated.
+    //
+    // It differs from readingReviewCopy.practiceResultNote by its second
+    // sentence. The part level note says no CELPIP level is estimated
+    // from one part, which is true there and would be wrong here: this
+    // screen does show an estimated band, and the note has to say what
+    // that estimate is worth instead.
+    practiceResultNote:
+      "This is a Toronto Academy practice score, not an official CELPIP score. The estimated Reading band below it is an estimate from a published score chart, not a CELPIP result.",
+    blankNote:
+      "Questions left blank are counted as incorrect in this score. The correct answer for each of them is shown in the review.",
+    scoreNotice:
+      "Nothing from this run has been saved. Leaving or restarting clears the answers, the score and the estimated band held on this page.",
+    reviewAnswersLabel: "Review answers",
+    restartLabel: "Restart Reading section",
+    backToDashboardLabel: "Return to dashboard",
+
+    // Part breakdown table on the score screen.
+    breakdownTitle: "Part breakdown",
+    breakdownPartColumn: "Part",
+    breakdownQuestionsColumn: "Questions",
+    breakdownAnsweredColumn: "Answered",
+    breakdownBlankColumn: "Blank",
+    breakdownCorrectColumn: "Correct",
+    breakdownScoreColumn: "Practice score",
+
+    // Estimated band card on the score screen.
+    //
+    // Three wording rules, and the first one is the reason this block is
+    // reviewed rather than edited casually:
+    //
+    // - The reading is named an estimate every time it appears, and the
+    //   note under it says in a full sentence that it is not an official
+    //   CELPIP score.
+    // - The range note says out loud that the source chart's rows
+    //   overlap, so a two level reading reads as the chart being
+    //   approximate rather than as the app being unsure of its own
+    //   arithmetic. The ticket asks for the ambiguity to be preserved
+    //   rather than resolved, and this is where a learner is told it is
+    //   there.
+    // - The source note says where the mapping came from, so a learner or
+    //   a teacher can check it, and does not claim the mapping models how
+    //   a real level is calculated. It does not.
+    estimatedBandLabel: "Estimated CELPIP Reading band",
+    estimatedBandRangeNote:
+      "The score ranges on that chart overlap, so an estimate can cover two levels.",
+    estimatedBandSourceNote:
+      "Estimated from the published CELPIP Reading score chart held with this program, which maps a Reading score out of 38 to a CELPIP level. A real CELPIP level also takes question difficulty into account, which a practice estimate cannot do.",
+    estimatedBandNote:
+      "This is a Toronto Academy practice estimate, not an official CELPIP score.",
+
+    // 11. Full Reading answer review.
+    reviewTitle: "Reading answer review",
+    reviewSubtitle:
+      "Every question in the Reading section, grouped by part, with the answer you chose and the correct answer.",
+    backToScoreLabel: "Back to score",
+    reviewNotice:
+      "This review is held on this screen only. Nothing is saved, no explanations are written for these answers, and this is not an official CELPIP result.",
+    reviewEmptyText: "There are no questions to review for this section.",
+
+    // Page metadata and the exam region name, for the route.
+    pageTitle: testLabel + " - Reading Test - Toronto Academy of Education",
+    pageDescription:
+      "The complete " +
+      testLabel +
+      " Reading section, Parts 1 to 4 in one run, with a practice score, an estimated Reading band and an answer review at the end.",
+    examRegionLabel: testLabel + " - Reading Test",
+
+    // Dashboard internal preview card.
+    //
+    // The full Reading section joins the four part cards as an internal
+    // build link, and it is dressed as one. What it deliberately does not
+    // say: that a full all-skills Mock Test 1 exists, or that any of this
+    // is an official CELPIP result.
+    dashboardCardTitle: testLabel + " - Reading Test",
+    dashboardCardDescription:
+      "Full Reading section flow with Parts 1-4, practice score, review, and estimated band.",
+    dashboardCardSectionLabel: "Reading",
+    dashboardCardPartsLabel: "Parts 1-4",
+    dashboardCardCtaLabel: "Open Reading Test",
+  } as const;
+}
+
+// Mock Test 1. Also the default every Reading section screen falls back
+// to when no copy is passed.
+export const readingSectionCopy = buildReadingSectionCopy({
+  testLabel: "Mock Test 1",
+});
+
+export type ReadingSectionCopy = ReturnType<typeof buildReadingSectionCopy>;
+
+// Transition line between two parts, for example
+// "Reading Part 2 complete. Continue to Reading Part 3."
+export function formatReadingSectionTransition(
+  completedPartLabel: string,
+  nextPartLabel: string,
+): string {
+  return completedPartLabel + " complete. Continue to " + nextPartLabel + ".";
+}
+
+// Part position inside the section, for example "Reading Part 3 of 4".
+export function formatReadingSectionPartPosition(
+  partNumber: number,
+  totalParts: number,
+): string {
+  return "Reading Part " + partNumber + " of " + totalParts;
+}
+
+// Top bar note on a screen belonging to a part, for example
+// "Reading Part 3 of 4 - Screen 9 of 14".
+export function formatReadingSectionPartMeta(
+  partNumber: number,
+  totalParts: number,
+  screenNumber: number,
+  totalScreens: number,
+): string {
+  return (
+    formatReadingSectionPartPosition(partNumber, totalParts) +
+    " - Screen " +
+    screenNumber +
+    " of " +
+    totalScreens
+  );
+}
+
+// Top bar note on a screen the section owns rather than a part, for
+// example "Reading section - Screen 1 of 14".
+export function formatReadingSectionMeta(
+  screenNumber: number,
+  totalScreens: number,
+): string {
+  return "Reading section - Screen " + screenNumber + " of " + totalScreens;
+}
+
+// Whole minutes, for the intro card, for example "43 minutes".
+//
+// The Reading part allowances are whole numbers of minutes in every
+// source we hold, so nothing here has to print seconds.
+export function formatReadingSectionMinutes(seconds: number): string {
+  const minutes = Math.round(seconds / 60);
+
+  return minutes + (minutes === 1 ? " minute" : " minutes");
+}
+
+// Line under the estimated band, for example
+// "Estimated from 25 correct answers out of 38."
+//
+// The raw count is repeated here rather than left to the summary card
+// above, so the reading and the number it came from are never read apart.
+export function formatReadingBandBasis(
+  correctCount: number,
+  totalQuestions: number,
+): string {
+  return (
+    "Estimated from " +
+    correctCount +
+    (correctCount === 1 ? " correct answer" : " correct answers") +
+    " out of " +
+    totalQuestions +
+    "."
+  );
+}
+
+// Breakdown cell, for example "5 / 8".
+export function formatReadingSectionCountOfTotal(
+  count: number,
+  total: number,
+): string {
+  return count + " / " + total;
+}
+
+// Group heading count in the section review, for example "11 questions".
+export function formatReadingSectionGroupCount(count: number): string {
+  return count + (count === 1 ? " question" : " questions");
 }
