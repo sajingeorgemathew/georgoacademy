@@ -1,8 +1,12 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useActionState, useState, type ReactNode } from "react";
+import { AppButton } from "@/components/app/AppButton";
 import { cx, text } from "@/features/design/design-tokens";
-import type { AdminActionState } from "@/features/admin/admin-action-state";
+import {
+  initialAdminActionState,
+  type AdminActionState,
+} from "@/features/admin/admin-action-state";
 
 // Form primitives shared by the three builder forms.
 //
@@ -249,5 +253,160 @@ export function AdminFormMessage({ state }: { state: AdminActionState }) {
     >
       {state.message}
     </p>
+  );
+}
+
+// The action signature every admin form posts to. Named here so the
+// ADMIN-02 components can carry a dozen of them without repeating the
+// type at each one.
+export type AdminFormAction = (
+  state: AdminActionState,
+  formData: FormData,
+) => Promise<AdminActionState>;
+
+export type AdminDeleteFormProps = {
+  action: AdminFormAction;
+  // Hidden inputs the action needs, for example the three route ids.
+  fields: Record<string, string>;
+  label?: string;
+  confirmLabel?: string;
+  // One line explaining what goes with it, shown only once armed.
+  warning?: string;
+  size?: "sm" | "md";
+};
+
+// A delete button that asks once before it fires.
+//
+// Two clicks rather than a window.confirm, for two reasons. A native
+// confirm blocks the whole tab, and it cannot say what else goes with
+// the row: deleting a question takes its options and its answer key
+// with it, and that sentence belongs on the screen rather than in a
+// dialog title.
+//
+// The armed state resets whenever the action returns, so a failed delete
+// does not leave a primed button behind.
+export function AdminDeleteForm({
+  action,
+  fields,
+  label = "Remove",
+  confirmLabel = "Confirm remove",
+  warning,
+  size = "sm",
+}: AdminDeleteFormProps) {
+  const [state, formAction, pending] = useActionState(
+    action,
+    initialAdminActionState,
+  );
+
+  const [armed, setArmed] = useState(false);
+
+  return (
+    <form action={formAction} className="flex flex-wrap items-center gap-3">
+      {Object.entries(fields).map(([name, value]) => (
+        <input key={name} type="hidden" name={name} value={value} />
+      ))}
+
+      {armed ? (
+        <>
+          <AppButton
+            type="submit"
+            variant="danger"
+            size={size}
+            isLoading={pending}
+            loadingText="Removing..."
+          >
+            {confirmLabel}
+          </AppButton>
+
+          <AppButton
+            type="button"
+            variant="ghost"
+            size={size}
+            onClick={() => setArmed(false)}
+          >
+            Cancel
+          </AppButton>
+
+          {warning ? (
+            <span className={cx("text-xs leading-5", text.muted)}>
+              {warning}
+            </span>
+          ) : null}
+        </>
+      ) : (
+        <AppButton
+          type="button"
+          variant="ghost"
+          size={size}
+          onClick={() => setArmed(true)}
+        >
+          {label}
+        </AppButton>
+      )}
+
+      {state.status === "error" && state.message.length > 0 ? (
+        <span role="alert" className={cx("text-xs leading-5", text.danger)}>
+          {state.message}
+        </span>
+      ) : null}
+    </form>
+  );
+}
+
+export type AdminActionButtonProps = {
+  action: AdminFormAction;
+  // Hidden inputs the action needs, for example the three route ids.
+  fields: Record<string, string>;
+  label: string;
+  loadingLabel?: string;
+  variant?: "primary" | "secondary" | "ghost";
+};
+
+// A button that runs one server action and prints the sentence it
+// returns, for an action with nothing to fill in.
+//
+// The result is inline text rather than a banner, because these sit in a
+// header row next to other controls and a full width panel there would
+// push the screen around every time somebody pressed it.
+export function AdminActionButton({
+  action,
+  fields,
+  label,
+  loadingLabel = "Working...",
+  variant = "secondary",
+}: AdminActionButtonProps) {
+  const [state, formAction, pending] = useActionState(
+    action,
+    initialAdminActionState,
+  );
+
+  return (
+    <form action={formAction} className="flex flex-wrap items-center gap-3">
+      {Object.entries(fields).map(([name, value]) => (
+        <input key={name} type="hidden" name={name} value={value} />
+      ))}
+
+      <AppButton
+        type="submit"
+        variant={variant}
+        size="sm"
+        isLoading={pending}
+        loadingText={loadingLabel}
+      >
+        {label}
+      </AppButton>
+
+      {state.status !== "idle" && state.message.length > 0 ? (
+        <p
+          role="status"
+          className={cx(
+            "text-xs leading-5",
+            state.status === "error" ? text.danger : text.secondary,
+          )}
+        >
+          {state.message}
+        </p>
+      ) : null}
+    </form>
   );
 }

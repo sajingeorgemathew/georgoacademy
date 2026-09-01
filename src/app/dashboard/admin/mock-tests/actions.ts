@@ -17,7 +17,16 @@ import {
   type AdminErrorContext,
   type SupabaseErrorLike,
 } from "@/features/admin/admin-supabase-error";
-import { getMockTestStructure } from "@/features/admin/mock-test-queries";
+import {
+  getMockTestPartContext,
+  getMockTestStructure,
+} from "@/features/admin/mock-test-queries";
+import {
+  MEDIA_TYPES,
+  QUESTION_TYPES,
+} from "@/features/admin/mock-test-content-types";
+import { getPartContent } from "@/features/admin/mock-test-question-queries";
+import { evaluatePartContent } from "@/features/admin/mock-test-content-validation";
 import {
   MOCK_TEST_STATUSES,
   PART_TYPES,
@@ -30,7 +39,13 @@ import {
 } from "@/features/admin/mock-test-types";
 import { evaluateMockTestStructure } from "@/features/admin/mock-test-validation";
 
-// Server actions for the ADMIN-01 mock test builder.
+// Server actions for the admin mock test builder.
+//
+// ADMIN-01 built the structure half: practice tests, sections and parts.
+// ADMIN-02 adds the content half below it: media links, questions,
+// options and answer keys, plus the part content check. Both halves live
+// here because a "use server" module is the unit a form posts to, and
+// splitting them would only move the import.
 //
 // Every action starts with requireAdmin. A server action is reachable by
 // direct POST, so the check on the page that renders the form protects
@@ -44,11 +59,14 @@ import { evaluateMockTestStructure } from "@/features/admin/mock-test-validation
 // this file is a "use server" module and never runs in a browser.
 //
 // What these actions deliberately do not do:
-//   - author questions, options or answer keys (ADMIN-02)
-//   - upload or attach media (ADMIN-02)
-//   - write timer rules, scoring rules or rubrics (ADMIN-03, ADMIN-04)
+//   - upload a file. Media is a pasted URL and nothing else (ADMIN-02
+//     scope rule), so no route here accepts a File.
+//   - author a Writing or Speaking prompt, or an AI rubric (ADMIN-03)
+//   - write timer rules or scoring rules (ADMIN-03, ADMIN-04)
 //   - save a student attempt (ADMIN-08)
 //   - publish anything a learner can see (see PUBLISHABLE_IN_ADMIN_01)
+//   - replace any hardcoded learner Mock Test 1 route. Nothing authored
+//     here reaches a student.
 //
 // House style: normal hyphens only, straight quotes only.
 
@@ -949,4 +967,1265 @@ function describeWriteError(
     ),
     {},
   ];
+}
+
+// =====================================================================
+// ADMIN-02: part content
+// =====================================================================
+//
+// Media links, questions, options and answer keys, all addressed by the
+// three ids in the URL. Every action below starts with requireAdmin for
+// the same reason the ADMIN-01 actions do: a server action is reachable
+// by direct POST, so the check on the page that renders the form
+// protects nothing here.
+//
+// After the check, every write is scoped to its parent before it runs.
+// loadPartForWrite refuses a part id that does not sit under the section
+// and test in the URL, and loadQuestionForWrite refuses a question id
+// that does not sit under that part. Without those two, a staff member
+// with a stale tab could post an option onto a question in a different
+// practice test.
+
+const REFUSED_PART = "That part could not be found.";
+const REFUSED_QUESTION = "That question could not be found.";
+
+// ---------------------------------------------------------------------
+// Shared field parsing
+// ---------------------------------------------------------------------
+
+// A required whole number from a text input.
+function requiredInteger(min: number, max: number, label: string) {
+  return z
+    .string()
+    .trim()
+    .transform((value) => (value.length === 0 ? NaN : Number(value)))
+    .refine(
+      (value) => Number.isInteger(value) && value >= min && value <= max,
+      `Enter a ${label} between ${min} and ${max}.`,
+    );
+}
+
+// An optional uuid from a select. The empty option means "not attached".
+const optionalUuid = z
+  .string()
+  .trim()
+  .refine(
+    (value) => value.length === 0 || uuid.safeParse(value).success,
+    "That selection is not valid.",
+  )
+  .transform((value) => (value.length === 0 ? null : value));
+
+// A pasted media URL.
+//
+// Checked for shape rather than for reachability. A HEAD request would
+// tell a staff member whether the link resolves right now, which is
+// useful, but it also turns every save into an outbound request to a
+// third party and fails on a Cloudinary asset that is still processing.
+// The shape check catches the mistake that actually happens, which is
+// pasting a Cloudinary console path instead of a delivery URL.
+const mediaUrlField = z
+  .string()
+  .trim()
+  .min(1, "Enter the media URL.")
+  .max(2000, "Keep the URL under 2000 characters.")
+  .refine(
+    (value) => /^https?:\/\/\S+$/i.test(value),
+    "Enter a full URL that starts with https://, for example a Cloudinary delivery link.",
+  );
+
+// ---------------------------------------------------------------------
+// Route scoping
+// ---------------------------------------------------------------------
+
+type PartIds = {
+  mockTestId: string;
+  sectionId: string;
+  partId: string;
+};
+
+// Reads the three ids every ADMIN-02 form posts. Returns null when any
+// of them is missing or malformed, which the caller turns into the same
+// "could not be found" wording a wrong id gets, so a probe learns
+// nothing from the difference.
+function readPartIds(formData: FormData): PartIds | null {
+  const mockTestId = uuid.safeParse(formData.get("mock_test_id"));
+  const sectionId = uuid.safeParse(formData.get("section_id"));
+  const partId = uuid.safeParse(formData.get("part_id"));
+
+  if (!mockTestId.success || !sectionId.success || !partId.success) {
+    return null;
+  }
+
+  return {
+    mockTestId: mockTestId.data,
+    sectionId: sectionId.data,
+    partId: partId.data,
+  };
+}
+
+// The URL of one part inside the builder.
+function partPath(ids: PartIds): string {
+  return `${LIST_PATH}/${ids.mockTestId}/sections/${ids.sectionId}/parts/${ids.partId}`;
+}
+
+// Refreshes every screen a content write can change: the part detail
+// screen, its preview, and the practice test screen above them, which
+// lists the parts.
+function revalidatePartContentPaths(ids: PartIds, questionId?: string): void {
+  const base = partPath(ids);
+
+  revalidatePath(base);
+  revalidatePath(`${base}/preview`);
+  revalidatePath(`${LIST_PATH}/${ids.mockTestId}`);
+
+  if (questionId) {
+    revalidatePath(`${base}/questions/${questionId}`);
+  }
+}
+
+// Confirms the part in the URL exists and sits under the section and
+// test in the URL. Returns the context, or null for the caller to turn
+// into a refusal.
+async function loadPartForWrite(session: AdminSession, ids: PartIds) {
+  const context = await getMockTestPartContext(
+    session,
+    ids.mockTestId,
+    ids.sectionId,
+    ids.partId,
+  );
+
+  return context ?? null;
+}
+
+// Confirms a question exists and sits under the part in the URL. Used by
+// every option and answer key action, since those are addressed by a
+// question id the browser supplies.
+async function loadQuestionForWrite(
+  session: AdminSession,
+  ids: PartIds,
+  questionId: string,
+): Promise<{ id: string; points: number } | null> {
+  if (!session.userId) {
+    return null;
+  }
+
+  const supabase = getSupabaseAdmin();
+
+  const { data, error } = await supabase
+    .from("mock_test_questions")
+    .select("id, points")
+    .eq("id", questionId)
+    .eq("part_id", ids.partId)
+    .maybeSingle();
+
+  if (error) {
+    logAdminSupabaseError("loadQuestionForWrite", error, { id: questionId });
+
+    return null;
+  }
+
+  return (data as { id: string; points: number } | null) ?? null;
+}
+
+// ---------------------------------------------------------------------
+// Media links
+// ---------------------------------------------------------------------
+
+const mediaFields = z.object({
+  media_type: z.enum(MEDIA_TYPES, {
+    message: "Choose a media type.",
+  }),
+  url: mediaUrlField,
+  title: optionalText(200, "title"),
+  alt_text: optionalText(500, "alt text"),
+  transcript: optionalText(20000, "transcript"),
+  internal_notes: optionalText(4000, "internal notes"),
+  display_order: requiredInteger(0, 999, "display order"),
+});
+
+const MEDIA_FIELD_NAMES = [
+  "media_type",
+  "url",
+  "title",
+  "alt_text",
+  "transcript",
+  "internal_notes",
+  "display_order",
+] as const;
+
+// Add one media link to a part.
+//
+// A link, never a file. ADMIN-02 does not build upload, so this action
+// takes a URL that already resolves somewhere, which is how all 46 Mock
+// Test 1 assets already work.
+export async function createMockTestMediaAsset(
+  _prevState: AdminActionState,
+  formData: FormData,
+): Promise<AdminActionState> {
+  const session = await requireAdmin();
+
+  if (!session) {
+    return adminActionError(REFUSED);
+  }
+
+  const ids = readPartIds(formData);
+
+  if (!ids) {
+    return adminActionError(REFUSED_PART);
+  }
+
+  const parsed = mediaFields.safeParse(readFields(formData, MEDIA_FIELD_NAMES));
+
+  if (!parsed.success) {
+    return adminActionError(
+      "Check the highlighted fields.",
+      toFieldErrors(parsed.error),
+    );
+  }
+
+  const context = await loadPartForWrite(session, ids);
+
+  if (!context) {
+    return adminActionError(REFUSED_PART);
+  }
+
+  const supabase = getSupabaseAdmin();
+
+  const { error } = await supabase.from("mock_test_media_assets").insert({
+    ...parsed.data,
+    mock_test_id: ids.mockTestId,
+    section_id: ids.sectionId,
+    part_id: ids.partId,
+    created_by: session.userId,
+    updated_by: session.userId,
+  });
+
+  if (error) {
+    return adminActionError(
+      ...describeWriteError("createMockTestMediaAsset", error, "media link", {
+        id: ids.partId,
+      }),
+    );
+  }
+
+  revalidatePartContentPaths(ids);
+
+  redirect(partPath(ids));
+}
+
+export async function updateMockTestMediaAsset(
+  _prevState: AdminActionState,
+  formData: FormData,
+): Promise<AdminActionState> {
+  const session = await requireAdmin();
+
+  if (!session) {
+    return adminActionError(REFUSED);
+  }
+
+  const ids = readPartIds(formData);
+  const assetResult = uuid.safeParse(formData.get("media_asset_id"));
+
+  if (!ids || !assetResult.success) {
+    return adminActionError("That media link could not be found.");
+  }
+
+  const parsed = mediaFields.safeParse(readFields(formData, MEDIA_FIELD_NAMES));
+
+  if (!parsed.success) {
+    return adminActionError(
+      "Check the highlighted fields.",
+      toFieldErrors(parsed.error),
+    );
+  }
+
+  const context = await loadPartForWrite(session, ids);
+
+  if (!context) {
+    return adminActionError(REFUSED_PART);
+  }
+
+  const supabase = getSupabaseAdmin();
+
+  const { error } = await supabase
+    .from("mock_test_media_assets")
+    .update({
+      ...parsed.data,
+      updated_by: session.userId,
+    })
+    .eq("id", assetResult.data)
+    // Scoped to the part from the URL as well, so a media id belonging
+    // to another part cannot be edited through this form.
+    .eq("part_id", ids.partId);
+
+  if (error) {
+    return adminActionError(
+      ...describeWriteError("updateMockTestMediaAsset", error, "media link", {
+        id: assetResult.data,
+      }),
+    );
+  }
+
+  revalidatePartContentPaths(ids);
+
+  return adminActionSuccess("Media link saved.");
+}
+
+// Remove a media link from a part.
+//
+// Questions pointing at it keep working: mock_test_questions.media_asset_id
+// is declared on delete set null, so a question loses its attachment
+// rather than being deleted alongside the asset. The gap then shows up
+// in the part content check.
+export async function deleteMockTestMediaAsset(
+  _prevState: AdminActionState,
+  formData: FormData,
+): Promise<AdminActionState> {
+  const session = await requireAdmin();
+
+  if (!session) {
+    return adminActionError(REFUSED);
+  }
+
+  const ids = readPartIds(formData);
+  const assetResult = uuid.safeParse(formData.get("media_asset_id"));
+
+  if (!ids || !assetResult.success) {
+    return adminActionError("That media link could not be found.");
+  }
+
+  const context = await loadPartForWrite(session, ids);
+
+  if (!context) {
+    return adminActionError(REFUSED_PART);
+  }
+
+  const supabase = getSupabaseAdmin();
+
+  const { error } = await supabase
+    .from("mock_test_media_assets")
+    .delete()
+    .eq("id", assetResult.data)
+    .eq("part_id", ids.partId);
+
+  if (error) {
+    return adminActionError(
+      ...describeWriteError("deleteMockTestMediaAsset", error, "media link", {
+        id: assetResult.data,
+      }),
+    );
+  }
+
+  revalidatePartContentPaths(ids);
+
+  return adminActionSuccess("Media link removed.");
+}
+
+// ---------------------------------------------------------------------
+// Questions
+// ---------------------------------------------------------------------
+
+// A question saves with a missing prompt or a missing stem on purpose.
+// Authoring is not linear: a staff member typing eleven Reading items
+// puts the numbers and the passage in first and comes back for the
+// wording. The gap is reported by the part content check instead, which
+// is where an unfinished question belongs.
+const questionFields = z.object({
+  question_type: z.enum(QUESTION_TYPES, {
+    message: "Choose a question type.",
+  }),
+  question_number: requiredInteger(1, 500, "question number"),
+  instruction: optionalText(4000, "instruction"),
+  passage_text: optionalText(20000, "passage text"),
+  prompt: optionalText(4000, "prompt"),
+  stem: optionalText(4000, "stem"),
+  helper_text: optionalText(2000, "helper text"),
+  points: requiredInteger(0, 100, "points value"),
+  display_order: requiredInteger(0, 999, "display order"),
+  status: z.enum(["draft", "ready"], {
+    message: "Choose Draft or Ready.",
+  }),
+  media_asset_id: optionalUuid,
+});
+
+const QUESTION_FIELD_NAMES = [
+  "question_type",
+  "question_number",
+  "instruction",
+  "passage_text",
+  "prompt",
+  "stem",
+  "helper_text",
+  "points",
+  "display_order",
+  "status",
+  "media_asset_id",
+] as const;
+
+// Refuses a media asset that is not on this part, and returns null when
+// the attachment is allowed or absent.
+//
+// The select only offers this part's media, so this is the direct POST
+// case. Worth checking anyway: attaching another part's clip would run a
+// Listening question against the wrong audio, which is the kind of
+// mistake that survives a proofread.
+async function checkMediaAssetBelongsToPart(
+  session: AdminSession,
+  ids: PartIds,
+  mediaAssetId: string | null,
+): Promise<AdminActionState | null> {
+  if (mediaAssetId === null || !session.userId) {
+    return null;
+  }
+
+  const supabase = getSupabaseAdmin();
+
+  const { data, error } = await supabase
+    .from("mock_test_media_assets")
+    .select("id")
+    .eq("id", mediaAssetId)
+    .eq("part_id", ids.partId)
+    .maybeSingle();
+
+  if (error) {
+    logAdminSupabaseError("checkMediaAssetBelongsToPart", error, {
+      id: mediaAssetId,
+    });
+
+    return adminActionError(
+      withDevelopmentReason("That media link could not be found.", error),
+    );
+  }
+
+  if (!data) {
+    return adminActionError("That media link is not on this part.", {
+      media_asset_id: "Choose a media link from this part.",
+    });
+  }
+
+  return null;
+}
+
+export async function createMockTestQuestion(
+  _prevState: AdminActionState,
+  formData: FormData,
+): Promise<AdminActionState> {
+  const session = await requireAdmin();
+
+  if (!session) {
+    return adminActionError(REFUSED);
+  }
+
+  const ids = readPartIds(formData);
+
+  if (!ids) {
+    return adminActionError(REFUSED_PART);
+  }
+
+  const parsed = questionFields.safeParse(
+    readFields(formData, QUESTION_FIELD_NAMES),
+  );
+
+  if (!parsed.success) {
+    return adminActionError(
+      "Check the highlighted fields.",
+      toFieldErrors(parsed.error),
+    );
+  }
+
+  const context = await loadPartForWrite(session, ids);
+
+  if (!context) {
+    return adminActionError(REFUSED_PART);
+  }
+
+  const mismatch = await checkMediaAssetBelongsToPart(
+    session,
+    ids,
+    parsed.data.media_asset_id,
+  );
+
+  if (mismatch) {
+    return mismatch;
+  }
+
+  const supabase = getSupabaseAdmin();
+
+  const { data, error } = await supabase
+    .from("mock_test_questions")
+    .insert({
+      ...parsed.data,
+      mock_test_id: ids.mockTestId,
+      section_id: ids.sectionId,
+      part_id: ids.partId,
+      created_by: session.userId,
+      updated_by: session.userId,
+    })
+    .select("id")
+    .single();
+
+  if (error) {
+    return adminActionError(
+      ...describeWriteError("createMockTestQuestion", error, "question", {
+        id: ids.partId,
+      }),
+    );
+  }
+
+  revalidatePartContentPaths(ids);
+
+  // Straight to the question screen rather than back to the part. A new
+  // question is not usable until it has options and a key, and both
+  // editors live there.
+  redirect(`${partPath(ids)}/questions/${data.id}`);
+}
+
+export async function updateMockTestQuestion(
+  _prevState: AdminActionState,
+  formData: FormData,
+): Promise<AdminActionState> {
+  const session = await requireAdmin();
+
+  if (!session) {
+    return adminActionError(REFUSED);
+  }
+
+  const ids = readPartIds(formData);
+  const questionResult = uuid.safeParse(formData.get("question_id"));
+
+  if (!ids || !questionResult.success) {
+    return adminActionError(REFUSED_QUESTION);
+  }
+
+  const questionId = questionResult.data;
+
+  const parsed = questionFields.safeParse(
+    readFields(formData, QUESTION_FIELD_NAMES),
+  );
+
+  if (!parsed.success) {
+    return adminActionError(
+      "Check the highlighted fields.",
+      toFieldErrors(parsed.error),
+    );
+  }
+
+  const context = await loadPartForWrite(session, ids);
+
+  if (!context) {
+    return adminActionError(REFUSED_PART);
+  }
+
+  const mismatch = await checkMediaAssetBelongsToPart(
+    session,
+    ids,
+    parsed.data.media_asset_id,
+  );
+
+  if (mismatch) {
+    return mismatch;
+  }
+
+  const supabase = getSupabaseAdmin();
+
+  const { error } = await supabase
+    .from("mock_test_questions")
+    .update({
+      ...parsed.data,
+      updated_by: session.userId,
+    })
+    .eq("id", questionId)
+    .eq("part_id", ids.partId);
+
+  if (error) {
+    return adminActionError(
+      ...describeWriteError("updateMockTestQuestion", error, "question", {
+        id: questionId,
+      }),
+    );
+  }
+
+  revalidatePartContentPaths(ids, questionId);
+
+  return adminActionSuccess("Question saved.");
+}
+
+// Delete a question, and with it every option and its answer key.
+//
+// The cascade is declared in the migration rather than performed here,
+// so a delete cannot half succeed and leave an orphaned key behind.
+export async function deleteMockTestQuestion(
+  _prevState: AdminActionState,
+  formData: FormData,
+): Promise<AdminActionState> {
+  const session = await requireAdmin();
+
+  if (!session) {
+    return adminActionError(REFUSED);
+  }
+
+  const ids = readPartIds(formData);
+  const questionResult = uuid.safeParse(formData.get("question_id"));
+
+  if (!ids || !questionResult.success) {
+    return adminActionError(REFUSED_QUESTION);
+  }
+
+  const context = await loadPartForWrite(session, ids);
+
+  if (!context) {
+    return adminActionError(REFUSED_PART);
+  }
+
+  const supabase = getSupabaseAdmin();
+
+  const { error } = await supabase
+    .from("mock_test_questions")
+    .delete()
+    .eq("id", questionResult.data)
+    .eq("part_id", ids.partId);
+
+  if (error) {
+    return adminActionError(
+      ...describeWriteError("deleteMockTestQuestion", error, "question", {
+        id: questionResult.data,
+      }),
+    );
+  }
+
+  revalidatePartContentPaths(ids);
+
+  // Back to the part, because the screen this was posted from may have
+  // been the question's own page, which no longer exists.
+  redirect(partPath(ids));
+}
+
+// ---------------------------------------------------------------------
+// Options
+// ---------------------------------------------------------------------
+
+const optionFields = z.object({
+  option_label: z
+    .string()
+    .trim()
+    .min(1, "Enter an option label, for example A.")
+    .max(20, "Keep the label under 20 characters."),
+  option_text: z
+    .string()
+    .trim()
+    .min(1, "Enter the option text.")
+    .max(2000, "Keep the option text under 2000 characters."),
+  display_order: requiredInteger(0, 999, "display order"),
+});
+
+const OPTION_FIELD_NAMES = [
+  "option_label",
+  "option_text",
+  "display_order",
+] as const;
+
+export async function createMockTestOption(
+  _prevState: AdminActionState,
+  formData: FormData,
+): Promise<AdminActionState> {
+  const session = await requireAdmin();
+
+  if (!session) {
+    return adminActionError(REFUSED);
+  }
+
+  const ids = readPartIds(formData);
+  const questionResult = uuid.safeParse(formData.get("question_id"));
+
+  if (!ids || !questionResult.success) {
+    return adminActionError(REFUSED_QUESTION);
+  }
+
+  const parsed = optionFields.safeParse(
+    readFields(formData, OPTION_FIELD_NAMES),
+  );
+
+  if (!parsed.success) {
+    return adminActionError(
+      "Check the highlighted fields.",
+      toFieldErrors(parsed.error),
+    );
+  }
+
+  const question = await loadQuestionForWrite(
+    session,
+    ids,
+    questionResult.data,
+  );
+
+  if (!question) {
+    return adminActionError(REFUSED_QUESTION);
+  }
+
+  const supabase = getSupabaseAdmin();
+
+  const { error } = await supabase.from("mock_test_options").insert({
+    ...parsed.data,
+    question_id: question.id,
+  });
+
+  if (error) {
+    return adminActionError(
+      ...describeWriteError("createMockTestOption", error, "option", {
+        id: question.id,
+      }),
+    );
+  }
+
+  revalidatePartContentPaths(ids, question.id);
+
+  return adminActionSuccess("Option added.");
+}
+
+export async function updateMockTestOption(
+  _prevState: AdminActionState,
+  formData: FormData,
+): Promise<AdminActionState> {
+  const session = await requireAdmin();
+
+  if (!session) {
+    return adminActionError(REFUSED);
+  }
+
+  const ids = readPartIds(formData);
+  const questionResult = uuid.safeParse(formData.get("question_id"));
+  const optionResult = uuid.safeParse(formData.get("option_id"));
+
+  if (!ids || !questionResult.success || !optionResult.success) {
+    return adminActionError("That option could not be found.");
+  }
+
+  const parsed = optionFields.safeParse(
+    readFields(formData, OPTION_FIELD_NAMES),
+  );
+
+  if (!parsed.success) {
+    return adminActionError(
+      "Check the highlighted fields.",
+      toFieldErrors(parsed.error),
+    );
+  }
+
+  const question = await loadQuestionForWrite(
+    session,
+    ids,
+    questionResult.data,
+  );
+
+  if (!question) {
+    return adminActionError(REFUSED_QUESTION);
+  }
+
+  const supabase = getSupabaseAdmin();
+
+  const { error } = await supabase
+    .from("mock_test_options")
+    .update(parsed.data)
+    .eq("id", optionResult.data)
+    .eq("question_id", question.id);
+
+  if (error) {
+    return adminActionError(
+      ...describeWriteError("updateMockTestOption", error, "option", {
+        id: optionResult.data,
+      }),
+    );
+  }
+
+  revalidatePartContentPaths(ids, question.id);
+
+  return adminActionSuccess("Option saved.");
+}
+
+// Delete one option.
+//
+// Refused while it is the correct answer. The foreign key is declared on
+// delete set null, so the database would allow this and quietly leave an
+// answer key pointing at nothing. Saying so is better than repairing it
+// silently: the staff member deleting option C is the only one who knows
+// which option should be correct instead.
+export async function deleteMockTestOption(
+  _prevState: AdminActionState,
+  formData: FormData,
+): Promise<AdminActionState> {
+  const session = await requireAdmin();
+
+  if (!session) {
+    return adminActionError(REFUSED);
+  }
+
+  const ids = readPartIds(formData);
+  const questionResult = uuid.safeParse(formData.get("question_id"));
+  const optionResult = uuid.safeParse(formData.get("option_id"));
+
+  if (!ids || !questionResult.success || !optionResult.success) {
+    return adminActionError("That option could not be found.");
+  }
+
+  const question = await loadQuestionForWrite(
+    session,
+    ids,
+    questionResult.data,
+  );
+
+  if (!question) {
+    return adminActionError(REFUSED_QUESTION);
+  }
+
+  const supabase = getSupabaseAdmin();
+
+  const { data: key, error: keyError } = await supabase
+    .from("mock_test_answer_keys")
+    .select("id")
+    .eq("question_id", question.id)
+    .eq("correct_option_id", optionResult.data)
+    .maybeSingle();
+
+  if (keyError) {
+    logAdminSupabaseError("deleteMockTestOption:key", keyError, {
+      id: optionResult.data,
+    });
+
+    return adminActionError(
+      withDevelopmentReason(
+        "The option could not be removed. Try again.",
+        keyError,
+      ),
+    );
+  }
+
+  if (key) {
+    return adminActionError(
+      "That option is the correct answer for this question. Choose a different correct option in the answer key first, then remove it.",
+    );
+  }
+
+  const { error } = await supabase
+    .from("mock_test_options")
+    .delete()
+    .eq("id", optionResult.data)
+    .eq("question_id", question.id);
+
+  if (error) {
+    return adminActionError(
+      ...describeWriteError("deleteMockTestOption", error, "option", {
+        id: optionResult.data,
+      }),
+    );
+  }
+
+  revalidatePartContentPaths(ids, question.id);
+
+  return adminActionSuccess("Option removed.");
+}
+
+// ---------------------------------------------------------------------
+// Answer keys
+// ---------------------------------------------------------------------
+//
+// ADMIN ONLY. Everything below writes mock_test_answer_keys, the one
+// table in the project where a mistake hands a learner the answers. Row
+// level security grants it no policy for anon or authenticated at all,
+// so the service role client reached after requireAdmin is the only
+// route to it, and no learner route reads it because ADMIN-02 builds no
+// learner route.
+
+const answerKeyFields = z.object({
+  correct_option_id: optionalUuid,
+  correct_text: optionalText(2000, "correct text"),
+  explanation: optionalText(4000, "explanation"),
+  points: requiredInteger(1, 100, "points value"),
+});
+
+const ANSWER_KEY_FIELD_NAMES = [
+  "correct_option_id",
+  "correct_text",
+  "explanation",
+  "points",
+] as const;
+
+// Refuses a correct option that is not on this question, and returns
+// null when the choice is allowed or absent.
+//
+// This is the check the whole answer key model rests on. A key pointing
+// at another question's option would mark every attempt wrong and still
+// look right on screen, because an option id is not something a
+// proofread catches.
+async function checkOptionBelongsToQuestion(
+  session: AdminSession,
+  questionId: string,
+  optionId: string | null,
+): Promise<AdminActionState | null> {
+  if (optionId === null || !session.userId) {
+    return null;
+  }
+
+  const supabase = getSupabaseAdmin();
+
+  const { data, error } = await supabase
+    .from("mock_test_options")
+    .select("id")
+    .eq("id", optionId)
+    .eq("question_id", questionId)
+    .maybeSingle();
+
+  if (error) {
+    logAdminSupabaseError("checkOptionBelongsToQuestion", error, {
+      id: optionId,
+    });
+
+    return adminActionError(
+      withDevelopmentReason("That option could not be found.", error),
+    );
+  }
+
+  if (!data) {
+    return adminActionError("That option is not on this question.", {
+      correct_option_id: "Choose an option from this question.",
+    });
+  }
+
+  return null;
+}
+
+// Create the answer key for a question, or replace the one it has.
+//
+// An upsert rather than an append, because a question has exactly one
+// key. Written as a read then a write rather than a Postgres upsert, so
+// the editor behaves the same on a database where the unique index was
+// skipped, which the migration does when a legacy table already holds
+// two keys for one question.
+export async function setMockTestAnswerKey(
+  _prevState: AdminActionState,
+  formData: FormData,
+): Promise<AdminActionState> {
+  const session = await requireAdmin();
+
+  if (!session) {
+    return adminActionError(REFUSED);
+  }
+
+  const ids = readPartIds(formData);
+  const questionResult = uuid.safeParse(formData.get("question_id"));
+
+  if (!ids || !questionResult.success) {
+    return adminActionError(REFUSED_QUESTION);
+  }
+
+  const parsed = answerKeyFields.safeParse(
+    readFields(formData, ANSWER_KEY_FIELD_NAMES),
+  );
+
+  if (!parsed.success) {
+    return adminActionError(
+      "Check the highlighted fields.",
+      toFieldErrors(parsed.error),
+    );
+  }
+
+  const question = await loadQuestionForWrite(
+    session,
+    ids,
+    questionResult.data,
+  );
+
+  if (!question) {
+    return adminActionError(REFUSED_QUESTION);
+  }
+
+  const mismatch = await checkOptionBelongsToQuestion(
+    session,
+    question.id,
+    parsed.data.correct_option_id,
+  );
+
+  if (mismatch) {
+    return mismatch;
+  }
+
+  const supabase = getSupabaseAdmin();
+
+  const existingId = await findAnswerKeyId(question.id);
+
+  if (existingId.error) {
+    return adminActionError(
+      ...describeWriteError(
+        "setMockTestAnswerKey:read",
+        existingId.error,
+        "answer key",
+        { id: question.id },
+      ),
+    );
+  }
+
+  const { error } = existingId.id
+    ? await supabase
+        .from("mock_test_answer_keys")
+        .update({ ...parsed.data, updated_by: session.userId })
+        .eq("id", existingId.id)
+        .eq("question_id", question.id)
+    : await supabase.from("mock_test_answer_keys").insert({
+        ...parsed.data,
+        question_id: question.id,
+        created_by: session.userId,
+        updated_by: session.userId,
+      });
+
+  if (error) {
+    return adminActionError(
+      ...describeWriteError("setMockTestAnswerKey", error, "answer key", {
+        id: question.id,
+      }),
+    );
+  }
+
+  revalidatePartContentPaths(ids, question.id);
+
+  return adminActionSuccess("Answer key saved.");
+}
+
+// Edit an answer key that already exists.
+//
+// Separate from setMockTestAnswerKey rather than an alias for it, and
+// the difference is the refusal: this one will not create a key. A form
+// that believes it is editing a key, posting against a question whose
+// key was deleted in another tab, should hear about it instead of
+// silently creating one.
+export async function updateMockTestAnswerKey(
+  _prevState: AdminActionState,
+  formData: FormData,
+): Promise<AdminActionState> {
+  const session = await requireAdmin();
+
+  if (!session) {
+    return adminActionError(REFUSED);
+  }
+
+  const ids = readPartIds(formData);
+  const questionResult = uuid.safeParse(formData.get("question_id"));
+
+  if (!ids || !questionResult.success) {
+    return adminActionError(REFUSED_QUESTION);
+  }
+
+  const parsed = answerKeyFields.safeParse(
+    readFields(formData, ANSWER_KEY_FIELD_NAMES),
+  );
+
+  if (!parsed.success) {
+    return adminActionError(
+      "Check the highlighted fields.",
+      toFieldErrors(parsed.error),
+    );
+  }
+
+  const question = await loadQuestionForWrite(
+    session,
+    ids,
+    questionResult.data,
+  );
+
+  if (!question) {
+    return adminActionError(REFUSED_QUESTION);
+  }
+
+  const mismatch = await checkOptionBelongsToQuestion(
+    session,
+    question.id,
+    parsed.data.correct_option_id,
+  );
+
+  if (mismatch) {
+    return mismatch;
+  }
+
+  const existingId = await findAnswerKeyId(question.id);
+
+  if (existingId.error) {
+    return adminActionError(
+      ...describeWriteError(
+        "updateMockTestAnswerKey:read",
+        existingId.error,
+        "answer key",
+        { id: question.id },
+      ),
+    );
+  }
+
+  if (!existingId.id) {
+    return adminActionError(
+      "This question has no answer key to edit. Set one instead.",
+    );
+  }
+
+  const supabase = getSupabaseAdmin();
+
+  const { error } = await supabase
+    .from("mock_test_answer_keys")
+    .update({ ...parsed.data, updated_by: session.userId })
+    .eq("id", existingId.id)
+    .eq("question_id", question.id);
+
+  if (error) {
+    return adminActionError(
+      ...describeWriteError("updateMockTestAnswerKey", error, "answer key", {
+        id: question.id,
+      }),
+    );
+  }
+
+  revalidatePartContentPaths(ids, question.id);
+
+  return adminActionSuccess("Answer key saved.");
+}
+
+// Remove the answer key from a question.
+//
+// The question stays, and the part content check immediately reports it
+// as unmarkable, which is the state a staff member asked for by deleting
+// the key.
+export async function deleteMockTestAnswerKey(
+  _prevState: AdminActionState,
+  formData: FormData,
+): Promise<AdminActionState> {
+  const session = await requireAdmin();
+
+  if (!session) {
+    return adminActionError(REFUSED);
+  }
+
+  const ids = readPartIds(formData);
+  const questionResult = uuid.safeParse(formData.get("question_id"));
+
+  if (!ids || !questionResult.success) {
+    return adminActionError(REFUSED_QUESTION);
+  }
+
+  const question = await loadQuestionForWrite(
+    session,
+    ids,
+    questionResult.data,
+  );
+
+  if (!question) {
+    return adminActionError(REFUSED_QUESTION);
+  }
+
+  const supabase = getSupabaseAdmin();
+
+  const { error } = await supabase
+    .from("mock_test_answer_keys")
+    .delete()
+    .eq("question_id", question.id);
+
+  if (error) {
+    return adminActionError(
+      ...describeWriteError("deleteMockTestAnswerKey", error, "answer key", {
+        id: question.id,
+      }),
+    );
+  }
+
+  revalidatePartContentPaths(ids, question.id);
+
+  return adminActionSuccess("Answer key removed.");
+}
+
+// The id of the answer key on a question, or null when it has none.
+//
+// Returns the Supabase error rather than throwing it, because both
+// callers already have a form to put a message on and a thrown error
+// there would render an error boundary over a filled in key editor.
+async function findAnswerKeyId(
+  questionId: string,
+): Promise<{ id: string | null; error: SupabaseErrorLike | null }> {
+  const supabase = getSupabaseAdmin();
+
+  const { data, error } = await supabase
+    .from("mock_test_answer_keys")
+    .select("id")
+    .eq("question_id", questionId)
+    .limit(1);
+
+  if (error) {
+    return { id: null, error };
+  }
+
+  const rows = (data ?? []) as { id: string }[];
+
+  return { id: rows[0]?.id ?? null, error: null };
+}
+
+// ---------------------------------------------------------------------
+// Part content validation
+// ---------------------------------------------------------------------
+
+// Run every content rule for one part and report what it found.
+//
+// The rules live in src/features/admin/mock-test-content-validation.ts
+// and touch no database, so the part detail screen and the part preview
+// show the same findings on every render without this action running.
+// What this adds is a check a staff member can ask for deliberately, and
+// a sentence that says whether the part is finished.
+//
+// Unlike validateMockTestStructure, this writes nothing. The cached rows
+// in mock_test_validation_issues belong to the structure check, which
+// rewrites them wholesale for a whole practice test, so part level rows
+// added here would be deleted by the next structure run. Recomputing one
+// part is cheap and always current.
+export async function validatePartContent(
+  _prevState: AdminActionState,
+  formData: FormData,
+): Promise<AdminActionState> {
+  const session = await requireAdmin();
+
+  if (!session) {
+    return adminActionError(REFUSED);
+  }
+
+  const ids = readPartIds(formData);
+
+  if (!ids) {
+    return adminActionError(REFUSED_PART);
+  }
+
+  const context = await loadPartForWrite(session, ids);
+
+  if (!context) {
+    return adminActionError(REFUSED_PART);
+  }
+
+  const content = await getPartContent(session, ids.partId);
+  const summary = evaluatePartContent(content);
+
+  revalidatePartContentPaths(ids);
+
+  if (summary.issues.length === 0) {
+    return adminActionSuccess(
+      `Content checks passed. ${summary.questionCount} question${summary.questionCount === 1 ? "" : "s"} worth ${summary.totalPoints} point${summary.totalPoints === 1 ? "" : "s"}. Timers, scoring rules and rubrics are checked in later tickets.`,
+    );
+  }
+
+  const counted: string[] = [];
+
+  if (summary.errorCount > 0) {
+    counted.push(
+      `${summary.errorCount} ${summary.errorCount === 1 ? "problem" : "problems"}`,
+    );
+  }
+
+  if (summary.warningCount > 0) {
+    counted.push(
+      `${summary.warningCount} ${summary.warningCount === 1 ? "warning" : "warnings"}`,
+    );
+  }
+
+  return adminActionSuccess(
+    `Content checked: ${counted.join(" and ")}. The list is below and on the part preview.`,
+  );
 }
