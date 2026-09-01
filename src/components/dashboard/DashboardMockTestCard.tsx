@@ -10,7 +10,12 @@ import {
   readingSectionCopy,
 } from "@/features/exam-engine/reading-copy";
 import { countReadingSectionQuestions } from "@/features/exam-engine/reading-section-flow";
+import {
+  formatWritingWordTarget,
+  writingMockCopy,
+} from "@/features/exam-engine/writing-mock-copy";
 import { mockTest1ReadingSection } from "@/features/exam-engine/mock-tests/mock-test-1/reading-section";
+import { mockTest1WritingSection } from "@/features/exam-engine/mock-tests/mock-test-1/writing-section";
 
 // Mock test entry point on the learner dashboard (EXAM-15A, Reading
 // internal preview cards added by EXAM-18, cut back to one by EXAM-24).
@@ -30,11 +35,17 @@ import { mockTest1ReadingSection } from "@/features/exam-engine/mock-tests/mock-
 // and four of the five were internal build steps rather than the thing a
 // learner opens.
 //
-// So the dashboard shows two cards, one per built section, for the two
-// routes that run a whole section:
+// So the dashboard shows one card per built section, for the routes that
+// run a whole section:
 //
 //   /dashboard/mock-tests/mock-test-1/listening
 //   /dashboard/mock-tests/mock-test-1/reading
+//   /dashboard/mock-tests/mock-test-1/writing
+//
+// EXAM-25 added the third. It follows the same rule as the other two: one
+// card per section a learner can sit end to end, and no card for a screen
+// inside one. There are no individual Writing task cards for the same
+// reason there are no Reading part cards.
 //
 // These routes lost their card and kept working. They are the way to
 // check a single part during development, and they open normally when
@@ -111,6 +122,43 @@ const READING_CARD_META = [
 
 const READING_TEST_HREF = "/dashboard/mock-tests/mock-test-1/reading";
 
+// The Writing card (EXAM-25).
+//
+// A third internal build link, dressed exactly as the Reading one: a
+// tinted panel with a dashed rule, an Internal preview badge, and a
+// secondary button. It has more reason to carry that badge than Reading
+// does, because the Writing run has no review and no score at all yet,
+// which is what the description says out loud.
+//
+// Nothing on it claims that a full all-skills Mock Test 1 exists. Three
+// sections of four are built and one of the three cannot mark itself.
+//
+// No individual Writing task cards. The two tasks are screens inside this
+// one run and are not reachable on their own, so there is nothing to link
+// to and nothing that would be useful if there were.
+const WRITING_TEST_HREF = "/dashboard/mock-tests/mock-test-1/writing";
+
+// The word target, read off the content rather than written down, so the
+// card and the guidance beside the editor cannot disagree. Every Mock
+// Test 1 Writing task shares the one target, so the first task's is the
+// section's.
+const WRITING_WORD_TARGET = mockTest1WritingSection.tasks[0]?.wordTarget;
+
+// The Writing facts line. Tasks 1 and 2, and the shared word target when
+// there is one.
+const WRITING_CARD_META = [
+  writingMockCopy.dashboardCardSectionLabel,
+  writingMockCopy.dashboardCardTasksLabel,
+  ...(WRITING_WORD_TARGET
+    ? [
+        formatWritingWordTarget(
+          WRITING_WORD_TARGET.min,
+          WRITING_WORD_TARGET.max,
+        ),
+      ]
+    : []),
+];
+
 // The slash separated facts line, shared by both cards so the Reading one
 // reads the same way as the Listening one.
 function CardMetaList({ items }: { items: readonly string[] }) {
@@ -143,7 +191,11 @@ export function DashboardMockTestCard() {
         description={listeningCopy.mockTestsDescription}
       />
 
-      <div className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2">
+      {/* Three across from the large breakpoint, two below it. EXAM-25
+          added the third card and the third column with it: two cards in
+          a two column grid plus one on its own row reads as an
+          afterthought rather than as a third section. */}
+      <div className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
         <AppCard as="article" padding="compact" className="flex flex-col">
           <div className="flex items-start justify-between gap-3">
             <h3 className={cx(text.heading, "min-w-0 text-lg")}>
@@ -197,6 +249,39 @@ export function DashboardMockTestCard() {
               size="md"
             >
               {readingSectionCopy.dashboardCardCtaLabel}
+            </AppButtonLink>
+          </div>
+        </AppCard>
+
+        <AppCard
+          as="article"
+          variant="subtle"
+          padding="compact"
+          className="flex flex-col border-dashed border-academy-navy/25"
+        >
+          <div className="flex items-start justify-between gap-3">
+            <h3 className={cx(text.heading, "min-w-0 text-lg")}>
+              {writingMockCopy.dashboardCardTitle}
+            </h3>
+
+            <AppStatusBadge tone="neutral" className="shrink-0">
+              {writingMockCopy.dashboardPreviewBadgeLabel}
+            </AppStatusBadge>
+          </div>
+
+          <p className={cx("mt-3 text-sm leading-6", text.secondary)}>
+            {writingMockCopy.dashboardCardDescription}
+          </p>
+
+          <CardMetaList items={WRITING_CARD_META} />
+
+          <div className="mt-auto pt-5">
+            <AppButtonLink
+              href={WRITING_TEST_HREF}
+              variant="secondary"
+              size="md"
+            >
+              {writingMockCopy.dashboardCardCtaLabel}
             </AppButtonLink>
           </div>
         </AppCard>

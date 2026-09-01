@@ -62,6 +62,16 @@
 // The four part routes stay listed beside it. They are unchanged by that
 // ticket and are still the way to check one part on its own.
 //
+// EXAM-25 added the Writing section route. It needs the locked surface
+// for a reason of its own: the screen is a situation to read on one side
+// and a writing area on the other, and an editor a learner spends 27
+// minutes in cannot sit in a dashboard content column with a sidebar
+// beside it and a footer under it. Its own ticket asks for no preview
+// label on the exam surface, so what the Listening part routes say in a
+// preview notice it says on the screens themselves: the intro notice, the
+// hint under the editor and the completion screen all state that nothing
+// is saved and nothing is scored.
+//
 // A trailing slash is tolerated because a typed URL can carry one. Query
 // strings and hashes never reach usePathname, so they need no handling.
 //
@@ -74,6 +84,7 @@ export const EXAM_MODE_ROUTES: readonly string[] = [
   "/dashboard/mock-tests/mock-test-1/reading/part-2",
   "/dashboard/mock-tests/mock-test-1/reading/part-3",
   "/dashboard/mock-tests/mock-test-1/reading/part-4",
+  "/dashboard/mock-tests/mock-test-1/writing",
 ];
 
 // Whether a pathname is one of the exam mode routes.

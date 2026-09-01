@@ -936,6 +936,92 @@ export const examReadingReviewStatusTones: Record<ReadingReviewStatus, string> =
     blank: "text-academy-navy/55",
   };
 
+// Writing task split screen (EXAM-25).
+//
+// Screen type 9: the situation on the left, and on the right the prompt,
+// the positions where the task has them, and the editor. It reuses
+// examTwoColumn for the split itself, so a Writing task and a Reading
+// part read as the same piece of software.
+//
+// Three decisions worth stating, because they are what make the screen
+// comfortable to write in rather than merely correct:
+//
+// - **Prose runs at leading-6, like Reading.** The situation is a
+//   paragraph a learner reads properly before writing, not a question
+//   stem they scan, so it is set at reading density and not at question
+//   density.
+// - **The editor is the tallest thing on the screen.** A response is 150
+//   to 200 words, and an editor that shows two lines of it makes a
+//   learner scroll their own writing to reread it. It is resizable
+//   vertically as well, because a writer who wants more room should be
+//   able to take it.
+// - **The word count sits under the editor, not in the top bar.** It
+//   belongs with the writing it counts, and the top bar already carries
+//   the countdown. Tabular figures keep the row from shifting as the
+//   number grows.
+export const examWriting = {
+  // Left column: the situation to read.
+  situation: "flex min-w-0 flex-col gap-3",
+  situationInstruction: "text-[12px] leading-5 text-academy-navy/70",
+  situationHeading: "text-[13px] font-semibold leading-6 text-academy-navy",
+  situationParagraph: "text-[13px] leading-6 text-academy-navy/85",
+
+  // Right column: everything the learner answers with, stacked. The
+  // prompt, the positions and the editor are three blocks rather than
+  // one, so the gap between them is wider than the gap inside any of
+  // them.
+  taskColumn: "flex min-w-0 flex-col gap-4",
+
+  // Right column: the prompt above the editor.
+  prompt: "flex min-w-0 flex-col gap-2",
+  promptInstruction:
+    "text-[13px] font-semibold leading-6 text-academy-navy",
+  requirementList: "flex min-w-0 list-disc flex-col gap-1 pl-5",
+  requirementItem: "text-[13px] leading-6 text-academy-navy/85",
+
+  // Right column: the positions on a task that offers a choice.
+  //
+  // The whole row is the click target, and the chosen row carries the
+  // same blue wash the Listening option rows use, so what is chosen is
+  // legible at a glance. The fieldset draws no geometry: preflight has
+  // already stripped its border, padding and margin.
+  choice: "flex min-w-0 flex-col gap-1.5",
+  choiceFieldset: "w-full min-w-0",
+  choiceLegend:
+    "mb-1.5 block w-full min-w-0 text-[11px] font-semibold uppercase tracking-[0.06em] text-academy-navy/55",
+  choiceList: "flex min-w-0 flex-col gap-1",
+  choiceRow:
+    "flex min-w-0 cursor-pointer items-start gap-2 rounded-sm border border-academy-line bg-academy-paper px-2.5 py-2 transition-colors hover:bg-academy-navy-soft/45",
+  choiceRowSelected: "bg-academy-blue-soft hover:bg-academy-blue-soft",
+  choiceInput:
+    "mt-1 h-3.5 w-3.5 shrink-0 accent-academy-blue focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-academy-blue",
+  choiceText: "min-w-0 text-[13px] leading-5 text-academy-navy",
+  choiceLabel: "font-semibold",
+  choiceHint: "text-[11px] leading-4 text-academy-navy/60",
+
+  // Right column: the editor.
+  editor: "flex min-w-0 flex-col gap-1.5",
+  editorLabel:
+    "text-[11px] font-semibold uppercase tracking-[0.06em] text-academy-navy/55",
+  // Square cornered and hairline ruled, so it reads as a test field
+  // rather than as the rounded dashboard textarea.
+  editorField: `block min-h-[16rem] w-full min-w-0 resize-y rounded-sm border border-academy-line bg-academy-paper px-3 py-2.5 text-[13px] leading-6 text-academy-navy placeholder:text-academy-navy/40 sm:min-h-[20rem] ${focus.ring}`,
+  editorHint: "text-[11px] leading-4 text-academy-navy/60",
+
+  // Word count row under the editor.
+  countRow:
+    "flex min-w-0 flex-wrap items-baseline gap-x-3 gap-y-0.5 text-[11px] leading-4",
+  countLabel:
+    "font-semibold uppercase tracking-[0.06em] text-academy-navy/55",
+  countValue: "font-semibold tabular-nums text-academy-navy",
+  countTarget: "tabular-nums text-academy-navy/60",
+
+  // Completion screen stack, capped so two short columns of readings do
+  // not stretch across a full width canvas.
+  completeStack: "mx-auto flex w-full min-w-0 max-w-3xl flex-col gap-4",
+  completeHeading: "text-[13px] font-semibold leading-5 text-academy-navy",
+} as const;
+
 // Shared body text tones inside the canvas. Exam copy runs tighter than
 // dashboard copy, so these sit a step below the marketing scale.
 export const examText = {
