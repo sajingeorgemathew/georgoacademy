@@ -1,8 +1,11 @@
 "use client";
 
-import { Fragment, useMemo, useState } from "react";
+import { Fragment, useMemo, useRef, useState } from "react";
+import { WritingEvaluationErrorScreen } from "./WritingEvaluationErrorScreen";
+import { WritingEvaluationProcessingScreen } from "./WritingEvaluationProcessingScreen";
 import { WritingSectionCompleteScreen } from "./WritingSectionCompleteScreen";
 import { WritingSectionIntroScreen } from "./WritingSectionIntroScreen";
+import { WritingSectionResultScreen } from "./WritingSectionResultScreen";
 import { WritingTaskScreen } from "./WritingTaskScreen";
 import { WritingTaskTransitionScreen } from "./WritingTaskTransitionScreen";
 import {
@@ -21,27 +24,41 @@ import {
 } from "@/features/exam-engine/writing-mock-flow";
 import type { WritingMockCopy } from "@/features/exam-engine/writing-mock-copy";
 import type {
+  WritingMockEvaluation,
+  WritingMockEvaluationInput,
+  WritingMockEvaluationOutcome,
+} from "@/features/exam-engine/writing-mock-evaluation-types";
+import type {
   WritingChoiceMap,
   WritingResponseMap,
   WritingSectionContent,
 } from "@/features/exam-engine/writing-mock-types";
 
-// Mock Test 1 Writing section prototype (EXAM-25).
+// Mock Test 1 Writing section (EXAM-25, extended by EXAM-26).
 //
 // The whole Writing section as one run: the section intro, Task 1, a
 // short transition, Task 2, and a completion screen. Five screens, built
 // by buildWritingSectionFlow from the content rather than typed out here.
 //
-// It owns two pieces of state and nothing else:
+// It owns three pieces of state and nothing else:
 //
 // - the responses, as one { taskId: text } map
 // - the chosen positions, as one { taskId: optionId } map
+// - the review, as one small state machine
 //
-// Both live in local component state. Nothing is written to a database,
-// to localStorage or to a cookie, no Supabase client is imported, no
-// server action is called, and a page reload starts the section again.
-// That is what the ticket asks for and it is recorded in
-// docs/product/writing-mock-test-prototype.md.
+// All three live in local component state. Nothing is written to a
+// database, to localStorage or to a cookie, no Supabase client is
+// imported here, and a page reload starts the section again. The one
+// thing that leaves the browser is the pair of responses, when the
+// learner presses Submit for AI Review, and what comes back is held in
+// the same state as everything else and saved nowhere.
+//
+// EXAM-26 added the review, and it did not add a screen to the flow. The
+// completion screen is still the last of the five, and the review states
+// are drawn in its place while a review is in flight, has failed, or has
+// come back. Adding a sixth flow screen would have renumbered every
+// screen in the section ("Screen 1 of 6" on the intro), for a screen that
+// only some runs ever reach.
 //
 // Why responses survive navigation. They are keyed by task id rather than
 // by screen position, and this component stays mounted for the whole
@@ -56,12 +73,22 @@ import type {
 // matters: a learner who clicks the other option halfway through Task 2
 // keeps every word they have written.
 //
+// Why a changed response clears a finished review. The review is a
+// judgement of two particular pieces of text, so the moment either of
+// them changes it is a judgement of writing that no longer exists.
+// Leaving it on screen would let a learner edit Task 2, walk forward, and
+// read a level that was estimated from the paragraph they just deleted.
+// Editing therefore returns the completion screen to its unreviewed
+// state, with the Submit for AI Review button live again.
+//
 // What this component deliberately does not do:
 //
-// - it does not mark anything, so there is no marking state, no request
-//   id and no server action prop, all of which the Reading section
-//   prototype needs and this one has no use for
-// - it does not call an AI reviewer, and imports nothing that could
+// - it does not mark anything against an answer key. Writing has none,
+//   which is why the server action beside this flow reviews rather than
+//   marks
+// - it does not construct an OpenAI client, read an environment variable
+//   or hold a prompt. It calls one server action and renders what comes
+//   back
 // - it does not gate Next on an empty response or an unmade choice. A
 //   learner can walk the whole section without typing a word and reach a
 //   completion screen that says 0 words, twice, which is the honest
@@ -82,15 +109,40 @@ import type {
 //
 // House style: normal hyphens only, no long hyphens or em dashes.
 
+// Sends both responses for AI review and returns the practice estimate.
+//
+// Passed in rather than imported, so this component depends on the shape
+// of the outcome and not on one particular route's action. It is the same
+// arrangement ReadingSectionPrototype uses for its marking action, and
+// for the same reason: the component stays renderable without a server.
+export type WritingSectionEvaluateAction = (
+  input: WritingMockEvaluationInput,
+) => Promise<WritingMockEvaluationOutcome>;
+
+// Where the review has got to.
+//
+// "failed" carries our own message rather than a provider's. The server
+// never returns provider text, so there is none to carry.
+type ReviewState =
+  | { status: "idle" }
+  | { status: "working" }
+  | { status: "ready"; evaluation: WritingMockEvaluation }
+  | { status: "failed"; message?: string };
+
 export type WritingSectionPrototypeProps = {
   content: WritingSectionContent;
+  // Omit to run the section with no review at all, which leaves the
+  // completion screen exactly as EXAM-25 shipped it.
+  evaluateResponses?: WritingSectionEvaluateAction;
   copy?: WritingMockCopy;
-  // Where Return to dashboard goes from the completion screen.
+  // Where Return to dashboard goes from the completion and result
+  // screens.
   dashboardHref?: string;
 };
 
 export function WritingSectionPrototype({
   content,
+  evaluateResponses,
   copy = writingMockCopy,
   dashboardHref,
 }: WritingSectionPrototypeProps) {
@@ -99,6 +151,19 @@ export function WritingSectionPrototype({
   const [screenIndex, setScreenIndex] = useState(0);
   const [responses, setResponses] = useState<WritingResponseMap>({});
   const [choices, setChoices] = useState<WritingChoiceMap>({});
+  const [review, setReview] = useState<ReviewState>({ status: "idle" });
+
+  // Which review request is the current one.
+  //
+  // A learner can submit, go back, change a paragraph and submit again
+  // faster than the first reply arrives, and the older reply would then
+  // land on writing they have already changed. Every request takes a
+  // number and a reply is dropped unless its number is still the latest.
+  //
+  // A ref rather than state, for the reason ReadingSectionPrototype gives
+  // for its own: nothing renders from it, and bumping it has to take
+  // effect immediately rather than at the next render.
+  const reviewRequestId = useRef(0);
 
   const screen = screens[screenIndex];
   const totalScreens = screens.length;
@@ -114,19 +179,85 @@ export function WritingSectionPrototype({
 
   const changeResponse = (taskId: string, text: string) => {
     setResponses((current) => setWritingResponse(current, taskId, text));
+
+    // A review of the previous text is not a review of this one. Any
+    // reply still in flight is dropped as well, so it cannot arrive after
+    // the edit and re-open a result for writing that has changed.
+    reviewRequestId.current += 1;
+    setReview({ status: "idle" });
   };
 
   const chooseOption = (taskId: string, optionId: string) => {
     setChoices((current) => setWritingChoice(current, taskId, optionId));
   };
 
-  // Start the section again from the first screen with nothing typed and
-  // nothing chosen. Both maps go, because everything the run produced is
-  // in them. Nothing was saved, so there is nothing else to clear.
+  // Send both responses for review.
+  //
+  // The input is the two response texts, positionally, which is the whole
+  // contract: the task ids, the prompts, the requirements and the word
+  // targets are held by the server and are neither sent nor accepted from
+  // here. Two tasks is what a CELPIP Writing section has, and a section
+  // with fewer sends an empty string for the task it does not have, which
+  // the server reads as blank.
+  const requestReview = async () => {
+    if (!evaluateResponses) {
+      return;
+    }
+
+    reviewRequestId.current += 1;
+    const requestId = reviewRequestId.current;
+
+    setReview({ status: "working" });
+
+    const input: WritingMockEvaluationInput = {
+      task1Response: content.tasks[0]
+        ? getWritingResponse(responses, content.tasks[0].taskId)
+        : "",
+      task2Response: content.tasks[1]
+        ? getWritingResponse(responses, content.tasks[1].taskId)
+        : "",
+    };
+
+    try {
+      const outcome = await evaluateResponses(input);
+
+      if (reviewRequestId.current !== requestId) {
+        return;
+      }
+
+      setReview(
+        outcome.ok
+          ? { status: "ready", evaluation: outcome.evaluation }
+          : { status: "failed", message: outcome.message },
+      );
+    } catch {
+      if (reviewRequestId.current !== requestId) {
+        return;
+      }
+
+      setReview({ status: "failed" });
+    }
+  };
+
+  // Start the section again from the first screen with nothing typed,
+  // nothing chosen and no review. All three go, because everything the
+  // run produced is in them. Nothing was saved, so there is nothing else
+  // to clear. The request id moves on so a reply still in flight cannot
+  // land on the fresh run.
   const restart = () => {
+    reviewRequestId.current += 1;
     setScreenIndex(0);
     setResponses({});
     setChoices({});
+    setReview({ status: "idle" });
+  };
+
+  // Leave the review and go back to the completion screen with the
+  // writing still held. Used by the error screen, so a failed review is
+  // never a dead end.
+  const dismissReview = () => {
+    reviewRequestId.current += 1;
+    setReview({ status: "idle" });
   };
 
   // Back is hidden on the first screen only, because there is nothing
@@ -228,14 +359,65 @@ export function WritingSectionPrototype({
       );
     }
 
-    // The completion screen. The last screen in the flow, so there is no
-    // Next, and Back returns to Task 2 with every word still there.
+    // The completion screen, and the three review states drawn in its
+    // place. The last screen in the flow, so there is no Next, and Back
+    // returns to Task 2 with every word still there in all four states.
+    if (review.status === "working") {
+      return (
+        <WritingEvaluationProcessingScreen
+          title={content.title}
+          copy={copy}
+          metaText={metaText}
+          onBack={goBack}
+          showBack={showBack}
+        />
+      );
+    }
+
+    if (review.status === "failed") {
+      return (
+        <WritingEvaluationErrorScreen
+          title={content.title}
+          message={review.message}
+          onRetry={() => void requestReview()}
+          onBackToResponses={dismissReview}
+          dashboardHref={dashboardHref}
+          copy={copy}
+          metaText={metaText}
+          onBack={goBack}
+          showBack={showBack}
+        />
+      );
+    }
+
+    if (review.status === "ready") {
+      return (
+        <WritingSectionResultScreen
+          title={content.title}
+          evaluation={review.evaluation}
+          tasks={content.tasks}
+          onRestart={restart}
+          dashboardHref={dashboardHref}
+          copy={copy}
+          metaText={metaText}
+          onBack={goBack}
+          showBack={showBack}
+        />
+      );
+    }
+
     return (
       <WritingSectionCompleteScreen
         title={content.title}
         tasks={summarizeWritingSection(content, responses, choices)}
         dashboardHref={dashboardHref}
         onRestart={restart}
+        // The review block is drawn only where an action was passed, so
+        // a run with no server behind it shows no control that cannot
+        // work.
+        onRequestReview={
+          evaluateResponses ? () => void requestReview() : undefined
+        }
         copy={copy}
         metaText={metaText}
         onBack={goBack}
@@ -257,5 +439,14 @@ export function WritingSectionPrototype({
   // It does not disturb the responses. They are held in this component's
   // state, which is above the key, so remounting the frame below rebuilds
   // the screen and leaves every word where it was.
-  return <Fragment key={screen.id}>{renderCurrentScreen()}</Fragment>;
+  //
+  // The review status is part of the key as well, because the four review
+  // states share one flow screen. Without it, moving from the completion
+  // screen to a result four times as long would leave the canvas scrolled
+  // to wherever the shorter screen had been left.
+  return (
+    <Fragment key={screen.id + "-" + review.status}>
+      {renderCurrentScreen()}
+    </Fragment>
+  );
 }
