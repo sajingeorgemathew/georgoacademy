@@ -1,21 +1,31 @@
-// Learner facing wording for the Mock Test 1 Speaking section (EXAM-27).
+// Learner facing wording for the Mock Test 1 Speaking section (EXAM-27,
+// extended by EXAM-28).
 //
 // Same rule as exam-copy.ts, listening-copy.ts, reading-copy.ts and
 // writing-mock-copy.ts: all Speaking mock test chrome copy lives in one
 // file so the screens say the same thing everywhere, and so a wording
 // change is one edit rather than seventeen.
 //
-// Three wording rules this file exists to hold the line on:
+// Four wording rules this file exists to hold the line on:
 //
-// - Nothing here promises a score. This ticket builds no transcription,
-//   no AI review, no Speaking score and no estimated Speaking level, so
-//   no screen may imply one has been produced. The words "official CELPIP
+// - Nothing here promises an official result. EXAM-28 added a
+//   transcription step, an AI review and an estimated Speaking level, so
+//   the screens no longer say a review is coming later. What they say
+//   instead is that the estimate is a Toronto Academy practice estimate
+//   produced by AI-supported feedback. The words "official CELPIP
 //   score", "official result", "guaranteed score" and "pass guarantee"
-//   appear nowhere in this file except in the sentence that denies them.
+//   appear nowhere in this file except in the sentences that deny them.
+// - Nothing here claims the review heard the recording. It did not. The
+//   recording is transcribed and the scoring model is given the
+//   transcript, the task, the recording window and the measured
+//   duration. So no sentence in this file says the review judged
+//   pronunciation, rhythm or intonation, and the audio assessment note
+//   says in words that it did not.
 // - Nothing here says a recording has been saved. It has not. Every
-//   recording lives in the browser tab and is lost on a reload, and three
-//   separate screens say so: the intro notice, the line under the
-//   recorder, and the completion notice.
+//   recording lives in the browser tab and is lost on a reload, and it
+//   leaves the page only for the length of one review request. The intro
+//   notice, the line under the recorder, the submit hint and the
+//   completion notice all say so.
 // - Nothing here names the official test as the thing the learner is
 //   sitting. This is Toronto Academy practice software, which is the rule
 //   docs/product/exam-engine-reference-audit.md section 9 sets out.
@@ -77,18 +87,18 @@ export function buildSpeakingMockCopy({ testLabel }: { testLabel: string }) {
       },
       {
         heading: "Your recordings",
-        text: "Recordings are held in this browser tab only. You can play them back and record again as many times as you like. Nothing is uploaded, nothing is saved, and leaving or reloading the page clears them.",
+        text: "Recordings are held in this browser tab only. You can play them back and record again as many times as you like. Nothing is saved, and leaving or reloading the page clears them.",
       },
       {
-        heading: "No review yet",
-        text: "This section does not produce feedback, a transcript or a level. AI review of your Speaking recordings will be added in the next build.",
+        heading: "AI review at the end",
+        text: "When you finish all eight tasks you can send your recordings for AI review. They are transcribed, and you get feedback on each task and an estimated Speaking level for practice.",
       },
     ],
     introNotice:
-      "This is Toronto Academy speaking practice, not an official CELPIP test. No score is produced here and nothing you record is saved or uploaded.",
+      "This is Toronto Academy speaking practice, not an official CELPIP test. The review is AI-supported and gives a practice estimate, not an official CELPIP score. Nothing you record here is saved.",
     introCardTitle: "Speaking section",
     introCardSummary:
-      "All eight Speaking tasks in one run, each with a preparation countdown, a recording countdown and a local playback of what you recorded. AI review will be added next.",
+      "All eight Speaking tasks in one run, each with a preparation countdown, a recording countdown and a local playback of what you recorded, followed by an optional AI review and an estimated Speaking level for practice.",
     introTasksLabel: "Tasks",
     introPrepLabel: "Preparation time",
     introSpeakingLabel: "Speaking time",
@@ -151,8 +161,14 @@ export function buildSpeakingMockCopy({ testLabel }: { testLabel: string }) {
     statusStoppingLabel: "Finishing your recording",
     statusRecordedLabel: "Recorded",
     // Quiet line under the recorder, on every task.
+    //
+    // Reworded in EXAM-28. Before this ticket a recording never left the
+    // page at all, and the line said so. Now it can leave, once, if the
+    // learner chooses to send it for review at the end, so the line says
+    // what is still true: it stays here until you choose otherwise, and
+    // it is never saved.
     recorderPrivacyNote:
-      "Your recording stays in this browser tab. It is not uploaded, not saved and not sent anywhere.",
+      "Your recording stays in this browser tab. It is not saved anywhere, and it is only sent for review if you choose to at the end of the section.",
 
     // Audio preview.
     previewHeading: "Your recording",
@@ -202,30 +218,177 @@ export function buildSpeakingMockCopy({ testLabel }: { testLabel: string }) {
     completeNoLengthValue: "-",
     completeNextStepHeading: "What comes next",
     completeNextStepText:
-      "AI review of your Speaking recordings, with task feedback and an estimated Speaking level for practice, will be added in the next build. Nothing on this screen has been scored.",
+      "Send your recordings for AI review to get a transcript of each answer, feedback against the four Speaking criteria, and an estimated Speaking level for practice.",
     completeNotice:
-      "Nothing from this run has been saved or uploaded. Leaving or restarting clears the recordings held on this page.",
+      "Nothing from this run has been saved. Leaving or restarting clears the recordings held on this page.",
     restartLabel: "Restart Speaking section",
     backToDashboardLabel: "Return to dashboard",
+
+    // 5. The AI review (EXAM-28).
+    //
+    // The review is offered, never forced. A learner can finish the
+    // section, read which tasks they recorded and leave without ever
+    // pressing the button, which is why the completion screen keeps every
+    // control it had and gains one rather than being replaced by a review
+    // screen.
+    reviewHeading: "AI review",
+    reviewIntro:
+      "Send your recordings for AI review to get a transcript of each answer, feedback on each task, and an estimated Speaking level for practice.",
+    reviewSubmitLabel: "Submit for AI Review",
+    reviewSubmitPendingLabel: "Reviewing your recordings",
+    // Shown under the button before it is pressed. It says what leaves
+    // the page, which is the one thing a learner should know before
+    // pressing a button that sends their voice somewhere.
+    reviewSubmitHint:
+      "Your recordings are sent for transcription and AI review. They are not saved, not stored and not kept after the review is returned, and no attempt history is kept.",
+    // Shown in place of the hint when nothing was recorded at all.
+    reviewEmptyHint:
+      "You have not recorded anything yet. Go back to the tasks and record an answer, or submit to see what an empty section reports.",
+    // Processing screen.
+    reviewProcessingHeading: "Reviewing your recordings",
+    reviewProcessingText:
+      "Your recordings are being transcribed and reviewed. This takes longer than a written review, usually a minute or two for a full section. Keep this screen open. Your recordings are still here and nothing has been lost.",
+    reviewProcessingNotice:
+      "The review is AI-supported and gives a Toronto Academy practice estimate, not an official CELPIP score.",
+
+    // Error screen.
+    reviewFailedHeading: "The review could not be completed",
+    reviewFailedText:
+      "Something went wrong while reviewing your recordings. Your recordings are still held on this page, so you can try again.",
+    reviewRetryLabel: "Try the review again",
+    reviewBackToRecordingsLabel: "Back to your recordings",
+
+    // Cause-specific error wording.
+    //
+    // Every one of these ends on the same screen with the same controls.
+    // They are separate sentences because they have different fixes, and
+    // a learner who reads "try again" at a problem that retrying cannot
+    // solve will keep pressing the button.
+    //
+    // None of them carries a provider message, a model name, an error
+    // code or any part of the environment. The server logs those and
+    // returns our wording.
+    reviewCreditsExhaustedText:
+      "AI review could not run because API credits are exhausted. Add API credits and try again. Your recordings are still held on this page.",
+    reviewNotConfiguredText:
+      "AI review is not configured on this environment yet, so the review could not run. Your recordings are still held on this page. Tell your administrator if you see this on a live site.",
+    reviewAudioTooLargeText:
+      "Your recordings were too large to send for review. Record shorter answers, or restart the section and record again, then try the review once more.",
+    reviewUnsupportedAudioText:
+      "Your browser recorded in a format the review cannot read. Try the Speaking section in an up to date Chrome, Edge, Firefox or Safari, and record again.",
+    reviewInvalidRequestText:
+      "The review request could not be read. Your recordings are still held on this page, so you can try again.",
+    reviewUnauthenticatedText:
+      "Your session has expired, so the review could not run. Sign in again in another tab, then try the review once more. Your recordings are still held on this page.",
+
+    // Result screen.
+    reviewResultHeading: "Speaking practice result",
+    reviewResultSubtitle:
+      "AI-supported feedback on each recorded task, with an estimated Speaking level for practice.",
+    reviewOverallLabel: "Estimated Speaking level",
+    // The practice-only disclaimer. The single most important sentence on
+    // the result screen, so it is stated once as a whole sentence rather
+    // than assembled from fragments at the point of use.
+    reviewPracticeDisclaimer:
+      "This is a Toronto Academy practice estimate produced by AI-supported feedback. It is not an official CELPIP score and it does not predict an official result.",
+    reviewPracticeDisclaimerLabel: "Practice estimate",
+    // The audio assessment note. The second most important sentence, and
+    // the one the ticket requires by name.
+    //
+    // Fixed wording rather than the model's, because it is a statement
+    // about how this product works and not a judgement the model is in
+    // any position to make. The model is asked for one anyway, so the
+    // limitation stays in front of it while it writes the rest, and the
+    // server then replaces it with this.
+    reviewAudioAssessmentNoteLabel: "How your audio was assessed",
+    reviewAudioAssessmentNote:
+      "Your recordings were transcribed, and the review was written from those transcripts together with each task prompt, its recording window and how long you actually spoke. Pronunciation, rhythm and intonation are estimated from the submitted audio and transcription pipeline and may require human review for full accuracy.",
+    reviewResultNotice:
+      "Nothing from this review has been saved. Your recordings were used for this review and not stored. Leaving or restarting clears the recordings and the feedback held on this page.",
+
+    // Task result card.
+    reviewTaskLevelLabel: "Estimated level",
+    reviewTaskLimitLabel: "Recording window",
+    reviewTaskDurationLabel: "You spoke for",
+    reviewTimeLengthHeading: "Time and length",
+    reviewCriteriaHeading: "Criterion levels",
+    reviewCriterionColumn: "Criterion",
+    reviewCriterionLevelColumn: "Level",
+    reviewCriterionEvidenceColumn: "What your answer shows",
+    reviewCriterionNextColumn: "What the next level needs",
+    reviewSucceededLabel: "What worked",
+    reviewFellShortLabel: "What held it back",
+    reviewMissingPointsLabel: "Prompt points not addressed",
+    reviewTemplateWarningsLabel: "Template language to avoid",
+    reviewTopMistakesHeading: "Top mistakes",
+    reviewMistakeOriginalLabel: "You said",
+    reviewMistakeCorrectionLabel: "Stronger",
+    reviewNoMistakesText:
+      "No specific corrections were flagged for this answer.",
+    reviewRewriteHeading: "Your answer, one level up",
+    reviewRewriteTargetLabel: "Target level",
+    reviewRewriteChangesHeading: "What changed",
+    reviewModelHeading: "Level 11-12 model answer",
+    reviewModelIntro:
+      "A fresh spoken answer to the same prompt, written at the top of the scale so you can see the distance.",
+
+    // The transcript card.
+    reviewTranscriptHeading: "What you said",
+    reviewTranscriptNoteLabel: "About this transcript",
+    // Fixed wording, set by the server on every reviewed task. It says
+    // the one thing a learner needs to know before reading a transcript
+    // of their own speech back: the hesitations in it are theirs and were
+    // left in on purpose, and the occasional wrong word is the
+    // transcriber's.
+    reviewTranscriptConfidenceNote:
+      "This is an automatic transcription of your recording. Fillers, repetitions and false starts are left in on purpose, because they are part of how easy your answer is to follow. Individual words may be transcribed wrongly, so read it as a close record rather than an exact one.",
+    reviewTranscriptEmptyText:
+      "There is no transcript for this task because there was no recording to transcribe.",
+
+    // The four recording outcomes, on a task result card.
+    //
+    // A missing task and a task whose transcription failed are different
+    // things and are never given the same words. One is something the
+    // learner did; the other is something this software failed to do, and
+    // saying so is the honest reading.
+    reviewNoRecordingLevel: "No recording submitted",
+    reviewMissingHeading: "No recording submitted",
+    reviewMissingText:
+      "Nothing was recorded for this task, so there is nothing to review and no level is estimated for it. On the official test an unanswered Speaking task is a serious loss, so record something for every task even when you are unsure.",
+    reviewTranscriptionFailedLevel: "Could not be reviewed",
+    reviewTranscriptionFailedHeading: "This recording could not be transcribed",
+    reviewTranscriptionFailedText:
+      "A recording was submitted for this task but it could not be transcribed, so it was not reviewed. This is a technical failure and not a judgement of your answer. Try the review again, or record this task again and resubmit.",
+    reviewInsufficientLevel: "Insufficient response",
+    reviewInsufficientHeading: "Not enough speech to review",
+    reviewInsufficientText:
+      "The recording for this task contained too little speech to review, so no level is estimated for it. Check that your microphone was picking you up, then record a full answer and try again.",
+
+    // Shown as the overall reading when nothing at all was recorded. No
+    // AI call is made in that case, so this is the whole result.
+    reviewNoRecordingsJustification:
+      "No recordings were submitted for any task, so there is nothing to review and no Speaking level is estimated. Record an answer for each task and submit again.",
 
     // Page metadata and the exam region name, for the route.
     pageTitle: testLabel + " - Speaking Test - Toronto Academy of Education",
     pageDescription:
       "Internal prototype of the " +
       testLabel +
-      " Speaking section, with all eight tasks, a preparation countdown, a recording countdown and local browser recordings. No transcription, no review and no score.",
+      " Speaking section, with all eight tasks, a preparation countdown, a recording countdown and local browser recordings, followed by an optional AI review and an estimated Speaking level for practice.",
     examRegionLabel: testLabel + " - Speaking Test",
 
     // Dashboard internal preview card.
     //
     // Dressed as an internal build link, the way the Reading and Writing
-    // cards are. What it deliberately does not say: that a full
-    // all-skills Mock Test 1 exists, or that this section produces a
-    // result of any kind. Four sections of four now have a route, and
-    // this one cannot review, score or save anything yet.
+    // cards are. What it deliberately does not say, and this is unchanged
+    // by EXAM-28: that a full all-skills Mock Test 1 exists. Four
+    // sections of four now have a route and all four produce a result,
+    // but there is no combined run, no overall Mock Test 1 score and no
+    // saved attempt, so nothing on the dashboard may claim the test is
+    // complete. The internal preview badge stays.
     dashboardCardTitle: testLabel + " - Speaking Test",
     dashboardCardDescription:
-      "Speaking section prototype with Tasks 1-8, preparation timer, and local recordings. AI review will be added next.",
+      "Speaking section prototype with Tasks 1-8, preparation timer, local recordings, AI review and an estimated Speaking level for practice.",
     dashboardCardSectionLabel: "Speaking",
     dashboardCardTasksLabel: "Tasks 1-8",
     dashboardCardCtaLabel: "Open Speaking Test",
@@ -362,5 +525,33 @@ export function formatSpeakingRecordedCount(
     " of " +
     totalTasks +
     (totalTasks === 1 ? " task recorded" : " tasks recorded")
+  );
+}
+
+// How many tasks have no recording, for example "2 tasks not recorded".
+//
+// Said as well as the recorded count rather than instead of it, which is
+// what the ticket asks for. The two numbers answer different questions:
+// the recorded count says how much of the section is about to be
+// reviewed, and this says how much of it will come back as a gap. A
+// learner about to press Submit for AI Review should see both before
+// they press it.
+//
+// Returns an empty string when nothing is missing, so the screen can
+// leave the line out rather than print "0 tasks not recorded" as
+// though it were news.
+export function formatSpeakingMissingCount(
+  missingCount: number,
+  totalTasks: number,
+): string {
+  if (missingCount <= 0) {
+    return "";
+  }
+
+  return (
+    missingCount +
+    " of " +
+    totalTasks +
+    (missingCount === 1 ? " task not recorded" : " tasks not recorded")
   );
 }
