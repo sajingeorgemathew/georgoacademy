@@ -62,7 +62,7 @@ export const metadata: Metadata = {
 // - it stores no audio. A recording crosses to the server once, for the
 //   length of one review request, and is released when that request
 //   ends. No Supabase Storage bucket is touched and no file is written
-// - it produces no official result. The estimate is a Toronto Academy
+// - it produces no official result. The estimate is a CELPIP Decoded
 //   practice estimate produced by AI-supported feedback from a
 //   transcription of the recordings, and every screen that shows it says
 //   so

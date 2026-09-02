@@ -2,6 +2,7 @@ import { AppAssetImage } from "@/components/app/AppAssetImage";
 import { AppButtonLink } from "@/components/app/AppButtonLink";
 import { AppCard } from "@/components/app/AppCard";
 import { dashboardAssets } from "@/features/assets/asset-registry";
+import { brandCopy } from "@/features/brand/brand-copy";
 import { cx, text } from "@/features/design/design-tokens";
 import {
   dashboardCopy,
@@ -54,6 +55,16 @@ export function DashboardHero({
             {hasPractice
               ? dashboardCopy.heroMessageReturning
               : dashboardCopy.heroMessageNew}
+          </p>
+
+          <p
+            className={cx(
+              "mt-4 inline-flex items-center gap-2 rounded-full bg-academy-blue-soft px-3 py-1 text-xs font-semibold",
+              text.accent,
+            )}
+          >
+            <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-brand-teal" />
+            {brandCopy.communityName}
           </p>
 
           <div className="mt-6 flex flex-wrap items-center gap-3">

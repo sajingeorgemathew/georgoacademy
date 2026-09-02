@@ -1,43 +1,71 @@
 @import "tailwindcss";
 
 :root {
-  /* Warm editorial palette inspired by the Canva reference. */
-  --background: #f7f2e7;
-  --foreground: #1a1712;
+  /* CELPIP Decoded brand palette (BRAND-01).
 
-  /* Warm terracotta accent used for the pricing block and buttons. */
-  --brand: #c1743a;
-  --brand-dark: #a25e2c;
+     Three colours carry the brand:
 
-  /* Section tones. */
-  --cream: #f7f2e7;
-  --cream-soft: #efe7d3;
-  --ink: #17140f;
-  --ink-soft: #221d16;
+       ink navy      #12314F  trust, structure, headings, dark surfaces
+       emerald-teal  #0E9F6E  progress, correct states, accents
+       warm off-white #F4F1EA  calm background surfaces
 
-  /* Academy palette for the signed in app. Deep navy leads, soft blue
-     supports, and a controlled Canadian red is used only as an accent.
-     The landing page keeps the warm editorial palette above. */
-  --academy-navy: #12294a;
-  --academy-navy-dark: #0b1b33;
-  --academy-navy-soft: #e9eef6;
-  --academy-blue: #2c6bab;
-  --academy-blue-soft: #eef4fb;
-  --academy-red: #c8102e;
-  --academy-red-soft: #fdeef0;
+     The two deep variants below are not new brand colours. Solid teal at
+     #0E9F6E under white text only reaches about 3.4:1, so the fill used
+     behind white button labels is the deeper teal and the brand teal
+     stays for rules, dots, borders and tints. Same idea for the navy.
+
+     Deliberately absent: the official CELPIP blue-red pairing and the
+     competitor purple. */
+  --brand-ink: #12314f;
+  --brand-ink-deep: #0c2338;
+  --brand-ink-soft: #e7edf4;
+  --brand-teal: #0e9f6e;
+  --brand-teal-deep: #0a7a54;
+  --brand-teal-soft: #e4f5ee;
+  --brand-offwhite: #f4f1ea;
+  --brand-offwhite-deep: #eae5d9;
+
+  --background: var(--brand-offwhite);
+  --foreground: var(--brand-ink);
+
+  /* Accent used for the public site buttons and eyebrows. */
+  --brand: var(--brand-teal-deep);
+  --brand-dark: #085c40;
+
+  /* Section tones on the public site. */
+  --cream: var(--brand-offwhite);
+  --cream-soft: var(--brand-offwhite-deep);
+  --ink: var(--brand-ink);
+  --ink-soft: var(--brand-ink-deep);
+
+  /* Signed in app palette. Ink navy leads, emerald-teal supports as the
+     progress and primary action colour, and a plain error red is kept
+     only for destructive and expired states. The red is deliberately not
+     the official CELPIP red.
+
+     The academy-* names are internal token names and are unchanged by the
+     rebrand: components read them through
+     src/features/design/design-tokens.ts, so the palette swap happens
+     here and flows through the whole signed in product. */
+  --academy-navy: var(--brand-ink);
+  --academy-navy-dark: var(--brand-ink-deep);
+  --academy-navy-soft: var(--brand-ink-soft);
+  --academy-blue: var(--brand-teal-deep);
+  --academy-blue-soft: var(--brand-teal-soft);
+  --academy-red: #b3261e;
+  --academy-red-soft: #fbeceb;
   /* Warning tone, used by the exam countdown timer for the closing part
      of a timed window. It sits between the neutral navy and the red so a
      learner gets a step of notice before the final seconds, and it is
      dark enough to keep its contrast against the pale exam chrome. */
   --academy-amber: #a1591a;
   --academy-paper: #ffffff;
-  --academy-paper-warm: #faf8f4;
-  --academy-line: #e4e7ee;
+  --academy-paper-warm: var(--brand-offwhite);
+  --academy-line: #dfe4ec;
   /* Exam mode surfaces (EXAM-15F). The rest of the signed in product sits
-     on the warm paper above, which carries a little of the landing page
-     cream in it. Inside a test that reads as a marketing background, so
-     exam mode has its own pair of flat, cool neutrals and uses no alpha
-     over anything warm.
+     on the warm off-white above, which is a brand surface colour. Inside
+     a test that reads as a marketing background, so exam mode has its own
+     pair of flat, cool neutrals and uses no alpha over anything warm.
 
      exam-surface is the desk the exam window sits on, both inside the
      locked viewport and on the internal part routes. exam-gutter is the
@@ -45,7 +73,7 @@
      bars and the white paper they make one neutral ramp, darkest at the
      outside and lightest on the sheet a learner reads:
 
-       surface #e6eaf0  <  bars #e9eef6  <  gutter #eff2f6  <  paper #fff
+       surface #e6eaf0  <  bars #e7edf4  <  gutter #eff2f6  <  paper #fff
 
      Neither is a brand colour and neither is used outside the exam
      engine. */
@@ -58,6 +86,13 @@
   --color-foreground: var(--foreground);
   --color-brand: var(--brand);
   --color-brand-dark: var(--brand-dark);
+  --color-brand-ink: var(--brand-ink);
+  --color-brand-ink-deep: var(--brand-ink-deep);
+  --color-brand-ink-soft: var(--brand-ink-soft);
+  --color-brand-teal: var(--brand-teal);
+  --color-brand-teal-deep: var(--brand-teal-deep);
+  --color-brand-teal-soft: var(--brand-teal-soft);
+  --color-brand-offwhite: var(--brand-offwhite);
   --color-cream: var(--cream);
   --color-cream-soft: var(--cream-soft);
   --color-ink: var(--ink);
@@ -75,9 +110,12 @@
   --color-academy-line: var(--academy-line);
   --color-academy-exam-surface: var(--academy-exam-surface);
   --color-academy-exam-gutter: var(--academy-exam-gutter);
-  --font-sans: var(--font-geist-sans);
-  --font-serif: var(--font-fraunces);
-  --font-mono: var(--font-geist-mono);
+  /* One humanist sans carries the whole brand. The serif slot is mapped
+     to the same family on purpose, so the existing font-serif heading
+     classes keep working and render in the brand face. */
+  --font-sans: var(--font-brand-sans);
+  --font-serif: var(--font-brand-sans);
+  --font-mono: var(--font-brand-mono);
 }
 
 html {
@@ -87,7 +125,8 @@ html {
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  font-family: var(--font-brand-sans), "Segoe UI", system-ui, -apple-system,
+    Arial, Helvetica, sans-serif;
 }
 
 /* Exam mode (EXAM-15F, second QA pass).

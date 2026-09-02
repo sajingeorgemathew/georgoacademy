@@ -41,7 +41,7 @@ export const metadata: Metadata = {
 // Because the exam surface carries no preview label, the caveats are said
 // where a learner meets them. The section intro notice says answers are
 // held on the screen and nothing is saved, the score screen names the
-// result a Toronto Academy practice score and the band a practice
+// result a CELPIP Decoded practice score and the band a practice
 // estimate, and the review repeats that nothing is saved and no
 // explanations are written.
 //

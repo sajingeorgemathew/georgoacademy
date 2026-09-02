@@ -7,7 +7,7 @@ import { getAdminSession } from "@/lib/admin/require-admin";
 import { createMockTest } from "../actions";
 
 export const metadata: Metadata = {
-  title: "New practice test - Toronto Academy of Education",
+  title: "New practice test - CELPIP Decoded",
   description: "Create a practice test draft in the staff builder.",
   robots: { index: false, follow: false },
 };

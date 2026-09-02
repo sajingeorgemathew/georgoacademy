@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { BRAND_NAME } from "@/features/brand/brand-copy";
 import { cx, text } from "@/features/design/design-tokens";
 
 // Heading block for an admin builder screen.
@@ -16,6 +17,10 @@ export type AdminBreadcrumb = {
   href?: string;
 };
 
+// BRAND-01: the instructor and admin side is branded too, so a staff
+// screen reads as part of the same product.
+const ADMIN_EYEBROW = BRAND_NAME + " admin";
+
 export type AdminPageHeaderProps = {
   title: string;
   description?: string;
@@ -29,7 +34,7 @@ export type AdminPageHeaderProps = {
 export function AdminPageHeader({
   title,
   description,
-  eyebrow = "Admin",
+  eyebrow = ADMIN_EYEBROW,
   breadcrumbs,
   action,
   children,

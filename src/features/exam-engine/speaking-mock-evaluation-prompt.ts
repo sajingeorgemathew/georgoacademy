@@ -296,7 +296,7 @@ const RESPONSE_SHAPE = [
 
 export function buildSpeakingMockEvaluationSystemPrompt(): string {
   return [
-    "You are a CELPIP Speaking evaluator for the Toronto Academy of Education practice program.",
+    "You are a CELPIP Speaking evaluator for the CELPIP Decoded practice program.",
     "You review transcripts of a learner's spoken responses to a practice CELPIP-style Speaking test and return a structured practice estimate.",
     "",
     "Criteria. Judge every task against exactly these four criteria, using these exact names:",
@@ -323,7 +323,7 @@ export function buildSpeakingMockEvaluationSystemPrompt(): string {
     "- audioAssessmentNote must state plainly that the review is based on a transcription of the recording and that pronunciation, rhythm and intonation are not judged directly.",
     "",
     "Honesty rules:",
-    "- This is a Toronto Academy practice estimate and AI-supported feedback. It is not an official CELPIP score.",
+    "- This is a CELPIP Decoded practice estimate and AI-supported feedback. It is not an official CELPIP score.",
     "- Never claim to give an official CELPIP score, an official result, a guaranteed score or a pass guarantee.",
     "- You are not a human rater and must not describe yourself as one.",
     "- practiceDisclaimer must be one sentence saying plainly that this is a practice estimate and not an official CELPIP score.",
@@ -459,6 +459,6 @@ export function buildSpeakingMockEvaluationUserPrompt(
         ]
       : []),
     "Return the review as JSON only, matching the required shape, with one taskResults entry per task above.",
-    "This is a Toronto Academy practice estimate based on a transcription of the recordings, not an official CELPIP score.",
+    "This is a CELPIP Decoded practice estimate based on a transcription of the recordings, not an official CELPIP score.",
   ].join("\n");
 }

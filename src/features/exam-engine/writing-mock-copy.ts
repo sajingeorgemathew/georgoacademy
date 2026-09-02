@@ -16,7 +16,7 @@
 //   "guaranteed score" and "pass guarantee" appear nowhere in this file
 //   except in the sentences that deny them.
 // - Nothing here names the official test as the thing the learner is
-//   sitting. This is Toronto Academy practice software, which is the rule
+//   sitting. This is CELPIP Decoded practice software, which is the rule
 //   docs/product/exam-engine-reference-audit.md section 9 sets out.
 //
 // What is deliberately not copied from the source document: the Writing
@@ -57,7 +57,7 @@ export function buildWritingMockCopy({ testLabel }: { testLabel: string }) {
       },
     ],
     introNotice:
-      "This is Toronto Academy writing practice, not an official CELPIP test. The review is AI-supported and gives a practice estimate, not an official CELPIP score. Nothing you type here is saved.",
+      "This is CELPIP Decoded writing practice, not an official CELPIP test. The review is AI-supported and gives a practice estimate, not an official CELPIP score. Nothing you type here is saved.",
     introCardTitle: "Writing section",
     introCardSummary:
       "Both Writing tasks in one run, with a live word count and a countdown on each task, followed by an optional AI review and an estimated Writing level for practice.",
@@ -146,7 +146,7 @@ export function buildWritingMockCopy({ testLabel }: { testLabel: string }) {
     reviewProcessingText:
       "This usually takes under a minute. Keep this screen open. Your writing is still here and nothing has been lost.",
     reviewProcessingNotice:
-      "The review is AI-supported and gives a Toronto Academy practice estimate, not an official CELPIP score.",
+      "The review is AI-supported and gives a CELPIP Decoded practice estimate, not an official CELPIP score.",
 
     // Error screen.
     reviewFailedHeading: "The review could not be completed",
@@ -165,7 +165,7 @@ export function buildWritingMockCopy({ testLabel }: { testLabel: string }) {
     // the result screen, so it is stated once as a whole sentence rather
     // than assembled from fragments at the point of use.
     reviewPracticeDisclaimer:
-      "This is a Toronto Academy practice estimate produced by AI-supported feedback. It is not an official CELPIP score and it does not predict an official result.",
+      "This is a CELPIP Decoded practice estimate produced by AI-supported feedback. It is not an official CELPIP score and it does not predict an official result.",
     reviewPracticeDisclaimerLabel: "Practice estimate",
     reviewResultNotice:
       "Nothing from this review has been saved. Leaving or restarting clears the writing and the feedback held on this page.",
@@ -202,7 +202,7 @@ export function buildWritingMockCopy({ testLabel }: { testLabel: string }) {
     reviewNoResponseSubmitted: "No writing was submitted for this task.",
 
     // Page metadata and the exam region name, for the route.
-    pageTitle: testLabel + " - Writing Test - Toronto Academy of Education",
+    pageTitle: testLabel + " writing test - CELPIP Decoded",
     pageDescription:
       "Internal prototype of the " +
       testLabel +
@@ -216,12 +216,12 @@ export function buildWritingMockCopy({ testLabel }: { testLabel: string }) {
     // 1 exists, or that any of this produces a CELPIP result. Three
     // sections of four are built, Speaking is not, and the estimate this
     // one produces is a practice estimate.
-    dashboardCardTitle: testLabel + " - Writing Test",
+    dashboardCardTitle: testLabel + " - Writing test",
     dashboardCardDescription:
       "Writing section prototype with Task 1 and Task 2 editors, AI review and an estimated Writing level for practice.",
     dashboardCardSectionLabel: "Writing",
     dashboardCardTasksLabel: "Tasks 1-2",
-    dashboardCardCtaLabel: "Open Writing Test",
+    dashboardCardCtaLabel: "Open writing test",
     dashboardPreviewBadgeLabel: "Internal preview",
   } as const;
 }

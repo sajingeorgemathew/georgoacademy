@@ -36,7 +36,7 @@ export const INSTRUCTIONAL_VIDEO_ASSETS: Record<
     title: "Complete test overview video",
     src: `${INSTRUCTIONAL_VIDEO_DIRECTORY}/1. Overview Instructional Video.mp4`,
     description:
-      "How a full Toronto Academy practice test runs from start to finish, and what to expect in each of the four sections.",
+      "How a full CELPIP Decoded practice test runs from start to finish, and what to expect in each of the four sections.",
   },
   listening: {
     section: "listening",

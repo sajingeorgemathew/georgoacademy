@@ -16,7 +16,7 @@ import type {
 
 export const metadata: Metadata = {
   title:
-    "Practice test instruction screens preview - Toronto Academy of Education",
+    "Practice test instruction screens preview - CELPIP Decoded",
   description:
     "Internal preview of the practice test instruction and instructional video screens.",
   robots: { index: false, follow: false },
@@ -28,7 +28,7 @@ export const metadata: Metadata = {
 // The nine samples below are the screens a full practice test opens with:
 // the complete test overview video, then the instructions and the
 // instructional video for each of the four sections. All five local
-// Toronto Academy clips are shown, so the whole instructional sequence
+// the licensed clips are shown, so the whole instructional sequence
 // can be reviewed in one place.
 //
 // The videos are real. Every line of instruction text on this page is
@@ -44,7 +44,7 @@ export const metadata: Metadata = {
 // the page verifies the session again. It is absent from navigation and
 // carries robots noindex.
 
-const TITLE_PREFIX = "Toronto Academy practice test";
+const TITLE_PREFIX = "CELPIP Decoded practice test";
 
 const PLACEHOLDER_NOTICE =
   "Placeholder instruction text for internal review. The section instructions are structured in a later ticket.";
@@ -59,7 +59,7 @@ type PreviewSection = {
   key: Exclude<ExamSectionKey, "overview">;
   label: string;
   // Reads into the top bar title, for example
-  // "Toronto Academy practice test - Listening test instructions".
+  // "CELPIP Decoded practice test - Listening test instructions".
   sectionTitle: string;
   subtitle: string;
   instructions: ExamInstruction[];
@@ -76,7 +76,7 @@ const PREVIEW_SECTIONS: PreviewSection[] = [
     subtitle:
       "Read the following information before you start the Listening section.",
     instructions: [
-      "This is a Toronto Academy practice test, not the official CELPIP test.",
+      "This is a CELPIP Decoded practice test, not the official CELPIP test.",
       "The Listening section has six parts, and each part opens with its own instruction screen.",
       "Placeholder line: each audio clip plays once, and the answer window opens when the clip ends.",
       {
@@ -100,7 +100,7 @@ const PREVIEW_SECTIONS: PreviewSection[] = [
     subtitle:
       "Read the following information before you start the Reading section.",
     instructions: [
-      "This is a Toronto Academy practice test, not the official CELPIP test.",
+      "This is a CELPIP Decoded practice test, not the official CELPIP test.",
       "The Reading section has four parts, and each part opens with its own instruction screen.",
       "Placeholder line: the passage sits on the left and the questions sit on the right, and each side scrolls on its own.",
       {
@@ -124,12 +124,12 @@ const PREVIEW_SECTIONS: PreviewSection[] = [
     subtitle:
       "Read the following information before you start the Writing section.",
     instructions: [
-      "This is a Toronto Academy practice test, not the official CELPIP test.",
+      "This is a CELPIP Decoded practice test, not the official CELPIP test.",
       "The Writing section has two tasks, and each task has its own time limit.",
       "Placeholder line: the source information sits on the left and the editor sits on the right, with a live word count under it.",
       {
         heading: "Feedback.",
-        text: "Your response is reviewed by the existing Toronto Academy writing feedback tool after you finish the task.",
+        text: "Your response is reviewed by the existing CELPIP Decoded writing feedback tool after you finish the task.",
       },
     ],
     noticeText: examCopy.practiceEstimateDisclaimer,
@@ -148,12 +148,12 @@ const PREVIEW_SECTIONS: PreviewSection[] = [
     subtitle:
       "Read the following information before you start the Speaking section.",
     instructions: [
-      "This is a Toronto Academy practice test, not the official CELPIP test.",
+      "This is a CELPIP Decoded practice test, not the official CELPIP test.",
       "The Speaking section has eight tasks, and each task has a preparation phase and a recording phase.",
       "Placeholder line: the preparation and recording times for the task appear in the top bar.",
       {
         heading: "Recording.",
-        text: "This practice test records your answer, so the existing Toronto Academy speaking feedback tool can review it.",
+        text: "This practice test records your answer, so the existing CELPIP Decoded speaking feedback tool can review it.",
       },
     ],
     noticeText: examCopy.practiceEstimateDisclaimer,
@@ -193,7 +193,7 @@ const PREVIEW_SCREENS: PreviewScreen[] = [
     label: "Complete test overview video screen",
     section: "overview",
     description:
-      "Watch this short overview of how a Toronto Academy practice test runs before you start the first section.",
+      "Watch this short overview of how a CELPIP Decoded practice test runs before you start the first section.",
   },
   ...PREVIEW_SECTIONS.flatMap((section): PreviewScreen[] => [
     {
@@ -251,7 +251,7 @@ export default async function ExamInstructionPreviewPage() {
           this page is a layout check for the practice test instruction and
           instructional video screens. It is not a practice test, nothing here
           is scored, and every instruction line is placeholder text. The
-          instructional videos are the real Toronto Academy clips.
+          instructional videos are the real licensed clips.
         </p>
 
         {PREVIEW_SCREENS.map((screen, index) => {

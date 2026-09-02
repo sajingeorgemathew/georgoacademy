@@ -26,7 +26,7 @@ import {
 } from "../../../../../../../actions";
 
 export const metadata: Metadata = {
-  title: "Edit question - Toronto Academy of Education",
+  title: "Edit question - CELPIP Decoded",
   description: "Edit a practice test question, its options and its answer key.",
   robots: { index: false, follow: false },
 };

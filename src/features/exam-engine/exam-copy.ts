@@ -3,7 +3,7 @@
 // All exam chrome copy lives here so the frame, the timers, and the
 // placeholders say the same thing everywhere. Wording follows the rules
 // in docs/product/exam-engine-reference-audit.md section 9: this is
-// Toronto Academy practice software, never the official CELPIP test.
+// CELPIP Decoded practice software, never the official CELPIP test.
 //
 // Strings and pure helpers only, no side effects, so this file is safe to
 // import from a client component.
@@ -16,9 +16,9 @@ import type { ExamMediaKind } from "./exam-shell-types";
 export const examCopy = {
   // Approved product wording. Screen titles are built from these, never
   // from official test wording.
-  engineName: "Toronto Academy practice test engine",
+  engineName: "CELPIP Decoded practice test engine",
   practiceLabel: "CELPIP-style practice",
-  practiceTestName: "Toronto Academy practice test",
+  practiceTestName: "CELPIP Decoded practice test",
 
   // Frame controls.
   nextLabel: "Next",
@@ -71,7 +71,7 @@ export const examCopy = {
     "Internal preview of the practice test screen shell. Layout only, with placeholder text in every sample. No practice test content, no official screenshot, and no CELPIP branding appears here.",
   instructionPreviewTitle: "Practice test instruction screens preview",
   instructionPreviewSummary:
-    "Internal preview of the instruction and instructional video screens. Layout only, with placeholder instruction text. The Toronto Academy instructional videos are real, and no practice test content, official screenshot, or CELPIP branding appears here.",
+    "Internal preview of the instruction and instructional video screens. Layout only, with placeholder instruction text. The instructional videos are the real licensed clips, and no practice test content, official screenshot, or CELPIP branding appears here.",
 
   // The one estimate disclaimer used across the app. Reused, not
   // rewritten, so the exam engine and the dashboard cannot drift.

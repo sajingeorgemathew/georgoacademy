@@ -2,13 +2,13 @@
 // wording here so it can be edited in one place.
 
 export const speakingCopy = {
-  moduleTitle: "CELPIP Speaking Practice",
+  moduleTitle: "Speaking practice",
   moduleSubtext:
     "Practice timed CELPIP speaking tasks, record your answers, and review AI-supported feedback reports.",
   progressNote:
     "Earn practice badges as you complete feedback reports.",
   promptDisclaimer:
-    "These are Toronto Academy practice prompts designed to help you prepare for the CELPIP speaking format.",
+    "These are CELPIP Decoded practice prompts designed to help you prepare for the CELPIP speaking format.",
   practiceBadge: "Practice prompt",
   viewTaskButton: "View task",
   backToDashboard: "Back to dashboard",

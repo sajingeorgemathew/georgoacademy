@@ -1,34 +1,30 @@
-import Image from "next/image";
+import { brandCopy } from "@/features/brand/brand-copy";
 import { Container, Eyebrow } from "./primitives";
 
-const photos = [
+// The Codebreakers community section (BRAND-01).
+//
+// This used to be a photo grid of another school's class scenes and
+// banners, which cannot stay on a CELPIP Decoded page. It is now a plain
+// community section that names the community from the brand brief and
+// says what belonging to it involves. No photography, no other brand's
+// marks, and nothing here claims a CELPIP affiliation.
+
+const habits = [
   {
-    src: "/img1.jpg",
-    alt: "Students attending a class session at Toronto Academy of Education",
-    aspect: "aspect-[4/3]",
-    offset: "lg:mt-10",
-    rotate: "-rotate-1",
+    title: "Decode the question first",
+    body: "Every task is read for what the marker is looking for before a single word is written or spoken.",
   },
   {
-    src: "/img2.jpg",
-    alt: "A student giving a thumbs up beside a Toronto Academy of Education banner",
-    aspect: "aspect-[3/4]",
-    offset: "",
-    rotate: "rotate-1",
+    title: "Practise in the real format",
+    body: "Timed, in the browser, in the order CELPIP uses, so test day is not the first time it feels like this.",
   },
   {
-    src: "/img3.jpg",
-    alt: "Two students standing beside a Toronto Academy of Education banner",
-    aspect: "aspect-[3/4]",
-    offset: "lg:mt-12",
-    rotate: "rotate-1",
+    title: "Fix one thing at a time",
+    body: "Each practice report names the specific habit to work on next, rather than a general grade.",
   },
   {
-    src: "/img4.jpg",
-    alt: "Two students posing in front of a Toronto Academy of Education banner",
-    aspect: "aspect-[4/3]",
-    offset: "lg:mt-4",
-    rotate: "-rotate-1",
+    title: "Keep the streak small",
+    body: "Short, regular sessions beat one long session the weekend before the test.",
   },
 ];
 
@@ -37,29 +33,25 @@ export function CollegeMomentsSection() {
     <section className="overflow-hidden bg-cream text-foreground">
       <Container className="py-20 sm:py-28">
         <div className="max-w-2xl">
-          <Eyebrow className="text-brand">College moments</Eyebrow>
+          <Eyebrow className="text-brand">{brandCopy.communityName}</Eyebrow>
           <h2 className="mt-5 font-serif text-4xl font-semibold leading-tight tracking-tight sm:text-5xl">
-            A community that learns together
+            A community that decodes the test together
           </h2>
           <p className="mt-5 text-lg leading-8 text-foreground/70">
-            Scenes from classes and student visits at Toronto Academy of
-            Education.
+            {brandCopy.communityLine}
           </p>
         </div>
 
-        <div className="mt-14 grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-4">
-          {photos.map((photo) => (
+        <div className="mt-14 grid gap-5 sm:grid-cols-2">
+          {habits.map((habit) => (
             <div
-              key={photo.src}
-              className={`relative ${photo.aspect} ${photo.offset} ${photo.rotate} overflow-hidden rounded-3xl shadow-lg shadow-black/10 ring-1 ring-foreground/5 transition-transform duration-300 hover:rotate-0`}
+              key={habit.title}
+              className="rounded-3xl bg-white p-8 shadow-sm ring-1 ring-foreground/5"
             >
-              <Image
-                src={photo.src}
-                alt={photo.alt}
-                fill
-                sizes="(max-width: 640px) 45vw, (max-width: 1024px) 45vw, 280px"
-                className="object-cover"
-              />
+              <h3 className="text-xl font-semibold text-foreground">
+                {habit.title}
+              </h3>
+              <p className="mt-3 leading-7 text-foreground/70">{habit.body}</p>
             </div>
           ))}
         </div>

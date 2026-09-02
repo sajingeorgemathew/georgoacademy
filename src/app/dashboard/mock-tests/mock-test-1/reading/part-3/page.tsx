@@ -43,7 +43,7 @@ export const metadata: Metadata = {
 // Because the exam surface carries no preview label, the caveats are said
 // where a learner meets them. The part intro screen's notice says answers
 // are held on the screen and nothing is saved, and the score screen and
-// the answer review both repeat it. The result is named a Toronto Academy
+// the answer review both repeat it. The result is named a CELPIP Decoded
 // practice score everywhere it appears, and no CELPIP level and no
 // estimated Reading band is shown. A band is a reading of the whole
 // section and this is one part of four, so there is nothing honest to

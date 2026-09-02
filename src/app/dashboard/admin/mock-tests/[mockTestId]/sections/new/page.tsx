@@ -13,7 +13,7 @@ import { getAdminSession } from "@/lib/admin/require-admin";
 import { createMockTestSection } from "../../../actions";
 
 export const metadata: Metadata = {
-  title: "Add a section - Toronto Academy of Education",
+  title: "Add a section - CELPIP Decoded",
   description: "Add a skill section to a practice test in the staff builder.",
   robots: { index: false, follow: false },
 };

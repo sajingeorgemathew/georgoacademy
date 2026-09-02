@@ -8,7 +8,7 @@
 // Three wording rules this file exists to hold the line on:
 //
 // - Nothing here claims an official CELPIP score or an official CELPIP
-//   level. The result is named a Toronto Academy practice result every
+//   level. The result is named a CELPIP Decoded practice result every
 //   time it appears, and the note under it says so in a full sentence.
 // - Nothing on a part transition screen says anything about how the
 //   learner did. A transition is a doorway between two parts, and a score
@@ -110,7 +110,7 @@ export function buildListeningSectionCopy({
     sectionLabel: "Listening",
     sectionName: "Listening section",
     practiceResultNote:
-      "This is a Toronto Academy practice result, not an official CELPIP score.",
+      "This is a CELPIP Decoded practice result, not an official CELPIP score.",
 
     // 1. Listening instruction text screen.
     //
@@ -125,7 +125,7 @@ export function buildListeningSectionCopy({
       "You will listen to conversations, a news item, a discussion, and viewpoints.",
       "Answer all questions.",
       "At the end, you will review your answers and see a practice score.",
-      "This is Toronto Academy practice, not an official CELPIP score.",
+      "This is CELPIP Decoded practice, not an official CELPIP score.",
     ],
     // EXAM-15B dropped the "Internal prototype" opening. This route is a
     // learner facing test now, so the notice says what a learner needs to
@@ -215,7 +215,7 @@ export function buildListeningSectionCopy({
     estimatedBandSourceNote:
       "Estimated from the published CELPIP Listening score chart, which maps a Listening score out of 38 to a CELPIP level. A real CELPIP level also takes question difficulty into account, which a practice estimate cannot do.",
     estimatedBandNote:
-      "This is a Toronto Academy practice estimate, not an official CELPIP score.",
+      "This is a CELPIP Decoded practice estimate, not an official CELPIP score.",
 
     // 11. End of Listening section.
     endTitle: "End of Listening Section",

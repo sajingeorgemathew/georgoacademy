@@ -44,7 +44,7 @@ export const metadata: Metadata = {
 // - it writes nothing. No attempt row, no migration, no Supabase write
 //   and no usage event. The responses live in React state in the browser
 //   for the length of the visit, and so does the review that comes back
-// - it produces no official result. The estimate is a Toronto Academy
+// - it produces no official result. The estimate is a CELPIP Decoded
 //   practice estimate produced by AI-supported feedback, and every screen
 //   that shows it says so
 // - it does not touch the standalone Writing Practice evaluator. That

@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
-import { cx, text } from "@/features/design/design-tokens";
+import { BrandDisclaimer } from "@/components/brand/BrandDisclaimer";
+import { CelpipDecodedLogo } from "@/components/brand/CelpipDecodedLogo";
 import { AppBreadcrumbs } from "./AppBreadcrumbs";
 import { AppShellFrame } from "./AppShellFrame";
 import { AppSideNav } from "./AppSideNav";
@@ -51,20 +52,15 @@ export function AppShell({
 
 // Split out so the frame can be handed one element rather than a block of
 // markup. Nothing else renders it.
+//
+// BRAND-01: the footer carries the CELPIP Decoded lockup and the one
+// legal disclaimer, so every signed in screen shows it once.
 function AppShellFooter() {
   return (
     <footer className="border-t border-academy-line bg-academy-paper">
       <div className="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 lg:px-8">
-        <p className={cx("text-xs leading-5", text.muted)}>
-          Toronto Academy of Education
-        </p>
-        <p className={cx("mt-1 text-xs leading-5", text.muted)}>
-          Practice estimates and AI feedback are for preparation only
-          and are not official CELPIP scores.
-        </p>
-        <p className="mt-1 text-xs leading-5 text-academy-navy/40">
-          Powered by Georgo Analytics and Automation
-        </p>
+        <CelpipDecodedLogo size="sm" />
+        <BrandDisclaimer className="mt-3" />
       </div>
     </footer>
   );

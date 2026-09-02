@@ -9,7 +9,7 @@ import { mockTest1ListeningSection } from "@/features/exam-engine/mock-tests/moc
 import { markListeningSection } from "./actions";
 
 export const metadata: Metadata = {
-  title: "Mock Test 1 - Listening Test - Toronto Academy of Education",
+  title: "Mock Test 1 listening test - CELPIP Decoded",
   description:
     "The complete Mock Test 1 Listening test, Parts 1 to 6 in one run, with an answer review and a practice score at the end.",
   robots: { index: false, follow: false },
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
 // The caveats the preview notice used to carry did not disappear with it.
 // They are said where a learner meets them: the instruction screen notice
 // says answers are held on the screen and nothing is saved, and the review
-// and score screens say the result is a Toronto Academy practice result
+// and score screens say the result is a CELPIP Decoded practice result
 // and not an official CELPIP score. No CELPIP level is shown anywhere.
 //
 // The six part level routes under this one are unchanged and still work

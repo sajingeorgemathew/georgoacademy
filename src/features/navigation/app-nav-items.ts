@@ -3,7 +3,7 @@
 // The sidebar, the mobile drawer and the breadcrumbs all read from this
 // list, so a route only ever has to be described once.
 //
-// Live Classes has no route inside /dashboard yet. The public program
+// Live classes has no route inside /dashboard yet. The public program
 // page already has a live classes section, so the item points there
 // instead of inventing a new feature. See
 // docs/product/app-shell-navigation.md.
@@ -33,19 +33,19 @@ export const APP_NAV_ITEMS: readonly AppNavItem[] = [
     description: "Your practice modules and progress",
   },
   {
-    label: "Speaking Practice",
+    label: "Speaking practice",
     href: "/dashboard/speaking",
     icon: "speaking",
     description: "Timed speaking tasks and feedback",
   },
   {
-    label: "Writing Practice",
+    label: "Writing practice",
     href: "/dashboard/writing",
     icon: "writing",
     description: "Timed writing tasks and feedback",
   },
   {
-    label: "Live Classes",
+    label: "Live classes",
     href: "/#live-classes",
     icon: "liveClasses",
     description: "Class options on the program page",
@@ -65,8 +65,8 @@ export function isNavItemActive(item: AppNavItem, pathname: string): boolean {
 // Labels for path segments, used by the breadcrumb trail.
 const SEGMENT_LABELS: Record<string, string> = {
   dashboard: "Dashboard",
-  speaking: "Speaking Practice",
-  writing: "Writing Practice",
+  speaking: "Speaking practice",
+  writing: "Writing practice",
   attempts: "Attempt history",
   practice: "Practice",
   tasks: "Task",

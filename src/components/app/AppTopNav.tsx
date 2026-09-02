@@ -1,10 +1,10 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
-import { brandingAssets } from "@/features/assets/asset-registry";
+import { CelpipDecodedLogo } from "@/components/brand/CelpipDecodedLogo";
+import { brandCopy } from "@/features/brand/brand-copy";
 import { cx, focus, text } from "@/features/design/design-tokens";
 import { AppMobileNav } from "./AppMobileNav";
 import { AppUserMenu } from "./AppUserMenu";
@@ -66,21 +66,7 @@ export function AppTopNav({ userEmail }: { userEmail: string }) {
             focus.ring,
           )}
         >
-          <Image
-            src={brandingAssets.favicon}
-            alt="Toronto Academy of Education"
-            width={36}
-            height={36}
-            className="h-9 w-9 shrink-0 rounded-lg"
-          />
-          <span
-            className={cx(
-              "min-w-0 truncate text-sm font-semibold leading-tight",
-              text.primary,
-            )}
-          >
-            Toronto Academy
-          </span>
+          <CelpipDecodedLogo size="sm" />
         </Link>
 
         <p
@@ -89,7 +75,7 @@ export function AppTopNav({ userEmail }: { userEmail: string }) {
             text.secondary,
           )}
         >
-          CELPIP Preparation Program
+          {brandCopy.tagline}
         </p>
 
         <div className="flex shrink-0 items-center gap-2">

@@ -1,13 +1,13 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
+import { CelpipDecodedLogo } from "@/components/brand/CelpipDecodedLogo";
 
 const navLinks = [
-  { label: "Program", href: "#program" },
-  { label: "AI Practice", href: "#ai-practice" },
-  { label: "Live Classes", href: "#live-classes" },
+  { label: "The method", href: "#program" },
+  { label: "AI practice", href: "#ai-practice" },
+  { label: "Live classes", href: "#live-classes" },
   { label: "Pricing", href: "#pricing" },
 ];
 
@@ -26,16 +26,7 @@ export function LandingHeader() {
           onClick={closeMenu}
           className="flex min-w-0 items-center gap-3"
         >
-          <Image
-            src="/taelogo.jpg"
-            alt="Toronto Academy of Education logo"
-            width={64}
-            height={48}
-            className="h-10 w-auto shrink-0 rounded-lg object-contain sm:h-11"
-          />
-          <span className="hidden text-sm font-semibold leading-tight tracking-tight sm:block lg:text-base">
-            Toronto Academy of Education
-          </span>
+          <CelpipDecodedLogo tone="reversed" size="md" />
         </Link>
 
         <nav aria-label="Main" className="hidden items-center gap-6 lg:flex">

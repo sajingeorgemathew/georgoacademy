@@ -44,7 +44,7 @@ import type {
 // sharing one screen would mean editing three working routes.
 //
 // No estimated CELPIP Reading band, and no official score wording. The
-// result is a Toronto Academy practice score throughout.
+// result is a CELPIP Decoded practice score throughout.
 //
 // House style: normal hyphens only, no long hyphens or em dashes.
 

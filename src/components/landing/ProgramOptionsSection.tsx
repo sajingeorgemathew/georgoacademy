@@ -1,9 +1,10 @@
 import Link from "next/link";
+import { brandCopy } from "@/features/brand/brand-copy";
 import { Container, Eyebrow } from "./primitives";
 
 const options = [
   {
-    name: "AI Speaking Practice Preview",
+    name: "AI practice preview",
     price: "Free preview",
     priceNote: "to begin",
     features: [
@@ -11,11 +12,11 @@ const options = [
       "Practice report after submission",
       "Upgrade options coming soon",
     ],
-    cta: { label: "Try AI speaking practice", href: "/signup" },
+    cta: { label: "Start free trial", href: "/signup" },
     featured: false,
   },
   {
-    name: "Live CELPIP Classes",
+    name: "Live CELPIP classes",
     price: "$299",
     priceNote: "per month",
     features: [
@@ -27,13 +28,13 @@ const options = [
     featured: true,
   },
   {
-    name: "AI Practice Packages",
+    name: "AI practice packages",
     price: "From $5",
     priceNote: "per package",
     features: [
-      "Starter Pack: $5 for 5 scored attempts",
-      "Practice Pack: $10 for 12 scored attempts",
-      "Monthly Practice Plan: $20/month for up to 40 scored attempts",
+      "Starter pack: $5 for 5 scored attempts",
+      "Practice pack: $10 for 12 scored attempts",
+      "Monthly practice plan: $20/month for up to 40 scored attempts",
     ],
     cta: { label: "Start speaking practice", href: "/signup" },
     featured: false,
@@ -134,8 +135,7 @@ export function ProgramOptionsSection() {
         </div>
 
         <p className="mt-10 max-w-2xl text-sm leading-6 text-white/80">
-          Practice estimates and AI feedback are for preparation only and are
-          not official CELPIP scores.
+          {brandCopy.practiceEstimateLine}
         </p>
       </Container>
     </section>

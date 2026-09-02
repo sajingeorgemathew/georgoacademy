@@ -389,15 +389,15 @@ export const listeningCopy = {
   // parts and 38 questions; change these if the section content changes.
   mockTestsHeading: "Mock tests",
   mockTestsDescription:
-    "Full practice sections built from Toronto Academy Mock Test 1 content. Answers are held on the page for one visit and nothing is saved yet.",
-  fullSectionCardTitle: "Mock Test 1 - Listening Test",
+    "Full practice sections built from CELPIP Decoded Mock Test 1 content. Answers are held on the page for one visit and nothing is saved yet.",
+  fullSectionCardTitle: "Mock Test 1 - Listening test",
   fullSectionCardDescription:
     "Complete the full Listening section with instructions, all 6 parts, answer review, and practice score.",
   fullSectionCardSectionLabel: "Listening",
   fullSectionCardPartsLabel: "6 parts",
   fullSectionCardQuestionsLabel: "38 questions",
   fullSectionCardStatusLabel: "Available",
-  fullSectionCardCtaLabel: "Start Listening test",
+  fullSectionCardCtaLabel: "Start listening test",
 } as const;
 
 // Answered count under a dropdown question list, for example

@@ -37,7 +37,7 @@ export function AiPracticeSection() {
               Practice speaking anytime, as part of the program
             </h2>
             <p className="mt-5 max-w-md text-lg leading-8 text-cream/75">
-              The practice app is one part of the CELPIP Preparation Program.
+              The practice app is one part of CELPIP Decoded.
               Use it between live classes to keep your speaking sharp and to
               track what to improve next.
             </p>

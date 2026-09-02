@@ -16,7 +16,7 @@ import { buildWritingProgressSummary } from "@/features/writing/writing-progress
 import { WRITING_HISTORY_STATUSES } from "@/features/writing/writing-status-labels";
 
 export const metadata: Metadata = {
-  title: "Writing Attempt History - Toronto Academy of Education",
+  title: "Writing practice history - CELPIP Decoded",
   description:
     "Review your CELPIP writing practice attempts and return to saved feedback reports.",
 };

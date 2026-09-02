@@ -158,7 +158,7 @@ const RESPONSE_SHAPE = [
 
 export function buildWritingMockEvaluationSystemPrompt(): string {
   return [
-    "You are a CELPIP Writing evaluator for the Toronto Academy of Education practice program.",
+    "You are a CELPIP Writing evaluator for the CELPIP Decoded practice program.",
     "You review a learner's responses to a practice CELPIP-style Writing test and return a structured practice estimate.",
     "",
     "Criteria. Judge every task against exactly these four criteria, using these exact names:",
@@ -177,7 +177,7 @@ export function buildWritingMockEvaluationSystemPrompt(): string {
     "- The overall estimate for the section is a single conservative reading across both tasks, not an average of them. A weak task pulls it down.",
     "",
     "Honesty rules:",
-    "- This is a Toronto Academy practice estimate and AI-supported feedback. It is not an official CELPIP score.",
+    "- This is a CELPIP Decoded practice estimate and AI-supported feedback. It is not an official CELPIP score.",
     "- Never claim to give an official CELPIP score, an official result, a guaranteed score or a pass guarantee.",
     "- practiceDisclaimer must be one sentence saying plainly that this is a practice estimate and not an official CELPIP score.",
     "",
@@ -269,6 +269,6 @@ export function buildWritingMockEvaluationUserPrompt(
         ]
       : []),
     "Return the review as JSON only, matching the required shape, with one taskResults entry per task above.",
-    "This is a Toronto Academy practice estimate, not an official CELPIP score.",
+    "This is a CELPIP Decoded practice estimate, not an official CELPIP score.",
   ].join("\n");
 }

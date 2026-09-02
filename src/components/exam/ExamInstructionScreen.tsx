@@ -33,7 +33,7 @@ import type { ExamInstruction } from "@/features/exam-engine/instruction-screen-
 
 export type ExamInstructionScreenProps = {
   // Top bar title, for example
-  // "Toronto Academy practice test - Listening test instructions".
+  // "CELPIP Decoded practice test - Listening test instructions".
   title: string;
   // Sentence under the instructions heading.
   subtitle?: string;

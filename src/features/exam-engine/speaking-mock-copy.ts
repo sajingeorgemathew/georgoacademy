@@ -11,7 +11,7 @@
 // - Nothing here promises an official result. EXAM-28 added a
 //   transcription step, an AI review and an estimated Speaking level, so
 //   the screens no longer say a review is coming later. What they say
-//   instead is that the estimate is a Toronto Academy practice estimate
+//   instead is that the estimate is a CELPIP Decoded practice estimate
 //   produced by AI-supported feedback. The words "official CELPIP
 //   score", "official result", "guaranteed score" and "pass guarantee"
 //   appear nowhere in this file except in the sentences that deny them.
@@ -27,7 +27,7 @@
 //   notice, the line under the recorder, the submit hint and the
 //   completion notice all say so.
 // - Nothing here names the official test as the thing the learner is
-//   sitting. This is Toronto Academy practice software, which is the rule
+//   sitting. This is CELPIP Decoded practice software, which is the rule
 //   docs/product/exam-engine-reference-audit.md section 9 sets out.
 //
 // What is deliberately not copied from the source document. The Mock Test
@@ -95,7 +95,7 @@ export function buildSpeakingMockCopy({ testLabel }: { testLabel: string }) {
       },
     ],
     introNotice:
-      "This is Toronto Academy speaking practice, not an official CELPIP test. The review is AI-supported and gives a practice estimate, not an official CELPIP score. Nothing you record here is saved.",
+      "This is CELPIP Decoded speaking practice, not an official CELPIP test. The review is AI-supported and gives a practice estimate, not an official CELPIP score. Nothing you record here is saved.",
     introCardTitle: "Speaking section",
     introCardSummary:
       "All eight Speaking tasks in one run, each with a preparation countdown, a recording countdown and a local playback of what you recorded, followed by an optional AI review and an estimated Speaking level for practice.",
@@ -249,7 +249,7 @@ export function buildSpeakingMockCopy({ testLabel }: { testLabel: string }) {
     reviewProcessingText:
       "Your recordings are being transcribed and reviewed. This takes longer than a written review, usually a minute or two for a full section. Keep this screen open. Your recordings are still here and nothing has been lost.",
     reviewProcessingNotice:
-      "The review is AI-supported and gives a Toronto Academy practice estimate, not an official CELPIP score.",
+      "The review is AI-supported and gives a CELPIP Decoded practice estimate, not an official CELPIP score.",
 
     // Error screen.
     reviewFailedHeading: "The review could not be completed",
@@ -290,7 +290,7 @@ export function buildSpeakingMockCopy({ testLabel }: { testLabel: string }) {
     // the result screen, so it is stated once as a whole sentence rather
     // than assembled from fragments at the point of use.
     reviewPracticeDisclaimer:
-      "This is a Toronto Academy practice estimate produced by AI-supported feedback. It is not an official CELPIP score and it does not predict an official result.",
+      "This is a CELPIP Decoded practice estimate produced by AI-supported feedback. It is not an official CELPIP score and it does not predict an official result.",
     reviewPracticeDisclaimerLabel: "Practice estimate",
     // The audio assessment note. The second most important sentence, and
     // the one the ticket requires by name.
@@ -370,7 +370,7 @@ export function buildSpeakingMockCopy({ testLabel }: { testLabel: string }) {
       "No recordings were submitted for any task, so there is nothing to review and no Speaking level is estimated. Record an answer for each task and submit again.",
 
     // Page metadata and the exam region name, for the route.
-    pageTitle: testLabel + " - Speaking Test - Toronto Academy of Education",
+    pageTitle: testLabel + " speaking test - CELPIP Decoded",
     pageDescription:
       "Internal prototype of the " +
       testLabel +
@@ -386,12 +386,12 @@ export function buildSpeakingMockCopy({ testLabel }: { testLabel: string }) {
     // but there is no combined run, no overall Mock Test 1 score and no
     // saved attempt, so nothing on the dashboard may claim the test is
     // complete. The internal preview badge stays.
-    dashboardCardTitle: testLabel + " - Speaking Test",
+    dashboardCardTitle: testLabel + " - Speaking test",
     dashboardCardDescription:
       "Speaking section prototype with Tasks 1-8, preparation timer, local recordings, AI review and an estimated Speaking level for practice.",
     dashboardCardSectionLabel: "Speaking",
     dashboardCardTasksLabel: "Tasks 1-8",
-    dashboardCardCtaLabel: "Open Speaking Test",
+    dashboardCardCtaLabel: "Open speaking test",
     dashboardPreviewBadgeLabel: "Internal preview",
   } as const;
 }
