@@ -13,7 +13,7 @@ import { getAdminSession } from "@/lib/admin/require-admin";
 import { validatePartContent } from "../../../../../../actions";
 
 export const metadata: Metadata = {
-  title: "Part preview - Toronto Academy of Education",
+  title: "Part preview - CELPIP Decoded",
   description: "Staff preview of an authored practice test part.",
   robots: { index: false, follow: false },
 };

@@ -2,7 +2,7 @@
 //
 // All access copy lives here so the dashboard, the speaking and writing
 // pages, and the blocked state say the same thing. Tone follows the rest
-// of the app: professional Toronto Academy wording, no promises of
+// of the app: professional CELPIP Decoded wording, no promises of
 // unlimited free AI feedback and no official score language.
 //
 // House style: normal hyphens only, no long hyphens or em dashes.

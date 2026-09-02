@@ -2,7 +2,7 @@
 //
 // All dashboard copy lives here so the hero, the progress cards, the
 // recommendation and the empty states say the same thing. Tone follows
-// the rest of the app: professional Toronto Academy wording, practice
+// the rest of the app: professional CELPIP Decoded wording, practice
 // estimates only, and never an official CELPIP score.
 //
 // House style: normal hyphens only, no long hyphens or em dashes.
@@ -10,6 +10,7 @@
 // Strings and pure helpers only, no side effects, so this file is safe
 // to import from a client component.
 
+import { BRAND_NAME, PRACTICE_ESTIMATE_LINE } from "@/features/brand/brand-copy";
 import type { DashboardModuleKey } from "./dashboard-types";
 
 // Routes the dashboard links to. All of these already exist, this file
@@ -40,15 +41,16 @@ export const DASHBOARD_MODULE_ROUTES: Record<string, string> = {
   "celpip-writing": dashboardRoutes.writing,
 };
 
-export const PROGRAM_NAME = "Toronto Academy CELPIP Preparation Program";
+export const PROGRAM_NAME = BRAND_NAME;
 
-// The one disclaimer used wherever an estimated level is shown.
-export const PRACTICE_ESTIMATE_DISCLAIMER =
-  "Practice estimates are for preparation only and are not official CELPIP scores.";
+// The one line used wherever an estimated level is shown. The full legal
+// disclaimer sits once in the app footer (BRAND-01), so a result screen
+// carries the short line rather than the paragraph.
+export const PRACTICE_ESTIMATE_DISCLAIMER = PRACTICE_ESTIMATE_LINE;
 
 export const MODULE_LABELS: Record<DashboardModuleKey, string> = {
-  speaking: "CELPIP Speaking Practice",
-  writing: "CELPIP Writing Practice",
+  speaking: "Speaking practice",
+  writing: "Writing practice",
 };
 
 // Short label for list rows and chips, where the full module title is
@@ -59,13 +61,13 @@ export const MODULE_SHORT_LABELS: Record<DashboardModuleKey, string> = {
 };
 
 export const dashboardCopy = {
-  pageTitle: "Your CELPIP practice home",
+  pageTitle: "Welcome to " + BRAND_NAME,
   pageEyebrow: PROGRAM_NAME,
   pageDescription:
     "Pick up where you left off, review your recent feedback, and keep building your CELPIP skills.",
 
   heroGreetingReturning: "Welcome back",
-  heroGreetingNew: "Welcome",
+  heroGreetingNew: "Welcome to " + BRAND_NAME,
   heroMessageReturning:
     "Short, regular practice sessions build the most progress. Continue where you left off and keep your feedback reports coming.",
   heroMessageNew:
@@ -74,7 +76,7 @@ export const dashboardCopy = {
   heroSecondaryAction: "View speaking history",
   heroImageAlt: "",
 
-  recommendedHeading: "Your next recommended practice",
+  recommendedHeading: "Start your next practice",
   recommendedEyebrow: "Recommended",
   recommendedDescription:
     "Suggested from your saved practice history. You can always choose a different module.",
@@ -93,10 +95,10 @@ export const dashboardCopy = {
   progressNoValue: "Not yet",
   progressNoLevelHelper:
     "Complete a feedback report to see your estimated practice level.",
-  continueSpeaking: "Continue Speaking",
-  continueWriting: "Continue Writing",
-  viewSpeakingHistory: "View Speaking History",
-  viewWritingHistory: "View Writing History",
+  continueSpeaking: "Continue speaking practice",
+  continueWriting: "Continue writing practice",
+  viewSpeakingHistory: "View speaking history",
+  viewWritingHistory: "View writing history",
 
   recentHeading: "Recent feedback",
   recentDescription:
@@ -136,17 +138,17 @@ export const recommendationCopy: Record<
   { title: string; reason: string }
 > = {
   "start-practice": {
-    title: "Start with CELPIP Speaking Practice",
+    title: "Start with speaking practice",
     reason:
       "You have no saved feedback reports yet. A short speaking task is the quickest way to get your first estimated practice level. Writing practice is ready when you are.",
   },
   "balance-writing": {
-    title: "Try CELPIP Writing Practice next",
+    title: "Try writing practice next",
     reason:
       "Your saved reports are all from speaking practice. Adding a writing task gives you a fuller picture of your CELPIP preparation.",
   },
   "balance-speaking": {
-    title: "Try CELPIP Speaking Practice next",
+    title: "Try speaking practice next",
     reason:
       "Your saved reports are all from writing practice. A speaking task will round out your CELPIP preparation.",
   },
@@ -162,14 +164,15 @@ export const recommendationCopy: Record<
   },
 };
 
-// "Continue Speaking" or "Continue Writing" for a module key.
+// "Continue speaking practice" or "Continue writing practice" for a
+// module key.
 export function getContinueLabel(moduleKey: DashboardModuleKey): string {
   return moduleKey === "speaking"
     ? dashboardCopy.continueSpeaking
     : dashboardCopy.continueWriting;
 }
 
-// "View Speaking History" or "View Writing History" for a module key.
+// "View speaking history" or "View writing history" for a module key.
 export function getHistoryLabel(moduleKey: DashboardModuleKey): string {
   return moduleKey === "speaking"
     ? dashboardCopy.viewSpeakingHistory

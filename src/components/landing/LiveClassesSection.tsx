@@ -32,9 +32,9 @@ export function LiveClassesSection() {
               Learn live with structured support
             </h2>
             <p className="mt-5 text-lg leading-8 text-foreground/70">
-              Live CELPIP classes are available through Toronto Academy of
-              Education for students who want structured support alongside the
-              AI speaking practice tool.
+              Live CELPIP classes are available through CELPIP Decoded for
+              students who want structured support alongside the AI practice
+              tool.
             </p>
 
             <ul className="mt-8 grid gap-3 sm:grid-cols-2">

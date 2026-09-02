@@ -19,7 +19,7 @@ import {
 } from "../../../../../actions";
 
 export const metadata: Metadata = {
-  title: "Part content - Toronto Academy of Education",
+  title: "Part content - CELPIP Decoded",
   description: "Edit the questions and media links of a practice test part.",
   robots: { index: false, follow: false },
 };

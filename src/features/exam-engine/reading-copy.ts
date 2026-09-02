@@ -16,7 +16,7 @@
 //   it that is true of this prototype is said plainly instead, in
 //   partIntroNotice.
 // - Any wording naming the official test as the thing the learner is
-//   sitting. This is Toronto Academy practice software, which is the rule
+//   sitting. This is CELPIP Decoded practice software, which is the rule
 //   docs/product/exam-engine-reference-audit.md section 9 sets out.
 //
 // Strings and pure helpers only, no side effects, so this file is safe to
@@ -110,7 +110,7 @@ export const readingCopy = {
   markingRetryLabel: "Try again",
 
   // Page metadata and the exam region name, for the route.
-  part1PageTitle: "Mock Test 1 - Reading Part 1 - Toronto Academy of Education",
+  part1PageTitle: "Mock Test 1 reading part 1 - CELPIP Decoded",
   part1PageDescription:
     "Internal prototype of Mock Test 1 Reading Part 1, Reading Correspondence.",
   part1ExamRegionLabel: "Mock Test 1 - Reading Part 1",
@@ -125,7 +125,7 @@ export const readingCopy = {
   partTwoIntroFormatLabel: "Diagram, email and drop-down questions",
   partTwoCompleteHeading: "Reading Part 2 complete",
   partTwoRestartLabel: "Restart Reading Part 2",
-  part2PageTitle: "Mock Test 1 - Reading Part 2 - Toronto Academy of Education",
+  part2PageTitle: "Mock Test 1 reading part 2 - CELPIP Decoded",
   part2PageDescription:
     "Internal prototype of Mock Test 1 Reading Part 2, Reading to Apply a Diagram.",
   part2ExamRegionLabel: "Mock Test 1 - Reading Part 2",
@@ -145,7 +145,7 @@ export const readingCopy = {
   partThreeIntroFormatLabel: "Labelled paragraphs and paragraph matching",
   partThreeCompleteHeading: "Reading Part 3 complete",
   partThreeRestartLabel: "Restart Reading Part 3",
-  part3PageTitle: "Mock Test 1 - Reading Part 3 - Toronto Academy of Education",
+  part3PageTitle: "Mock Test 1 reading part 3 - CELPIP Decoded",
   part3PageDescription:
     "Internal prototype of Mock Test 1 Reading Part 3, Reading for Information.",
   part3ExamRegionLabel: "Mock Test 1 - Reading Part 3",
@@ -166,7 +166,7 @@ export const readingCopy = {
   partFourIntroFormatLabel: "Article, reader comment and drop-down questions",
   partFourCompleteHeading: "Reading Part 4 complete",
   partFourRestartLabel: "Restart Reading Part 4",
-  part4PageTitle: "Mock Test 1 - Reading Part 4 - Toronto Academy of Education",
+  part4PageTitle: "Mock Test 1 reading part 4 - CELPIP Decoded",
   part4PageDescription:
     "Internal prototype of Mock Test 1 Reading Part 4, Reading for Viewpoints.",
   part4ExamRegionLabel: "Mock Test 1 - Reading Part 4",
@@ -233,7 +233,7 @@ export function formatReadingCompletionMessage(
 // listening-review-copy.ts holds:
 //
 // - Nothing here claims an official CELPIP score or an official CELPIP
-//   level. The result is named a Toronto Academy practice score every
+//   level. The result is named a CELPIP Decoded practice score every
 //   time it appears, and the note under it says in a full sentence that
 //   it is not an official CELPIP score.
 // - Nothing here estimates a CELPIP Reading band. A band needs the full
@@ -259,7 +259,7 @@ export const readingReviewCopy = {
   // official result. It sits with the number rather than elsewhere on the
   // screen, so the two are never separated.
   practiceResultNote:
-    "This is a Toronto Academy practice score, not an official CELPIP score. No CELPIP Reading level is estimated from one part.",
+    "This is a CELPIP Decoded practice score, not an official CELPIP score. No CELPIP Reading level is estimated from one part.",
   // Said out loud on the score screen, because a blank is counted as a
   // wrong answer and a learner should not have to work that out from the
   // numbers.
@@ -395,7 +395,7 @@ export function formatReadingScoreMessage(
 // Four wording rules this object exists to hold the line on:
 //
 // - Nothing here claims an official CELPIP score or an official CELPIP
-//   level. The result is named a Toronto Academy practice score every
+//   level. The result is named a CELPIP Decoded practice score every
 //   time it appears, and the note under it says so in a full sentence.
 // - Nothing on a part transition screen says anything about how the
 //   learner did. A transition is a doorway between two parts, and a score
@@ -443,7 +443,7 @@ export function buildReadingSectionCopy({
       "Each part has its own reading time. Answer all questions.",
       "You can continue with questions unanswered. Any question left blank is counted as incorrect.",
       "At the end you will see a practice score, an estimated Reading band, and a full answer review.",
-      "This is Toronto Academy practice, not an official CELPIP test.",
+      "This is CELPIP Decoded practice, not an official CELPIP test.",
     ],
     introNotice:
       "Your answers are held on this screen only, nothing is saved, and the practice score and estimated band are not an official CELPIP result.",
@@ -495,7 +495,7 @@ export function buildReadingSectionCopy({
     // screen does show an estimated band, and the note has to say what
     // that estimate is worth instead.
     practiceResultNote:
-      "This is a Toronto Academy practice score, not an official CELPIP score. The estimated Reading band below it is an estimate from a published score chart, not a CELPIP result.",
+      "This is a CELPIP Decoded practice score, not an official CELPIP score. The estimated Reading band below it is an estimate from a published score chart, not a CELPIP result.",
     blankNote:
       "Questions left blank are counted as incorrect in this score. The correct answer for each of them is shown in the review.",
     scoreNotice:
@@ -536,7 +536,7 @@ export function buildReadingSectionCopy({
     estimatedBandSourceNote:
       "Estimated from the published CELPIP Reading score chart held with this program, which maps a Reading score out of 38 to a CELPIP level. A real CELPIP level also takes question difficulty into account, which a practice estimate cannot do.",
     estimatedBandNote:
-      "This is a Toronto Academy practice estimate, not an official CELPIP score.",
+      "This is a CELPIP Decoded practice estimate, not an official CELPIP score.",
 
     // 11. Full Reading answer review.
     reviewTitle: "Reading answer review",
@@ -548,7 +548,7 @@ export function buildReadingSectionCopy({
     reviewEmptyText: "There are no questions to review for this section.",
 
     // Page metadata and the exam region name, for the route.
-    pageTitle: testLabel + " - Reading Test - Toronto Academy of Education",
+    pageTitle: testLabel + " reading test - CELPIP Decoded",
     pageDescription:
       "The complete " +
       testLabel +
@@ -561,12 +561,12 @@ export function buildReadingSectionCopy({
     // build link, and it is dressed as one. What it deliberately does not
     // say: that a full all-skills Mock Test 1 exists, or that any of this
     // is an official CELPIP result.
-    dashboardCardTitle: testLabel + " - Reading Test",
+    dashboardCardTitle: testLabel + " - Reading test",
     dashboardCardDescription:
       "Full Reading section flow with Parts 1-4, practice score, review, and estimated band.",
     dashboardCardSectionLabel: "Reading",
     dashboardCardPartsLabel: "Parts 1-4",
-    dashboardCardCtaLabel: "Open Reading Test",
+    dashboardCardCtaLabel: "Open reading test",
   } as const;
 }
 

@@ -292,8 +292,8 @@ export function EarlyAccessForm() {
               </button>
 
               <p className="mt-4 text-center text-xs leading-5 text-foreground/50">
-                We will only use your details to contact you about the CELPIP
-                Preparation Program.
+                We will only use your details to contact you about CELPIP
+                Decoded.
               </p>
             </form>
           )}

@@ -12,7 +12,7 @@ import { getAdminSession } from "@/lib/admin/require-admin";
 import { validateMockTestStructure } from "../../actions";
 
 export const metadata: Metadata = {
-  title: "Structure preview - Toronto Academy of Education",
+  title: "Structure preview - CELPIP Decoded",
   description: "Preview the structure of a practice test in the staff builder.",
   robots: { index: false, follow: false },
 };

@@ -71,7 +71,7 @@ export type ExamInstructionScreenContent = {
   id: string;
   section: ExamSectionKey;
   // Title for the top bar, for example
-  // "Toronto Academy practice test - Listening test instructions".
+  // "CELPIP Decoded practice test - Listening test instructions".
   title: string;
   // Sentence under the instructions heading.
   subtitle?: string;

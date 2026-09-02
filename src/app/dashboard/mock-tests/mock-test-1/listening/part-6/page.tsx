@@ -10,7 +10,7 @@ import { listeningPart6 } from "@/features/exam-engine/mock-tests/mock-test-1/li
 import { markListeningPartSix } from "./actions";
 
 export const metadata: Metadata = {
-  title: "Mock Test 1 Listening Part 6 prototype - Toronto Academy of Education",
+  title: "Mock Test 1 Listening Part 6 prototype - CELPIP Decoded",
   description:
     "Internal prototype of Mock Test 1 Listening Part 6, Listening for Viewpoints.",
   robots: { index: false, follow: false },
@@ -73,7 +73,7 @@ export default async function ListeningPartSixPrototypePage() {
           <span className="font-semibold text-academy-navy">
             {examCopy.previewBadge}:
           </span>{" "}
-          this is a Toronto Academy practice prototype, not the official CELPIP
+          this is a CELPIP Decoded practice prototype, not the official CELPIP
           test. Your answers stay on this page and nothing is saved. The answer
           review and the practice score run for this visit only and are not an
           official CELPIP score. The report can be replayed and Next does not

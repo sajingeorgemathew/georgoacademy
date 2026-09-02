@@ -20,7 +20,7 @@ import type { SpeakingTaskRow } from "@/features/speaking/task-types";
 import { normalizeSpeakingTask } from "@/features/speaking/task-utils";
 
 export const metadata: Metadata = {
-  title: "CELPIP Speaking Practice - Toronto Academy of Education",
+  title: "Speaking practice - CELPIP Decoded",
   description:
     "Practice CELPIP speaking tasks, track your progress, and review your feedback reports.",
 };

@@ -7,7 +7,7 @@
 // Two wording rules this file exists to hold the line on:
 //
 // - Nothing here claims an official CELPIP score or an official CELPIP
-//   level. The result is named a Toronto Academy practice result every
+//   level. The result is named a CELPIP Decoded practice result every
 //   time it appears, and the note under it says so in a full sentence.
 // - Nothing here says an answer is wrong when the answer key is missing.
 //   The pending wording is about the key, never about the learner.
@@ -132,7 +132,7 @@ export function buildListeningReviewCopy({
     pendingScoreText:
       "The answer key for this part is not available yet, so no practice score is calculated. Your answers are shown in the review table, and none of them are marked wrong.",
     practiceResultNote:
-      "This is a Toronto Academy practice result, not an official CELPIP score.",
+      "This is a CELPIP Decoded practice result, not an official CELPIP score.",
     endPartLabel: `End ${partLabel}`,
     reviewAnswersLabel: "Review answers",
 

@@ -10,6 +10,15 @@ them into the next ticket.
 built is recorded in `docs/admin/admin-01-mock-test-builder-mvp.md` and
 `docs/admin/admin-02-question-answer-media-editor.md`.
 
+**Admin work is paused for the client demo rebrand (BRAND-01).** ADMIN-03
+is not started and should not be started until the demo is done.
+BRAND-01 changed admin wording and colour only: the header eyebrow now
+reads "CELPIP Decoded admin", metadata titles end in "- CELPIP Decoded",
+and the palette moved to the brand tokens. No builder behaviour, query,
+validation rule or route changed, so section 8 below is still an
+accurate description of what ADMIN-03 has to build. See
+`docs/brand/celpip-decoded-rebrand-demo.md`.
+
 The short version. ADMIN-01 built items 1 to 6 and item 10 of the table
 in section 1, as a structure builder, and left items 7 to 9 to ADMIN-02.
 ADMIN-02 built items 7 to 9 plus the media link editor, and turned item

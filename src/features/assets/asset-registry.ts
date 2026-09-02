@@ -16,18 +16,13 @@
 // Inventory and warnings: docs/product/asset-inventory.md
 // Normalization notes: docs/product/badge-icon-normalization-report.md
 
+// BRAND-01: the CELPIP Decoded lockup is drawn in
+// src/components/brand/CelpipDecodedLogo.tsx as inline SVG and text, so
+// there is no logo raster to register here. The previous brand's logo
+// files stay in public/ but are no longer referenced by the app.
 export const brandingAssets = {
-  // Browser and app icons stay as the original PNG on purpose.
+  // Browser and app icon.
   favicon: "/favicon.png",
-  taeFavicon: "/assets/branding/tae-favicon.png",
-  // Logos keep their original raster form, they are already small.
-  logoPrimary: "/assets/branding/tae-logo-primary.jpg",
-  logoHorizontal: "/assets/branding/tae-logo-horizontal.jpg",
-  logoWithSlogan: "/assets/branding/logo_final_Tslogan.png",
-  // Header and footer lockup used on the landing page.
-  landingLogo: "/taelogo.jpg",
-  poweredBy: "/assets/optimized/branding/georgo-powered-by.webp",
-  poweredByOriginal: "/assets/branding/georgo-powered-by.png",
 } as const;
 
 export const dashboardAssets = {

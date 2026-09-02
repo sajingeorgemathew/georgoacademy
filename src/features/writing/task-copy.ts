@@ -2,13 +2,13 @@
 // wording here so it can be edited in one place.
 
 export const writingCopy = {
-  moduleTitle: "CELPIP Writing Practice",
+  moduleTitle: "Writing practice",
   moduleSubtext:
     "Choose a writing task type and practice with a timed writing editor and a live word count.",
   progressNote:
     "Submit a response to receive AI-supported practice feedback.",
   promptDisclaimer:
-    "These are Toronto Academy practice prompts designed to help you prepare for the CELPIP writing format.",
+    "These are CELPIP Decoded practice prompts designed to help you prepare for the CELPIP writing format.",
   practiceBadge: "Practice prompt",
   viewTaskButton: "View task",
   backToDashboard: "Back to dashboard",
@@ -109,7 +109,7 @@ export const writingResultCopy = {
   levelScale: "of 12",
   skillScoreScale: "/ 12",
   practiceEstimateNote:
-    "This is AI-supported practice feedback from Toronto Academy of Education. It is not an official CELPIP score.",
+    "This is AI-supported practice feedback from CELPIP Decoded. It is not an official CELPIP score.",
   skillBreakdownHeading: "Skill breakdown",
   improvementLabel: "Try this next",
   strengthsHeading: "What you did well",

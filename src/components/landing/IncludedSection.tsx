@@ -7,7 +7,7 @@ const items = [
   },
   {
     title: "Live CELPIP classes",
-    body: "Join structured live classes with weekday and weekend options through Toronto Academy of Education.",
+    body: "Join structured live classes with weekday and weekend options through CELPIP Decoded.",
   },
   {
     title: "Timed practice experience",
@@ -37,9 +37,9 @@ export function IncludedSection() {
             One program, every part of your CELPIP preparation
           </h2>
           <p className="mt-5 text-lg leading-8 text-foreground/70">
-            The CELPIP Preparation Program combines live teaching with
-            AI-supported practice so you can prepare with structure and
-            confidence.
+            CELPIP Decoded combines instructor-led strategy with AI-supported
+            practice, so you prepare with structure and know what each task is
+            asking for.
           </p>
         </div>
 

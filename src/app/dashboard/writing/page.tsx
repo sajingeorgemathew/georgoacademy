@@ -22,7 +22,7 @@ import { buildWritingProgressSummary } from "@/features/writing/writing-progress
 import { WRITING_HISTORY_STATUSES } from "@/features/writing/writing-status-labels";
 
 export const metadata: Metadata = {
-  title: "CELPIP Writing Practice - Toronto Academy of Education",
+  title: "Writing practice - CELPIP Decoded",
   description:
     "Practice CELPIP writing tasks, track your writing progress, and review your saved feedback reports.",
 };

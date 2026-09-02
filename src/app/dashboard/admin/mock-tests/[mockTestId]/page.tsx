@@ -24,7 +24,7 @@ import {
 } from "../actions";
 
 export const metadata: Metadata = {
-  title: "Edit practice test - Toronto Academy of Education",
+  title: "Edit practice test - CELPIP Decoded",
   description: "Edit a practice test in the staff builder.",
   robots: { index: false, follow: false },
 };

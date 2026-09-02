@@ -1,30 +1,31 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Fraunces } from "next/font/google";
+import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
+import { brandCopy, BRAND_NAME } from "@/features/brand/brand-copy";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+// CELPIP Decoded typography (BRAND-01).
+//
+// The brand brief asks for one clean humanist sans, Inter or a system
+// sans, so Inter carries headings and body copy alike. The serif slot in
+// globals.css is mapped to the same family, which keeps every existing
+// font-serif heading class working without a sweep through every screen.
+const brandSans = Inter({
+  variable: "--font-brand-sans",
   subsets: ["latin"],
+  display: "swap",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
-// Editorial serif used for the large display headings, matching the
-// Canva reference feel.
-const fraunces = Fraunces({
-  variable: "--font-fraunces",
+// Mono is used only for identifiers in the admin builder.
+const brandMono = JetBrains_Mono({
+  variable: "--font-brand-mono",
   subsets: ["latin"],
   display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "Toronto Academy of Education - CELPIP Preparation Program",
-  description:
-    "Practice CELPIP-style speaking on a timer and get AI feedback with the Toronto Academy CELPIP Preparation Program.",
-  applicationName: "Toronto Academy of Education",
+  title: brandCopy.rootTitle,
+  description: brandCopy.metaDescription,
+  applicationName: BRAND_NAME,
 };
 
 export default function RootLayout({
@@ -35,7 +36,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} ${fraunces.variable} h-full antialiased`}
+      className={`${brandSans.variable} ${brandMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-cream text-foreground">
         {children}

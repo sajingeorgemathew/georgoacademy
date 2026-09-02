@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { AppAssetImage } from "./AppAssetImage";
+import { CelpipDecodedLogo } from "@/components/brand/CelpipDecodedLogo";
 import { AppNavLink } from "./AppNavLink";
-import { brandingAssets } from "@/features/assets/asset-registry";
+import { brandCopy } from "@/features/brand/brand-copy";
 import { cx, focus, text } from "@/features/design/design-tokens";
 import { APP_NAV_ITEMS } from "@/features/navigation/app-nav-items";
 
@@ -23,26 +23,7 @@ export function AppSideNav() {
             focus.ring,
           )}
         >
-          <AppAssetImage
-            src={brandingAssets.favicon}
-            alt="Toronto Academy of Education"
-            width={40}
-            height={40}
-            className="h-10 w-10 shrink-0 rounded-xl"
-          />
-          <span className="min-w-0">
-            <span
-              className={cx(
-                "block text-sm font-semibold leading-tight",
-                text.primary,
-              )}
-            >
-              Toronto Academy of Education
-            </span>
-            <span className={cx("mt-0.5 block text-xs", text.muted)}>
-              CELPIP Preparation
-            </span>
-          </span>
+          <CelpipDecodedLogo size="md" />
         </Link>
 
         <nav aria-label="Main" className="min-h-0 flex-1 overflow-y-auto">
@@ -56,8 +37,7 @@ export function AppSideNav() {
         </nav>
 
         <p className={cx("px-2 text-xs leading-5", text.muted)}>
-          Practice feedback supports your preparation. It is not an
-          official CELPIP score.
+          {brandCopy.practiceEstimateLine}
         </p>
       </div>
     </aside>

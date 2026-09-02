@@ -14,7 +14,7 @@ import { examCopy } from "@/features/exam-engine/exam-copy";
 import { examText } from "@/features/exam-engine/exam-theme";
 
 export const metadata: Metadata = {
-  title: "Practice test shell preview - Toronto Academy of Education",
+  title: "Practice test shell preview - CELPIP Decoded",
   description:
     "Internal preview of the practice test screen shell, using placeholder content only.",
   robots: { index: false, follow: false },
@@ -33,7 +33,7 @@ export const metadata: Metadata = {
 // notice below say Internal preview before anything else.
 
 const INSTRUCTION_BULLETS = [
-  "This is a Toronto Academy practice test, not the official CELPIP test.",
+  "This is a CELPIP Decoded practice test, not the official CELPIP test.",
   "Each part begins with a short instruction screen like this one.",
   "Use Next at the top right to move forward, and Back at the bottom left to return.",
   "Placeholder text only. Practice test content is added in a later ticket.",
@@ -119,7 +119,7 @@ export default async function ExamShellPreviewPage() {
         <section className="space-y-3">
           <SampleHeading id="sample-instructions" label="1. Instruction screen" />
           <ExamShell
-            title="Toronto Academy practice test - Sample part instructions"
+            title="CELPIP Decoded practice test - Sample part instructions"
             metaText="Sample screen 1 of 4"
             nextHref="#sample-reading"
             showBack={false}
@@ -146,7 +146,7 @@ export default async function ExamShellPreviewPage() {
         <section className="space-y-3">
           <SampleHeading id="sample-reading" label="2. Two column reading layout" />
           <ExamShell
-            title="Toronto Academy practice test - Sample reading layout"
+            title="CELPIP Decoded practice test - Sample reading layout"
             timerLabel={examCopy.timeRemainingLabel}
             timerValue="9:00"
             nextHref="#sample-listening"
@@ -196,7 +196,7 @@ export default async function ExamShellPreviewPage() {
             label="3. Listening question layout with media placeholder"
           />
           <ExamShell
-            title="Toronto Academy practice test - Sample listening layout"
+            title="CELPIP Decoded practice test - Sample listening layout"
             timerLabel={examCopy.timeRemainingLabel}
             timerValue="0:30"
             timerState="warning"
@@ -226,7 +226,7 @@ export default async function ExamShellPreviewPage() {
         <section className="space-y-3">
           <SampleHeading id="sample-speaking" label="4. Speaking preparation layout" />
           <ExamShell
-            title="Toronto Academy practice test - Sample speaking layout"
+            title="CELPIP Decoded practice test - Sample speaking layout"
             timers={[
               {
                 label: examCopy.preparationLabel,

@@ -14,7 +14,7 @@ import { getAdminSession } from "@/lib/admin/require-admin";
 import { createMockTestMediaAsset } from "../../../../../../../actions";
 
 export const metadata: Metadata = {
-  title: "Add a media link - Toronto Academy of Education",
+  title: "Add a media link - CELPIP Decoded",
   description: "Add a media link to a practice test part in the staff builder.",
   robots: { index: false, follow: false },
 };

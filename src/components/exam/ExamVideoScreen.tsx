@@ -26,7 +26,7 @@ import { examScreenBody } from "@/features/exam-engine/exam-theme";
 
 export type ExamVideoScreenProps = {
   // Top bar title, for example
-  // "Toronto Academy practice test - Listening instructional video".
+  // "CELPIP Decoded practice test - Listening instructional video".
   title: string;
   // Learner facing clip name, shown on the player caption strip.
   videoTitle: string;

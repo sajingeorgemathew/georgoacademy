@@ -9,7 +9,7 @@ import { listMockTests } from "@/features/admin/mock-test-queries";
 import { getAdminSession } from "@/lib/admin/require-admin";
 
 export const metadata: Metadata = {
-  title: "Mock test builder - Toronto Academy of Education",
+  title: "Mock test builder - CELPIP Decoded",
   description: "Staff tool for building CELPIP practice tests.",
   robots: { index: false, follow: false },
 };

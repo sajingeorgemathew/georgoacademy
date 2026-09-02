@@ -22,7 +22,7 @@ import type { DashboardBadgeItem } from "@/features/dashboard/dashboard-types";
 import { getUsageAccessSummary } from "@/features/usage/get-usage-access-summary";
 
 export const metadata: Metadata = {
-  title: "Dashboard - Toronto Academy of Education",
+  title: "Dashboard - CELPIP Decoded",
   description:
     "Your CELPIP practice home: recommended practice, progress, recent feedback, and practice badges.",
 };
