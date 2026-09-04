@@ -79,6 +79,37 @@
      engine. */
   --academy-exam-surface: #e6eaf0;
   --academy-exam-gutter: #eff2f6;
+
+  /* Mock test player skin (EXAM-UI-02).
+
+     The four Mock Test 1 player routes are not product pages. They are a
+     practice exam simulator, and a learner sitting one should see a plain
+     testing application rather than the CELPIP Decoded brand.
+
+     So the player has its own neutral ramp. Nothing here is a brand
+     colour, nothing here is used outside the player, and none of it is
+     taken from any official test provider: no official logo, no official
+     blue-red pairing, no official footer text. This is an original
+     practice simulator skin.
+
+       desk    #f2f2f2  the grey the exam window sits on
+       chrome  #e5e7eb  the compact top and bottom bars
+       line    #cfd4dc  the window border and the internal rules
+       paper   #ffffff  the content area a learner reads
+       ink     #1f2937  body text
+       blue    #1d4ed8  the primary exam action and instruction headings
+
+     The teal and navy that carry the CELPIP Decoded brand stay on the
+     dashboard, the landing page, login and admin. */
+  --player-desk: #f2f2f2;
+  --player-chrome: #e5e7eb;
+  --player-chrome-soft: #eceef1;
+  --player-line: #cfd4dc;
+  --player-paper: #ffffff;
+  --player-ink: #1f2937;
+  --player-blue: #1d4ed8;
+  --player-blue-dark: #1b3fa8;
+  --player-blue-soft: #eaf0fb;
 }
 
 @theme inline {
@@ -110,6 +141,15 @@
   --color-academy-line: var(--academy-line);
   --color-academy-exam-surface: var(--academy-exam-surface);
   --color-academy-exam-gutter: var(--academy-exam-gutter);
+  --color-player-desk: var(--player-desk);
+  --color-player-chrome: var(--player-chrome);
+  --color-player-chrome-soft: var(--player-chrome-soft);
+  --color-player-line: var(--player-line);
+  --color-player-paper: var(--player-paper);
+  --color-player-ink: var(--player-ink);
+  --color-player-blue: var(--player-blue);
+  --color-player-blue-dark: var(--player-blue-dark);
+  --color-player-blue-soft: var(--player-blue-soft);
   /* One humanist sans carries the whole brand. The serif slot is mapped
      to the same family on purpose, so the existing font-serif heading
      classes keep working and render in the brand face. */
@@ -129,29 +169,44 @@ body {
     Arial, Helvetica, sans-serif;
 }
 
-/* Exam mode (EXAM-15F, second QA pass).
+/* Mock test player skin (EXAM-UI-02).
 
-   The exam frame is shared between two very different places. On the six
-   internal Listening part routes it sits inside the dashboard content
-   column, where a capped width, a border and rounded corners are right:
-   it is one panel on a page. Inside the locked exam viewport it is the
-   whole screen, and drawing the same card there left the test floating in
-   a grey field at roughly the width and position of the dashboard column
-   it had just replaced, which is what a browser test reported as still
-   feeling embedded.
+   Replaces the full bleed exam mode rules that used to live here.
 
-   So the frame keeps its card everywhere except inside the viewport, and
-   these two rules are the exception. They are written here rather than as
-   a prop threaded through every screen component, because not one screen
-   should have to know which of the two places it is being rendered in.
+   Those rules did the opposite of what this ticket asks for. Inside the
+   locked viewport they lifted the frame's width cap and stripped its
+   border and its rounded corners, so the test was painted edge to edge
+   across whatever monitor it was opened on. A 27 inch browser drew a
+   38 question Listening screen 2500 pixels wide, which is what the client
+   reported as stretched. A real computer based test is a window, not a
+   wallpaper, so the frame now keeps its cap, its border and its corners
+   everywhere, and the desk behind it is what fills the screen.
 
-   A descendant selector outranks a utility class, so the exam viewport
-   wins without !important and without depending on stylesheet order. */
-[data-exam-viewport] [data-exam-frame] {
-  max-width: none;
-}
+   What is left here is the one thing a class on a component cannot do:
+   re-point the palette for everything inside the player at once.
 
-[data-exam-viewport] [data-exam-window] {
-  border-width: 0;
-  border-radius: 0;
+   The exam screen recipes in src/features/exam-engine/exam-theme.ts are
+   written against the academy-* tokens, which the rebrand pointed at the
+   CELPIP Decoded ink navy and emerald teal. That is right on the
+   dashboard and wrong inside a test: a learner should see plain testing
+   software, not a branded product. Re-pointing those five variables on
+   the player root swaps the whole exam surface to the neutral player ramp
+   without touching a single recipe, and nothing outside
+   data-mock-test-player is affected.
+
+   This works because the palette is declared with @theme inline, so a
+   utility such as bg-academy-navy-soft compiles to
+   background-color: var(--academy-navy-soft) and picks up whatever the
+   nearest ancestor has that variable set to. */
+[data-mock-test-player] {
+  --academy-navy: var(--player-ink);
+  --academy-navy-dark: #111827;
+  --academy-navy-soft: var(--player-chrome);
+  --academy-blue: var(--player-blue);
+  --academy-blue-soft: var(--player-blue-soft);
+  --academy-line: var(--player-line);
+  --academy-paper: var(--player-paper);
+  --academy-paper-warm: var(--player-paper);
+  --academy-exam-surface: var(--player-desk);
+  --academy-exam-gutter: var(--player-paper);
 }

@@ -107,15 +107,23 @@ export function WritingTaskScreen({
       showBack={showBack}
       // The split manages its own edges and fills the canvas.
       padded={false}
+      // The split pane gives each column its own scrollbar, so the
+      // content pane takes none of its own (EXAM-UI-02).
+      scrollContent={false}
     >
       <ExamTwoColumnLayout
         leftLabel={copy.situationColumnLabel}
         rightLabel={copy.responseColumnLabel}
-        // The situation scrolls on its own so a long one never pushes the
-        // editor off the screen. The response side does not, because an
-        // editor inside a capped column would scroll twice.
+        // Fixed heights, used only below the large breakpoint and on the
+        // internal part routes, where there is no window height to fill.
         leftScroll="tall"
         rightScroll="none"
+        // Above that, each column takes the height of the content pane and
+        // its own scrollbar (EXAM-UI-02). The situation stays readable
+        // while the editor is being typed in, the word count under the
+        // editor stays reachable without scrolling the whole screen, and
+        // the timer in the top bar and Next in the bottom bar never move.
+        fill
         bordered={false}
         left={
           <div className={examWriting.situation}>

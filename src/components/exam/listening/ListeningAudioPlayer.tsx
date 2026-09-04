@@ -1,12 +1,16 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { cx } from "@/features/design/design-tokens";
-import { examAudio } from "@/features/exam-engine/exam-theme";
+import {
+  MockTestAudioVisual,
+  type MockTestAudioStatus,
+} from "../player/MockTestAudioVisual";
+import { playerAudioVisual } from "@/features/exam-engine/mock-test-player-theme";
 import { listeningCopy } from "@/features/exam-engine/listening-copy";
 import { resolveExamMediaSrc } from "@/features/exam-engine/instructional-video-assets";
 
-// Native audio player for the Listening screens (EXAM-03).
+// Native audio player for the Listening screens (EXAM-03, re-skinned by
+// EXAM-UI-03).
 //
 // Native on purpose, for the same reasons as ExamVideoPlayer: the browser
 // control set is keyboard reachable and screen reader aware, and it costs
@@ -21,9 +25,24 @@ import { resolveExamMediaSrc } from "@/features/exam-engine/instructional-video-
 //   playing at a person unasked
 // - preload metadata by default, so the control bar shows a real duration
 //   without pulling the whole clip down
-// - fallback text in two layers: the message below replaces the control
-//   bar when the clip fails to load, and the text inside the audio
-//   element covers a browser that cannot play audio at all
+// - fallback text in two layers: the message below replaces the card body
+//   when the clip fails to load, and the text inside the audio element
+//   covers a browser that cannot play audio at all
+//
+// **What EXAM-UI-03 changed, and what it did not.** The clip now plays
+// inside MockTestAudioVisual, which draws a speaker mark, a status word,
+// a progress bar and the practice playbar note around the same native
+// control that was always there. Nothing about playback moved: this
+// component still calls play() in exactly one place, for the autoplay
+// attempt EXAM-15F added, and it calls pause() and seek nowhere at all.
+// The bar is driven from the element's own timeupdate event and drives
+// nothing back, so it can lag the clip but it cannot disagree with it,
+// and taking the visual away again would leave a working player.
+//
+// The three pieces of state added for it are written from media events
+// rather than from an effect, which is the rule the error flag already
+// followed and what the project's lint rule against setState in effects
+// wants.
 //
 // Autoplay is an attempt and never a promise (EXAM-15F). Browser autoplay
 // policies refuse a clip with sound unless the page has earned enough of a
@@ -44,22 +63,22 @@ import { resolveExamMediaSrc } from "@/features/exam-engine/instructional-video-
 // as known gaps in docs/product/listening-part-1-prototype.md. onEnded is
 // here so the ticket that adds the gate has somewhere to hook into
 // without reworking the player.
-//
-// The error flag is set from the media error handler, never from an
-// effect. This mirrors ExamVideoPlayer, which is the only other stateful
-// component in the exam engine.
 
 export type ListeningAudioPlayerProps = {
   // Absolute URL, normally a Cloudinary link. Local paths work too and
   // are made URL safe by resolveExamMediaSrc.
   src: string;
   // Learner facing clip name, used for the accessible label and, unless
-  // captionText overrides it, the caption strip.
+  // captionText overrides it, the line under the status word.
   title: string;
-  // Running time as text, shown on the right of the caption strip.
+  // Running time as text. Shown beside the clip name when one is given.
   durationLabel?: string;
   captionText?: string;
   showCaption?: boolean;
+  // Whether the practice playbar note is printed under the card. The
+  // Parts 1 to 3 question screens turn it off: the note earns its place
+  // on a clip screen and is noise repeated under 38 question clips.
+  showPlaybarNote?: boolean;
   // metadata is the default. Drop to none on a screen holding several
   // players, so one screen does not open several media connections.
   preload?: "none" | "metadata";
@@ -77,6 +96,7 @@ export function ListeningAudioPlayer({
   durationLabel,
   captionText,
   showCaption = true,
+  showPlaybarNote = true,
   preload = "metadata",
   autoPlay = false,
   onEnded,
@@ -85,6 +105,11 @@ export function ListeningAudioPlayer({
 }: ListeningAudioPlayerProps) {
   const [hasError, setHasError] = useState(false);
   const [autoplayBlocked, setAutoplayBlocked] = useState(false);
+  const [status, setStatus] = useState<MockTestAudioStatus>("idle");
+  const [currentSeconds, setCurrentSeconds] = useState(0);
+  const [durationSeconds, setDurationSeconds] = useState<number | undefined>(
+    undefined,
+  );
   const audioRef = useRef<HTMLAudioElement>(null);
 
   useEffect(() => {
@@ -108,51 +133,69 @@ export function ListeningAudioPlayer({
 
   const caption = captionText ?? title;
 
+  // Only a duration the browser has actually worked out drives the bar. A
+  // stream reports Infinity and a clip whose metadata has not landed
+  // reports NaN, and neither is a length to divide by.
+  const hasDuration =
+    durationSeconds !== undefined &&
+    Number.isFinite(durationSeconds) &&
+    durationSeconds > 0;
+  const progress = hasDuration ? currentSeconds / durationSeconds : 0;
+
+  const captionLine = showCaption
+    ? durationLabel
+      ? `${caption} - ${durationLabel}`
+      : caption
+    : undefined;
+
   return (
-    <div className={cx(examAudio.wrap, className)}>
-      {hasError ? (
-        <div className={examAudio.fallback} role="status">
-          <p className={examAudio.fallbackTitle}>
-            {listeningCopy.audioFallbackHeading}
-          </p>
-          <p className={examAudio.fallbackText}>
-            {fallbackText ?? listeningCopy.audioFallbackText}
-          </p>
-        </div>
-      ) : (
-        <div className={examAudio.stage}>
-          {/* src sits on the element rather than on a source child, so a
-              failed load fires onError here and the fallback can show.
-              A source child only fires on itself. */}
-          <audio
-            ref={audioRef}
-            className={examAudio.element}
-            src={resolveExamMediaSrc(src)}
-            controls
-            preload={preload}
-            aria-label={`${listeningCopy.audioPlayerLabel}: ${title}`}
-            onError={() => setHasError(true)}
-            onEnded={onEnded}
-          >
-            {listeningCopy.audioUnsupportedText}
-          </audio>
-        </div>
+    <MockTestAudioVisual
+      className={className}
+      status={status}
+      progress={progress}
+      currentSeconds={currentSeconds}
+      durationSeconds={hasDuration ? durationSeconds : undefined}
+      title={captionLine}
+      showNote={showPlaybarNote}
+      hasError={hasError}
+      fallbackHeading={listeningCopy.audioFallbackHeading}
+      fallbackText={fallbackText ?? listeningCopy.audioFallbackText}
+      noticeText={
+        autoplayBlocked && !hasError
+          ? listeningCopy.audioAutoplayBlockedText
+          : undefined
+      }
+    >
+      {hasError ? null : (
+        // src sits on the element rather than on a source child, so a
+        // failed load fires onError here and the fallback can show. A
+        // source child only fires on itself.
+        <audio
+          ref={audioRef}
+          className={playerAudioVisual.element}
+          src={resolveExamMediaSrc(src)}
+          controls
+          preload={preload}
+          aria-label={`${listeningCopy.audioPlayerLabel}: ${title}`}
+          onError={() => setHasError(true)}
+          onLoadedMetadata={(event) =>
+            setDurationSeconds(event.currentTarget.duration)
+          }
+          onTimeUpdate={(event) =>
+            setCurrentSeconds(event.currentTarget.currentTime)
+          }
+          onPlay={() => setStatus("playing")}
+          onPause={(event) =>
+            setStatus(event.currentTarget.ended ? "ended" : "paused")
+          }
+          onEnded={() => {
+            setStatus("ended");
+            onEnded?.();
+          }}
+        >
+          {listeningCopy.audioUnsupportedText}
+        </audio>
       )}
-
-      {showCaption ? (
-        <div className={examAudio.caption}>
-          <p className={examAudio.captionTitle}>{caption}</p>
-          {durationLabel ? (
-            <p className={examAudio.captionMeta}>{durationLabel}</p>
-          ) : null}
-        </div>
-      ) : null}
-
-      {autoplayBlocked && !hasError ? (
-        <p className={examAudio.autoplayNotice} role="status">
-          {listeningCopy.audioAutoplayBlockedText}
-        </p>
-      ) : null}
-    </div>
+    </MockTestAudioVisual>
   );
 }

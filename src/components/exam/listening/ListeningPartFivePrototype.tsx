@@ -263,7 +263,7 @@ export function ListeningPartFivePrototype({
         // No sectionCount. Part 5 is one video, not a part built from
         // conversation sections, so the row is left out rather than
         // reading "Sections 1".
-        formatLabel="Discussion video and multiple-choice questions"
+        formatLabel="Discussion video and dropdown questions"
         metaText={metaText}
         onNext={goNext}
         onBack={goBack}
@@ -348,7 +348,7 @@ export function ListeningPartFivePrototype({
         copy={listeningPartFiveReviewCopy}
         metaText={metaText}
         onNext={goNext}
-        // Back lands on the multiple-choice question screen, which is the
+        // Back lands on the dropdown question screen, which is the
         // prototype affordance the ticket asks for.
         onBack={goBack}
         showBack={showBack}

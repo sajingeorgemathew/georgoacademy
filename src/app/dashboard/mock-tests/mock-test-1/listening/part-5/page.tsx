@@ -21,7 +21,7 @@ export const metadata: Metadata = {
 //
 // The seven screen sequence for Listening Part 5: the part intro, the
 // scenario, the discussion video, one screen holding all eight
-// multiple-choice questions, the answer review, the practice score, and
+// dropdown questions, the answer review, the practice score, and
 // the end of part screen.
 //
 // This is an internal preview. Answers are held in the browser for the

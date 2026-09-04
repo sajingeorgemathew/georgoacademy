@@ -3,6 +3,7 @@ import { ExamPanel } from "../ExamPanel";
 import { ExamShell } from "../ExamShell";
 import { ListeningAnswerReviewTable } from "./ListeningAnswerReviewTable";
 import { examReview, examScreenBody } from "@/features/exam-engine/exam-theme";
+import { SHOW_EXAM_ANSWER_KEY_REFERENCE } from "@/features/exam-engine/exam-debug";
 import { listeningReviewCopy } from "@/features/exam-engine/listening-review-copy";
 import type { ListeningReviewCopy } from "@/features/exam-engine/listening-review-copy";
 import type { ListeningReviewRow } from "@/features/exam-engine/listening-review-types";
@@ -18,13 +19,29 @@ import type { ListeningReviewRow } from "@/features/exam-engine/listening-review
 // prototype behaviour, kept for the same reason Back is enabled on every
 // EXAM-03 screen: the sequence has to be walkable during review.
 //
-// The answer and explanation sheet is optional and collapsed. It is the
-// source the transcribed key was read off, so a learner can check the
-// correct answer column against it, but it is behind a disclosure so
-// opening the review does not put the sheet on screen unasked. The image
-// is referenced from Cloudinary and never downloaded, and it is a plain
-// img rather than next/image for the reason recorded in
-// ListeningScenarioScreen.
+// **The answer key reference panel is off by default** (EXAM-UI-03). It
+// opens the published answer and explanation sheet for the whole part,
+// which is the source a reviewer checks a transcribed key against and is
+// a staff control, not a learner one. It used to render on every part
+// level review, and those routes are reachable from a typed URL by anyone
+// signed in, so a learner who wandered onto one was offered the answers
+// to a part they had just sat.
+//
+// It now renders only when showAnswerKeyReference is true, and that
+// defaults to SHOW_EXAM_ANSWER_KEY_REFERENCE, which is off unless
+// NEXT_PUBLIC_SHOW_EXAM_ANSWER_KEY is set to "true". A normal local run
+// and every deployment therefore hide it with nothing configured. The
+// caller can still force it on for a staff screen by passing the prop.
+//
+// This changes what is offered, not what is protected. The keys were
+// never on the page: every route strips its key on the server before the
+// content crosses to the browser, and marking runs in a server action
+// beside the key. See src/features/exam-engine/exam-debug.ts.
+//
+// When it does render it is still collapsed behind a disclosure, so it
+// cannot put the sheet on screen unasked. The image is referenced from
+// Cloudinary and never downloaded, and it is a plain img rather than
+// next/image for the reason recorded in ListeningScenarioScreen.
 //
 // No state of its own. The rows arrive already built, from wherever the
 // answer key happens to live: Part 1 builds them in the browser, Part 2
@@ -34,9 +51,13 @@ export type ListeningAnswerReviewScreenProps = {
   // Exam frame title, normally the part title from the content object.
   title: string;
   rows: ListeningReviewRow[];
-  // Answer and explanation sheet, when the source publishes one.
+  // Answer and explanation sheet, when the source publishes one. Shown
+  // only when showAnswerKeyReference is true.
   explanationImageUrl?: string;
   explanationImageAlt?: string;
+  // Whether the answer key reference panel is offered at all. Defaults to
+  // the development flag, which is off, so a learner never sees it.
+  showAnswerKeyReference?: boolean;
   // Wording for the part. Defaults to Listening Part 1.
   copy?: ListeningReviewCopy;
   metaText?: string;
@@ -50,6 +71,7 @@ export function ListeningAnswerReviewScreen({
   rows,
   explanationImageUrl,
   explanationImageAlt,
+  showAnswerKeyReference = SHOW_EXAM_ANSWER_KEY_REFERENCE,
   copy = listeningReviewCopy,
   metaText,
   onNext,
@@ -74,7 +96,7 @@ export function ListeningAnswerReviewScreen({
 
         <ListeningAnswerReviewTable rows={rows} copy={copy} />
 
-        {explanationImageUrl ? (
+        {showAnswerKeyReference && explanationImageUrl ? (
           <ExamPanel title={copy.explanationPanelTitle} tone="muted">
             <div className={examReview.referenceStack}>
               <p>{copy.explanationPanelIntro}</p>

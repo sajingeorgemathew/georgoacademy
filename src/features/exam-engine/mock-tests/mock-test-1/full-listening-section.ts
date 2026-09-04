@@ -52,6 +52,7 @@ export const mockTest1ListeningSection: ListeningSectionContent = {
 
   instructionScreen: {
     title: `${SECTION_TITLE}: Instructions`,
+    heading: listeningSectionCopy.instructionHeading,
     subtitle: listeningSectionCopy.instructionSubtitle,
     instructions: listeningSectionCopy.instructionLines,
     noticeText: listeningSectionCopy.instructionNotice,
@@ -111,14 +112,14 @@ export const mockTest1ListeningSection: ListeningSectionContent = {
     {
       partNumber: 5,
       partLabel: "Listening Part 5",
-      formatLabel: "Discussion video and multiple-choice questions",
+      formatLabel: "Discussion video and dropdown questions",
       kind: "video",
       content: listeningPart5,
     },
     {
       partNumber: 6,
       partLabel: "Listening Part 6",
-      formatLabel: "Report audio and viewpoints questions",
+      formatLabel: "Report audio and dropdown questions",
       kind: "viewpoints",
       content: listeningPart6,
     },

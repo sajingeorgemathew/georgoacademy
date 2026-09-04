@@ -4,11 +4,8 @@ import { ExamInstructionRow } from "../ExamInstructionRow";
 import { ExamShell } from "../ExamShell";
 import { ExamCountdownTimer } from "../timer/ExamCountdownTimer";
 import { ListeningDropdownQuestionList } from "./ListeningDropdownQuestionList";
-import {
-  examListening,
-  examListeningDropdown,
-  examScreenBody,
-} from "@/features/exam-engine/exam-theme";
+import { examListening, examScreenBody } from "@/features/exam-engine/exam-theme";
+import { playerDropdown } from "@/features/exam-engine/mock-test-player-theme";
 import { LISTENING_QUESTION_TIMER } from "@/features/exam-engine/listening-timing";
 import {
   formatListeningAnsweredCount,
@@ -151,7 +148,7 @@ export function ListeningDropdownQuestionScreen({
             onSelectOption={onSelectOption}
           />
 
-          <p className={examListeningDropdown.progressNote}>
+          <p className={playerDropdown.note}>
             {formatListeningAnsweredCount(answeredCount, questions.length)}
             {requireAllAnswered && !allAnswered
               ? ` ${listeningCopy.dropdownAnswerAllHint}`

@@ -2,9 +2,12 @@ import { ExamInstructionRow } from "../ExamInstructionRow";
 import { ExamShell } from "../ExamShell";
 import { ReadingReviewQuestionCard } from "./ReadingReviewQuestionCard";
 import {
+  MockTestReviewPanel,
+  MockTestReviewStack,
+} from "../player/MockTestReviewPanel";
+import {
   examReadingReview,
   examScreenBody,
-  examSectionReview,
   examText,
 } from "@/features/exam-engine/exam-theme";
 import {
@@ -23,12 +26,12 @@ import type { ReadingSectionPartResult } from "@/features/exam-engine/reading-se
 // the section is answered on four screens, so a learner arriving at the
 // end wants the result first and the question by question account second.
 //
-// A group is a quiet heading over a list of cards: the part label, the
-// CELPIP part name beside it, and the part's question count on the right.
-// The heading chrome is the EXAM-15 examSectionReview recipe, so the
-// Reading groups and the Listening groups read as the same kind of
-// object, and the rows inside are the EXAM-17 ReadingReviewQuestionCard,
-// unchanged. That card is already part neutral: it prints "No answer
+// A group is a bordered panel over a list of cards: a tinted header strip
+// carrying the part label and the CELPIP part name, the part's question
+// count on the right of it, and the cards in the body. The chrome is the
+// shared player review panel (EXAM-UI-02), so the Reading groups and the
+// Listening groups read as the same kind of object, and the rows inside
+// are the EXAM-17 ReadingReviewQuestionCard, unchanged. That card is already part neutral: it prints "No answer
 // selected" for a blank while still showing the correct answer, and it
 // prints an explanation only when the row carries one.
 //
@@ -86,30 +89,28 @@ export function ReadingSectionReviewScreen({
           text={copy.reviewSubtitle}
         />
 
+        {/* One shared player review panel per part (EXAM-UI-02). The four
+            parts used to run into one another as a single unbroken column
+            of 38 question cards under four heading rules, which is the
+            longest screen in the Reading test and the one where losing
+            your place costs the most. A bordered box with a tinted header
+            strip per part gives a reader somewhere to stop. */}
         {hasRows ? (
-          <div className={examSectionReview.groupStack}>
+          <MockTestReviewStack>
             {parts.map((part) => (
-              <section key={part.partId} className={examSectionReview.group}>
-                <div className={examSectionReview.groupHeading}>
-                  <h3 className={examSectionReview.groupLabel}>
-                    {part.partLabel}
-                  </h3>
-                  <span className={examSectionReview.groupTitle}>
-                    {part.partTitle}
-                  </span>
-                  <span className={examSectionReview.groupMeta}>
-                    {formatReadingSectionGroupCount(part.rows.length)}
-                  </span>
-                </div>
-
+              <MockTestReviewPanel
+                key={part.partId}
+                title={`${part.partLabel} - ${part.partTitle}`}
+                meta={formatReadingSectionGroupCount(part.rows.length)}
+              >
                 <ol className={examReadingReview.list}>
                   {part.rows.map((row) => (
                     <ReadingReviewQuestionCard key={row.questionId} row={row} />
                   ))}
                 </ol>
-              </section>
+              </MockTestReviewPanel>
             ))}
-          </div>
+          </MockTestReviewStack>
         ) : (
           <p className={examText.muted}>{copy.reviewEmptyText}</p>
         )}

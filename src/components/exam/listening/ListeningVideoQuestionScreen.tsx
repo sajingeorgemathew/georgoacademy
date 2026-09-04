@@ -3,12 +3,9 @@
 import { ExamInstructionRow } from "../ExamInstructionRow";
 import { ExamShell } from "../ExamShell";
 import { ExamCountdownTimer } from "../timer/ExamCountdownTimer";
-import { ListeningVideoQuestionList } from "./ListeningVideoQuestionList";
-import {
-  examListening,
-  examListeningChoice,
-  examScreenBody,
-} from "@/features/exam-engine/exam-theme";
+import { MockTestDropdownCompletion } from "../player/MockTestDropdownCompletion";
+import { examListening, examScreenBody } from "@/features/exam-engine/exam-theme";
+import { playerDropdown } from "@/features/exam-engine/mock-test-player-theme";
 import { LISTENING_QUESTION_TIMER } from "@/features/exam-engine/listening-timing";
 import {
   formatListeningAnsweredCount,
@@ -19,18 +16,17 @@ import type {
   ListeningVideoQuestion,
 } from "@/features/exam-engine/listening-video-types";
 
-// Multiple-choice question screen for a video discussion Listening part
-// (EXAM-11).
+// Question screen for a video discussion Listening part (EXAM-11, control
+// corrected by EXAM-UI-03).
 //
-// Screen type 7 from docs/product/exam-engine-screen-types.md, in its
-// radio option form, and the screen the reference layout matters most for
-// in this part:
+// Screen type 7 from docs/product/exam-engine-screen-types.md, in the
+// form where a whole question set is answered on one screen:
 //
-// - grey top bar with a live "Time remaining: 00:30" countdown
+// - grey top bar with a live countdown for the whole screen
 // - white exam canvas, single column, no split
 // - compact instruction row at the top
-// - left aligned numbered questions, ruled apart
-// - four radio options under each question
+// - left aligned numbered questions, each in its own block
+// - a drop-down menu under each question
 // - blue Next in the top bar, Back in the bottom bar
 //
 // Single column, unlike the Parts 1 to 3 question screen. There is no
@@ -42,17 +38,31 @@ import type {
 // holds no state: the answers are owned by the prototype above it, so
 // leaving the screen and coming back shows what was chosen before.
 //
-// The control is a radio group rather than a select, and EXAM-15F left it
-// that way deliberately. Part 6 moved to a select in that ticket because
-// its six items are sentence stems and its source instructs it with the
-// drop-down wording twice. Part 5 is the opposite case: all eight items in
-// the Mock Test 1 source are whole interrogatives ending in a question
-// mark, so there is no blank for a select to sit in, and building one
-// would mean inventing eight stems the source does not contain. The
-// reasoning is in section 7 of
-// docs/product/listening-format-audit-and-correction-plan.md and the
-// decision is recorded in
-// docs/product/listening-format-strict-timing-polish.md.
+// **The control changed in EXAM-UI-03.** EXAM-11 drew eight radio groups
+// here and EXAM-15F kept them, on the reading that the eight Mock Test 1
+// items are whole interrogatives rather than sentence stems, so there was
+// no blank for a select to sit in.
+//
+// That reading answered the wrong question. Part 5 is a one screen part
+// answered from a drop-down menu: the source document instructs it that
+// way, the part sits beside Parts 4 and 6 which are already selects, and
+// eight radio groups of four options is thirty two controls stacked down a
+// page a learner has to scroll several times to work through. A drop-down
+// does not need a blank in the text: the question is printed whole in the
+// block header and the menu under it carries the four answers. That is
+// what MockTestDropdownCompletion draws when an item has a prompt rather
+// than a split statement, and it is why the fix cost no content change.
+//
+// **Nothing about the data moved.** The eight question ids, the four
+// option ids under each of them, the option wording and the answer key
+// they are marked against are exactly as EXAM-11 wrote them. The value
+// stored is still the option id, so a Part 5 answer chosen from a menu
+// marks precisely as the same answer chosen from a radio did, on the same
+// server action, against the same key.
+//
+// ListeningVideoQuestionList, the radio list this screen used to render,
+// is gone rather than left in place unused: after the correction it was a
+// second way to draw a screen that now has one.
 //
 // Next is gated on every question having an answer by default, which is
 // what allAnswered carries. The count under the list says how many are
@@ -160,13 +170,15 @@ export function ListeningVideoQuestionScreen({
         <ExamInstructionRow text={instructionText} />
 
         <div className={examListening.columnStack}>
-          <ListeningVideoQuestionList
-            questions={questions}
+          <MockTestDropdownCompletion
+            items={questions}
             answers={answers}
             onSelectOption={onSelectOption}
+            placeholderLabel={listeningCopy.dropdownPlaceholder}
+            blankLabel={listeningCopy.dropdownBlankLabel}
           />
 
-          <p className={examListeningChoice.progressNote}>
+          <p className={playerDropdown.note}>
             {formatListeningAnsweredCount(answeredCount, questions.length)}
             {requireAllAnswered && !allAnswered
               ? ` ${listeningCopy.choiceAnswerAllHint}`

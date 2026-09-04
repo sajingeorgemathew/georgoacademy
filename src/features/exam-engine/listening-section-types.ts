@@ -85,6 +85,10 @@ export type ListeningSectionPart =
 export type ListeningSectionInstructionContent = {
   // Top bar title.
   title: string;
+  // Heading beside the information glyph, for example
+  // "Listening Test Instructions" (EXAM-UI-03). The screen falls back to
+  // the generic "Instructions:" lead when a section does not name one.
+  heading?: string;
   // Sentence under the instructions heading.
   subtitle?: string;
   instructions: ExamInstruction[];

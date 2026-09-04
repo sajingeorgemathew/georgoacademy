@@ -52,6 +52,7 @@ export function ListeningSectionInstructionScreen({
   return (
     <ExamInstructionScreen
       title={content.title}
+      heading={content.heading}
       subtitle={content.subtitle}
       instructions={content.instructions}
       noticeText={content.noticeText}

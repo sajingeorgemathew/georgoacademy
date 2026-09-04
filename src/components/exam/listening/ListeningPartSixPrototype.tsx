@@ -266,7 +266,7 @@ export function ListeningPartSixPrototype({
         // No sectionCount. Part 6 is one report, not a part built from
         // conversation sections, so the row is left out rather than
         // reading "Sections 1".
-        formatLabel="Report audio and viewpoints questions"
+        formatLabel="Report audio and dropdown questions"
         metaText={metaText}
         onNext={goNext}
         onBack={goBack}

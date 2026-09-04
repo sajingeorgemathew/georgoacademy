@@ -14,7 +14,7 @@
 //   1  part intro
 //   2  scenario
 //   3  discussion video
-//   4  all eight multiple-choice questions
+//   4  all eight dropdown questions
 //   5  answer review
 //   6  practice score
 //   7  end of part

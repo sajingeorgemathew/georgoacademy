@@ -1,9 +1,5 @@
 import type { ReactNode } from "react";
-import { cx } from "@/features/design/design-tokens";
-import { ExamBottomBar } from "./ExamBottomBar";
-import { ExamCanvas } from "./ExamCanvas";
-import { ExamTopBar } from "./ExamTopBar";
-import { examFrame } from "@/features/exam-engine/exam-theme";
+import { MockTestPlayerShell } from "./player/MockTestPlayerShell";
 import type {
   ExamTimerReading,
   ExamTimerState,
@@ -11,29 +7,25 @@ import type {
 
 // The frame every practice test screen sits inside.
 //
-// It composes the grey top bar, the white canvas, and the grey bottom
-// bar, and it is the only place that knows about the title, the timer,
-// and the navigation controls. A screen type renders its body and
-// nothing else.
+// **This is now a thin adapter** (EXAM-UI-02). The frame itself moved to
+// src/components/exam/player/MockTestPlayerShell.tsx, which is where the
+// compact exam window, the two bars and the scrolling content pane are
+// built. Roughly sixty screen components across Listening, Reading,
+// Writing and Speaking render an ExamShell, so keeping this name and this
+// prop list means the redesign lands on all four sections at once without
+// a single screen having to be rewritten for it, and without a chance of
+// half of them being missed.
 //
-// Timers can be passed two ways:
+// Everything the shell used to document about itself still holds and is
+// documented on MockTestPlayerShell:
 //
-// - timerLabel, timerValue and timerState for a single reading, which
-//   covers Listening, Reading and Writing
-// - timers for a list, which covers the Speaking pair of preparation and
-//   recording. When timers is set it wins.
-// - timerSlot for a live reading that owns its own clock, which is what
-//   EXAM-15D added and what every timed Listening screen now passes. It
-//   renders in the same strip as the fixed readings and can sit beside
-//   them, so a screen can show one of each.
+// - it owns no clock, it is handed a formatted value or a live component
+// - timers wins over the single timerValue reading
+// - navigation takes either an href or a handler
 //
-// The shell still owns no clock. It is handed either a formatted value or
-// a component that formats its own, and it renders whichever it gets in
-// the same place.
-//
-// Navigation takes either an href or a handler. Use an href where the
-// next screen is a route, and a handler where the sequence is held in
-// client state.
+// One prop is new. scrollContent tells the shell whether the content pane
+// should take the scrollbar, and a split screen sets it false so its two
+// columns can each take one of their own instead.
 
 export type ExamShellProps = {
   title: string;
@@ -74,83 +66,12 @@ export type ExamShellProps = {
   children: ReactNode;
   // Set false when the body manages its own edges.
   padded?: boolean;
+  // Set false when the body scrolls its own regions, for example a split
+  // screen whose two columns each take a scrollbar.
+  scrollContent?: boolean;
   className?: string;
 };
 
-export function ExamShell({
-  title,
-  timerLabel,
-  timerValue,
-  timerState = "normal",
-  timers,
-  timerSlot,
-  metaText,
-  showNext = true,
-  nextLabel,
-  nextHref,
-  onNext,
-  nextDisabled = false,
-  showBack = true,
-  backLabel,
-  backHref,
-  onBack,
-  backDisabled = false,
-  secondaryAction,
-  bottomContent,
-  showBottomBar = true,
-  children,
-  padded = true,
-  className,
-}: ExamShellProps) {
-  const readings: ExamTimerReading[] =
-    timers ??
-    (timerValue
-      ? [{ label: timerLabel, value: timerValue, state: timerState }]
-      : []);
-
-  return (
-    <div className={cx(examFrame.page, className)}>
-      {/* data-exam-frame and data-exam-window are the hooks the exam mode
-          rules in globals.css use (EXAM-15F, second QA pass). Inside a
-          data-exam-viewport the container drops its max width and the
-          window drops its border and rounded corners, so the test fills
-          the browser window. On the internal part routes, which render
-          this shell inside the dashboard content column, none of those
-          rules apply and the frame draws as it always did. */}
-      <div data-exam-frame="true" className={examFrame.container}>
-        <section
-          data-exam-window="true"
-          className={examFrame.frame}
-          aria-label={title}
-        >
-          <ExamTopBar
-            title={title}
-            timers={readings}
-            timerSlot={timerSlot}
-            metaText={metaText}
-            showNext={showNext}
-            nextLabel={nextLabel}
-            nextHref={nextHref}
-            onNext={onNext}
-            nextDisabled={nextDisabled}
-          />
-
-          <ExamCanvas padded={padded}>{children}</ExamCanvas>
-
-          {showBottomBar ? (
-            <ExamBottomBar
-              showBack={showBack}
-              backLabel={backLabel}
-              backHref={backHref}
-              onBack={onBack}
-              backDisabled={backDisabled}
-              secondaryAction={secondaryAction}
-            >
-              {bottomContent}
-            </ExamBottomBar>
-          ) : null}
-        </section>
-      </div>
-    </div>
-  );
+export function ExamShell(props: ExamShellProps) {
+  return <MockTestPlayerShell {...props} />;
 }

@@ -1,47 +1,43 @@
 import type { ReactNode } from "react";
-import { cx } from "@/features/design/design-tokens";
-import { examCanvas } from "@/features/exam-engine/exam-theme";
+import { MockTestContentPane } from "./player/MockTestContentPane";
 
 // White exam area between the two grey bars.
 //
-// The canvas holds the screen body and nothing else. It never renders
-// chrome, so a screen type can be dropped into it unchanged.
+// **This is now a thin adapter** (EXAM-UI-02). The content area moved to
+// src/components/exam/player/MockTestContentPane.tsx, which is where the
+// scroll rule for the whole player is decided: the pane scrolls, the
+// window does not, and the two bars never move.
 //
-// Two elements, not one: a grey gutter and a bordered white sheet inside
-// it. The border is what makes the canvas read as a document the engine
-// is displaying rather than as the page background running behind the
-// bars.
+// The canvas used to draw a grey gutter with a bordered white sheet
+// floating inside it. The exam window has its own border now, so a second
+// one just inside it read as a box in a box, and the pane is white to its
+// edges.
 //
-// Set padded to false when the screen body manages its own edges, for
-// example a full width answer review table.
+// minHeight is gone from the pane. It existed to stop the frame jumping
+// between a short screen and a long one, and the window now carries a
+// minimum height of its own, so every screen is the same size whatever is
+// on it. The prop is kept on this adapter so no caller breaks, and it is
+// ignored.
 
 export type ExamCanvasProps = {
   children: ReactNode;
   padded?: boolean;
-  // Keeps short screens the same height as long ones, so the frame does
-  // not jump between screens.
+  // Kept for callers. The exam window sets the minimum height now.
   minHeight?: boolean;
+  // Set false to hand the height to the body instead of scrolling here.
+  scroll?: boolean;
   className?: string;
 };
 
 export function ExamCanvas({
   children,
   padded = true,
-  minHeight = true,
+  scroll = true,
   className,
 }: ExamCanvasProps) {
   return (
-    <div className={examCanvas.region}>
-      <div
-        className={cx(
-          examCanvas.sheet,
-          padded ? examCanvas.padded : "",
-          minHeight ? examCanvas.minHeight : "",
-          className,
-        )}
-      >
-        {children}
-      </div>
-    </div>
+    <MockTestContentPane padded={padded} scroll={scroll} className={className}>
+      {children}
+    </MockTestContentPane>
   );
 }

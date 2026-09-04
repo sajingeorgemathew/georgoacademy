@@ -2,45 +2,45 @@
 
 import { useEffect } from "react";
 import type { ReactNode } from "react";
-import { examViewport } from "@/features/exam-engine/exam-theme";
+import { playerViewport } from "@/features/exam-engine/mock-test-player-theme";
 
-// Locked exam mode viewport (EXAM-15B).
+// The desk the mock test player window sits on (EXAM-15B, rebuilt by
+// EXAM-UI-02).
 //
-// A test screen is not a web page. It does not scroll, it has no
-// breadcrumbs above it, and nothing belonging to the surrounding
-// application is visible while it is open. The exam routes live under
-// /dashboard so the layout auth guard covers them, which means the
-// dashboard layout wraps them in a sidebar, a sticky header, a breadcrumb
-// trail and a footer.
-//
-// EXAM-15B answered that by covering the dashboard with a fixed overlay
-// one viewport tall rather than teaching the shared shell about exam
-// routes. That is no longer how it works, see below.
-//
-// **The overlay is no longer how the chrome is removed** (EXAM-15F, second
-// QA pass). A browser test found the flaw in covering it: the sidebar, the
-// account pill and the breadcrumb trail were still mounted, still
-// focusable and still read by a screen reader, and an overlay only stays
-// an overlay for as long as nothing up the tree creates a containing block
-// for a fixed element, at which point the test quietly becomes a box
-// inside the dashboard content column. So the dashboard shell now checks
-// the route and does not render its chrome on an exam route at all. See
+// A test screen is not a web page. It does not scroll with the document,
+// it has no breadcrumbs above it, and nothing belonging to the surrounding
+// application is visible while it is open. The four Mock Test 1 routes
+// live under /dashboard so the layout auth guard covers them, and the
+// dashboard shell checks the route and does not render its sidebar,
+// header, breadcrumb trail or footer on an exam route at all. See
 // src/features/navigation/exam-mode-routes.ts and AppShellFrame.
 //
-// What this component owns after that change is the viewport, which is
-// still worth owning:
+// What this component owns is the desk:
 //
-// - it is fixed and one window tall, so the frame inside it fills the
-//   height exactly and its top and bottom bars stay where they are while a
-//   long screen scrolls between them
-// - it is full bleed, so the exam reaches all four edges of the window
-//   rather than floating in a gutter as a card
-// - document scrolling is switched off while this is mounted, so a
-//   trackpad flick or a space bar press cannot drag the exam up the screen,
-//   and scroll chaining is refused as well so a flick past the end of the
-//   canvas cannot bounce the document either
-// - it carries data-exam-viewport, which is what tells the shared exam
-//   frame to drop its width cap and its card border inside it
+// - it is fixed and one window tall, which is what gives the player shell
+//   inside it a real height to fill, which is in turn what pins the top
+//   and bottom bars while the content pane between them scrolls
+// - it is painted the player grey, so the exam window reads as an
+//   application sitting on a desktop
+// - document scrolling is switched off while it is mounted, so a trackpad
+//   flick or a space bar press cannot drag the exam up the screen
+//
+// **What changed in EXAM-UI-02.** The desk used to be overflow-hidden and
+// the window inside it was painted edge to edge: the exam mode rules in
+// globals.css lifted the frame's width cap and stripped its border, so on
+// a wide monitor a question list was drawn across the whole screen. That
+// is what the client reported as stretched, and it is fixed on the shell
+// rather than here, by the shell keeping its cap and its border
+// everywhere.
+//
+// The one change that belongs here is overflow-y-auto in place of
+// overflow-hidden. The window carries a minimum height, so on a browser
+// too short to hold it, the desk now scrolls rather than clipping the
+// bottom bar off the screen. On any normal laptop there is nothing to
+// scroll, so this costs nothing and only ever helps.
+//
+// overscroll-none stays. A flick that runs past the end of the content
+// pane must not chain out and rubber band the page behind the exam.
 //
 // The scroll lock is written on the elements themselves rather than
 // through a class, and the previous inline values are put back on unmount,
@@ -48,13 +48,12 @@ import { examViewport } from "@/features/exam-engine/exam-theme";
 // back button or a client navigation, returns the document to whatever it
 // had before. Nothing else on the page is touched.
 //
-// This component owns the viewport and nothing else. It has no opinion
-// about which test is inside it, so Reading, Writing and Speaking can use
-// it unchanged when their flows arrive.
+// This component has no opinion about which test is inside it, so
+// Listening, Reading, Writing and Speaking all use it unchanged.
 
 export type ExamModeViewportProps = {
-  // The exam frame to show. Normally one section flow component, which
-  // renders its own ExamShell per screen.
+  // The player window to show. Normally one section flow component, which
+  // renders its own shell per screen.
   children: ReactNode;
   // Names the exam region for assistive technology, for example
   // "Mock Test 1 - Listening Test".
@@ -74,11 +73,11 @@ export function ExamModeViewport({ children, label }: ExamModeViewportProps) {
     root.style.overflow = "hidden";
     body.style.overflow = "hidden";
     // overflow hidden stops the document scrolling, and this stops the
-    // bounce (EXAM-15C). A trackpad flick or a touch drag that runs past
-    // the end of the exam canvas can still rubber band the document on
-    // macOS and on mobile Safari, which flashes a strip of the dashboard
-    // behind the exam. Refusing the chain here means the only thing that
-    // moves on screen is the canvas, and only while it has somewhere to go.
+    // bounce. A trackpad flick or a touch drag that runs past the end of
+    // the content pane can still rubber band the document on macOS and on
+    // mobile Safari, which flashes a strip of the dashboard behind the
+    // exam. Refusing the chain here means the only thing that moves on
+    // screen is the pane, and only while it has somewhere to go.
     root.style.overscrollBehavior = "none";
     body.style.overscrollBehavior = "none";
 
@@ -92,17 +91,11 @@ export function ExamModeViewport({ children, label }: ExamModeViewportProps) {
 
   return (
     <div
-      // The hook the exam mode rules in globals.css hang off. Inside this
-      // element the exam frame drops its width cap, its border and its
-      // rounded corners, so the test fills the window instead of drawing
-      // itself as a card. Everywhere else the same frame keeps all three,
-      // which is what the internal part routes want.
-      data-exam-viewport="true"
-      className={examViewport.overlay}
+      className={playerViewport.overlay}
       role="region"
       aria-label={label}
     >
-      <div className={examViewport.inner}>{children}</div>
+      <div className={playerViewport.inner}>{children}</div>
     </div>
   );
 }

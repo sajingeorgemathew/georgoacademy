@@ -268,13 +268,21 @@ export const listeningCopy = {
   discussionVideoUnsupportedText:
     "Your browser cannot play this video. You can continue when you are ready.",
 
-  // One screen multiple-choice question list (EXAM-11).
+  // One screen question list for Part 5 (EXAM-11, wording corrected by
+  // EXAM-UI-03).
   //
   // Separate from chooseAnswerInstruction above, which reads "Choose the
   // best answer to each question." and belongs to the Parts 1 to 3
-  // question screens. This is the source document's own wording for Part
-  // 5, kept as written.
-  chooseBestWayInstruction: "Choose the best way to answer each question.",
+  // question screens.
+  //
+  // The drop-down clause is back, the way it came back for Part 6 in
+  // EXAM-15F and for the same reason. The source document instructs this
+  // part with the clause; EXAM-11 dropped it because it drew radio
+  // options and naming a control that was not on the screen would have
+  // been a lie. Part 5 is a drop-down screen from EXAM-UI-03 on, so the
+  // line names the control the learner is looking at.
+  chooseBestWayInstruction:
+    "Choose the best way to answer each question from the drop-down menu.",
   // Same sentence the dropdown list shows, and the same reason. See
   // ANSWER_ALL_QUESTIONS_HINT above.
   choiceAnswerAllHint: ANSWER_ALL_QUESTIONS_HINT,
@@ -296,13 +304,13 @@ export const listeningCopy = {
   part5PreviewSummary:
     "Internal preview of Listening Part 5, Listening to a Discussion, built from Mock Test 1 content. Answers are held on the page only and nothing is saved.",
   part5PreviewDescription:
-    "Prototype of Mock Test 1 Listening Part 5, with the workplace discussion video and the eight multiple-choice questions on one screen, local answer selection, and the answer review and practice score screens.",
+    "Prototype of Mock Test 1 Listening Part 5, with the workplace discussion video and the eight dropdown questions on one screen, local answer selection, and the answer review and practice score screens.",
 
   // Viewpoints screens (EXAM-13).
   //
   // Screen type 4 followed by screen type 7, used by Listening Part 6,
-  // which completes statements from radio options rather than from a
-  // select. None of these strings names a part.
+  // which completes statements from a drop-down menu since EXAM-15F. None
+  // of these strings names a part.
   //
   // reportInstruction drops the source document's "You will hear the
   // report only once", for the same reason the conversation wording at the
@@ -327,8 +335,8 @@ export const listeningCopy = {
   // own content shape and can still want its own wording.
   viewpointsInstruction:
     "Choose the best way to complete each statement from the drop-down menu.",
-  // Same sentence the dropdown and multiple-choice lists show, and the
-  // same reason. See ANSWER_ALL_QUESTIONS_HINT above.
+  // Same sentence the other one screen lists show, and the same reason.
+  // See ANSWER_ALL_QUESTIONS_HINT above.
   viewpointsAnswerAllHint: ANSWER_ALL_QUESTIONS_HINT,
 
   // Listening Part 6 (EXAM-13, closing screens added by EXAM-14).

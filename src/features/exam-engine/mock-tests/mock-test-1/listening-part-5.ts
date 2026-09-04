@@ -93,7 +93,13 @@ export const listeningPart5: ListeningVideoPartContent = {
   instructions: [
     "You will watch a 2-minute video.",
     "Then 8 questions will appear.",
-    "Choose the best way to answer each question.",
+    // The source bullet ends "from the drop-down menu". EXAM-11 dropped
+    // the clause because it drew radio options; EXAM-UI-03 renders the
+    // select the source describes, so the bullet is the source bullet
+    // again. Nothing else in this file changed: the eight ids, the four
+    // option ids under each of them, every word of question and option
+    // text, and the answer key are exactly as EXAM-11 wrote them.
+    "Choose the best way to answer each question from the drop-down menu.",
   ],
   // No context image for this part. extracted-links.md records Part 1 as
   // the only Listening part with one, so imageUrl stays unset rather than
@@ -112,7 +118,8 @@ export const listeningPart5: ListeningVideoPartContent = {
     // invented still would be a picture the source test does not have.
   },
   mediaInstruction: "Watch the discussion.",
-  questionInstruction: "Choose the best way to answer each question.",
+  questionInstruction:
+    "Choose the best way to answer each question from the drop-down menu.",
   answerKey: ANSWER_KEY,
   // Answer sheet for Part 5, from
   // mock-tests/mock-test-1/extracted-links.md. Referenced from Cloudinary

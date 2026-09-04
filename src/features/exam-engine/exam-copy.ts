@@ -36,6 +36,25 @@ export const examCopy = {
   infoIconLabel: "Information",
   instructionsHeading: "Instructions:",
 
+  // Dropdown completion questions (EXAM-UI-03). Defaults for the shared
+  // player control. A section with its own wording, such as Listening,
+  // passes its own and these are never read.
+  selectAnswerLabel: "Select answer",
+  dropdownBlankLabel: "blank",
+
+  // Audio visual card (EXAM-UI-03). The status word under the speaker
+  // mark, and the line saying the bar is a practice aid.
+  //
+  // The note is deliberate and it is ours. A practice simulator that
+  // shows a scrub bar has to say that the real thing does not, because a
+  // learner who practises with one will expect one. No official wording
+  // is reproduced to say it.
+  audioReadyLabel: "Ready to play",
+  audioPlayingLabel: "Playing...",
+  audioPausedLabel: "Paused",
+  audioEndedLabel: "Finished",
+  audioPlaybarNote: "This playbar will not appear in the official test.",
+
   // Media placeholder. A fixed duration on an inert transport strip, so
   // the grey audio and video boxes look like the real thing without any
   // player behind them.
