@@ -1,7 +1,11 @@
 import { ExamInstructionRow } from "../ExamInstructionRow";
 import { ExamShell } from "../ExamShell";
+import {
+  MockTestMediaFrame,
+  mockTestMediaImageClass,
+} from "../player/MockTestMediaFrame";
 import { examCopy } from "@/features/exam-engine/exam-copy";
-import { examListening, examScreenBody } from "@/features/exam-engine/exam-theme";
+import { examScreenBody } from "@/features/exam-engine/exam-theme";
 import { listeningCopy } from "@/features/exam-engine/listening-copy";
 import type { ListeningScenario } from "@/features/exam-engine/listening-types";
 
@@ -52,21 +56,24 @@ export function ListeningScenarioScreen({
           text={scenario.text}
         />
 
+        {/* The picture sits in the shared player media frame
+            (EXAM-UI-02), which caps its height against the viewport and
+            letterboxes rather than cropping. A scenario drawing served at
+            its intrinsic size used to be able to run taller than the whole
+            content pane, which pushed the audio controls and the questions
+            after it out of reach. */}
         {scenario.imageUrl ? (
-          <figure className={examListening.scenarioFigure}>
+          <MockTestMediaFrame caption={listeningCopy.scenarioImageCaption}>
             {/* eslint-disable-next-line @next/next/no-img-element -- remote
                 Cloudinary asset, see the note at the top of this file. */}
             <img
               src={scenario.imageUrl}
               alt={scenario.imageAlt ?? scenario.text}
-              className={examListening.scenarioImage}
+              className={mockTestMediaImageClass}
               loading="lazy"
               decoding="async"
             />
-            <figcaption className={examListening.scenarioCaption}>
-              {listeningCopy.scenarioImageCaption}
-            </figcaption>
-          </figure>
+          </MockTestMediaFrame>
         ) : null}
 
         <p className={examScreenBody.hint}>{examCopy.continueWhenReadyLabel}</p>

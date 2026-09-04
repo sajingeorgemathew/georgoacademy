@@ -1,3 +1,7 @@
+import {
+  MockTestMediaFrame,
+  mockTestMediaImageClass,
+} from "../player/MockTestMediaFrame";
 import { examSpeaking } from "@/features/exam-engine/exam-theme";
 import { speakingMockCopy } from "@/features/exam-engine/speaking-mock-copy";
 import type { SpeakingMockCopy } from "@/features/exam-engine/speaking-mock-copy";
@@ -60,8 +64,16 @@ function SpeakingPromptFigure({
 }) {
   const captionText = caption ?? image.caption;
 
+  // The shared player media frame (EXAM-UI-02) caps the picture against
+  // the viewport height and letterboxes rather than cropping, so a tall
+  // drawing cannot push the recorder, the two clocks or the Next control
+  // out of reach on a laptop. The prompt column scrolls instead.
   return (
-    <figure className={examSpeaking.figure}>
+    // The 34rem cap is kept from the recipe this replaced. It is the width
+    // of the largest picture in the section as the source delivers it, so
+    // the two cafe scenes draw at their own size and the smaller Task 8
+    // drawing is scaled up by about half rather than by more than twice.
+    <MockTestMediaFrame caption={captionText} className="max-w-[34rem]">
       {/* eslint-disable-next-line @next/next/no-img-element --
           remote Cloudinary asset, see the note at the top of this
           file. */}
@@ -70,16 +82,12 @@ function SpeakingPromptFigure({
         alt={image.alt}
         width={image.width}
         height={image.height}
-        className={examSpeaking.image}
+        className={mockTestMediaImageClass}
         // Not deferred. The picture is the prompt on Tasks 3, 4 and 8, so
         // the screen is unusable until it is on the page.
         decoding="async"
       />
-
-      {captionText ? (
-        <figcaption className={examSpeaking.caption}>{captionText}</figcaption>
-      ) : null}
-    </figure>
+    </MockTestMediaFrame>
   );
 }
 

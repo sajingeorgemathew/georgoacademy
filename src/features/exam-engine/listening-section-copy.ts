@@ -38,6 +38,7 @@ export type ListeningSectionCopy = {
 
   // Instruction text screen.
   instructionTitle: string;
+  instructionHeading: string;
   instructionSubtitle: string;
   instructionLines: string[];
   instructionNotice: string;
@@ -118,6 +119,11 @@ export function buildListeningSectionCopy({
     // rather than as six fields so the screen renders them with the
     // EXAM-02 instruction list and the order lives in one place.
     instructionTitle: "Listening Test",
+    // Heading beside the information glyph on the instructions screen
+    // (EXAM-UI-03). It used to read "Instructions:", which is what every
+    // other screen in the player says, so the one screen that is nothing
+    // but instructions was the one screen that did not name itself.
+    instructionHeading: "Listening Test Instructions",
     instructionSubtitle:
       "Read the following information before the Listening section begins.",
     instructionLines: [

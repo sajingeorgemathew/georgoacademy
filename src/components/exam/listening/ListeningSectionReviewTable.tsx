@@ -1,30 +1,37 @@
 import { ListeningAnswerReviewTable } from "./ListeningAnswerReviewTable";
-import { examSectionReview } from "@/features/exam-engine/exam-theme";
+import {
+  MockTestReviewPanel,
+  MockTestReviewStack,
+} from "../player/MockTestReviewPanel";
 import { buildListeningReviewCopy } from "@/features/exam-engine/listening-review-copy";
 import { formatListeningSectionAnswered } from "@/features/exam-engine/listening-section-copy";
 import type { ListeningSectionPartResult } from "@/features/exam-engine/listening-section-types";
 
-// Answer review, grouped by part, for the full Listening section
-// (EXAM-15).
+// The whole section answer review: six parts, 38 questions, one list.
 //
-// Six groups in one scroll. Each group is a heading naming the part and
-// the EXAM-04 review table under it, so a row here is the same row the
-// part level review screen prints: question number, the option the learner
-// chose, the correct option, and a status word.
+// One block per part, in part order, each carrying that part's label and
+// title, the count answered, and the part's own answer review table.
 //
-// The table itself is reused rather than rewritten. Its caption is the one
-// part specific string it carries, and the caption is read out loud by a
-// screen reader, so each group builds the Part N wording with the same
-// helper the part routes use. Nothing else about the table changes, which
-// is why a dropdown part's printed statement and a Parts 1 to 3 row with
-// no statement both render here exactly as they do in their own routes.
+// **EXAM-UI-02 rebuilt the blocks on the shared player review panel.** A
+// part used to be a heading rule with a table under it, which meant six
+// headings and six tables ran into one another as a single unbroken
+// column: the longest screen in the whole test, and the one where losing
+// your place costs the most. The panel gives each part a bordered box and
+// a tinted header strip carrying the label and the count, so a reader can
+// see where one part ends and the next begins while scrolling past.
 //
-// The heading carries the answered count for the part rather than a
-// correct count. The score comes one screen later, and putting a part
-// result here would be the part level score this ticket exists to remove.
+// The stack is capped and centred by the panel's own column, because a
+// results table set on the full 1100 pixel width of the exam window is a
+// table nobody can follow across a row.
 //
-// Presentational only. It receives results already marked on the server
-// and looks nothing up itself.
+// The tables are unpadded inside their panels: an answer review table
+// draws its own rules to its own edges, and a padded body would inset them
+// from the border that is already there.
+//
+// Nothing about marking, scoring or the review rows themselves is touched
+// here. This component is handed finished rows and it lays them out.
+//
+// House style: normal hyphens only, no long hyphens or em dashes.
 
 export type ListeningSectionReviewTableProps = {
   parts: ListeningSectionPartResult[];
@@ -34,28 +41,23 @@ export function ListeningSectionReviewTable({
   parts,
 }: ListeningSectionReviewTableProps) {
   return (
-    <div className={examSectionReview.groupStack}>
+    <MockTestReviewStack>
       {parts.map((part) => (
-        <section key={part.partNumber} className={examSectionReview.group}>
-          <div className={examSectionReview.groupHeading}>
-            <h3 className={examSectionReview.groupLabel}>{part.partLabel}</h3>
-            <p className={examSectionReview.groupTitle}>{part.partTitle}</p>
-            <p className={examSectionReview.groupMeta}>
-              {formatListeningSectionAnswered(
-                part.summary.answeredCount,
-                part.summary.totalQuestions,
-              )}
-            </p>
-          </div>
-
+        <MockTestReviewPanel
+          key={part.partNumber}
+          title={`${part.partLabel} - ${part.partTitle}`}
+          meta={formatListeningSectionAnswered(
+            part.summary.answeredCount,
+            part.summary.totalQuestions,
+          )}
+          padded={false}
+        >
           <ListeningAnswerReviewTable
             rows={part.rows}
-            // Only the caption differs per part, and it names the part out
-            // loud to a screen reader, so it has to say the right one.
             copy={buildListeningReviewCopy({ partLabel: part.partLabel })}
           />
-        </section>
+        </MockTestReviewPanel>
       ))}
-    </div>
+    </MockTestReviewStack>
   );
 }

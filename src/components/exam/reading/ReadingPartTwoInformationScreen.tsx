@@ -1,6 +1,10 @@
 "use client";
 
 import { ExamShell } from "../ExamShell";
+import {
+  MockTestMediaFrame,
+  mockTestMediaImageTallClass,
+} from "../player/MockTestMediaFrame";
 import { ExamCountdownTimer } from "../timer/ExamCountdownTimer";
 import { ReadingPartTwoQuestionPanel } from "./ReadingPartTwoQuestionPanel";
 import { ReadingTwoColumnLayout } from "./ReadingTwoColumnLayout";
@@ -119,6 +123,9 @@ export function ReadingPartTwoInformationScreen({
       showBack={showBack}
       // The split manages its own edges and fills the canvas.
       padded={false}
+      // The split pane gives each column its own scrollbar, so the
+      // content pane takes none of its own (EXAM-UI-02).
+      scrollContent={false}
     >
       <ReadingTwoColumnLayout
         passageLabel={content.passage.label ?? readingCopy.diagramColumnLabel}
@@ -130,8 +137,13 @@ export function ReadingPartTwoInformationScreen({
               </p>
             ) : null}
 
+            {/* The shared player media frame (EXAM-UI-02), on its tall
+                setting: here the picture is the passage rather than a
+                prompt beside one, so it takes a larger share of the
+                screen, and the passage column scrolls if the brochure is
+                taller than the cap. */}
             {image ? (
-              <figure className={examReading.passageFigure}>
+              <MockTestMediaFrame caption={image.caption} tall>
                 {/* eslint-disable-next-line @next/next/no-img-element --
                     remote Cloudinary asset, see the note at the top of
                     this file. */}
@@ -140,18 +152,12 @@ export function ReadingPartTwoInformationScreen({
                   alt={image.alt}
                   width={image.width}
                   height={image.height}
-                  className={examReading.passageImage}
+                  className={mockTestMediaImageTallClass}
                   // The diagram is the passage, so it is not deferred:
                   // this screen is unusable until it is on the page.
                   decoding="async"
                 />
-
-                {image.caption ? (
-                  <figcaption className={examReading.passageCaption}>
-                    {image.caption}
-                  </figcaption>
-                ) : null}
-              </figure>
+              </MockTestMediaFrame>
             ) : null}
 
             {/* Prose beside the diagram, if a part ever has both. Mock

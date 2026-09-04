@@ -120,6 +120,9 @@ export function ReadingCorrespondenceScreen({
       showBack={showBack}
       // The split manages its own edges and fills the canvas.
       padded={false}
+      // The split pane gives each column its own scrollbar, so the
+      // content pane takes none of its own (EXAM-UI-02).
+      scrollContent={false}
     >
       <ReadingTwoColumnLayout
         passageLabel={content.passage.label ?? readingCopy.passageColumnLabel}

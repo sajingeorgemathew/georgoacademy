@@ -1,7 +1,6 @@
 "use client";
 
-import { cx } from "@/features/design/design-tokens";
-import { examListeningDropdown } from "@/features/exam-engine/exam-theme";
+import { MockTestDropdownCompletion } from "../player/MockTestDropdownCompletion";
 import { listeningCopy } from "@/features/exam-engine/listening-copy";
 import type {
   ListeningDropdownAnswerMap,
@@ -11,28 +10,26 @@ import type {
 // The numbered list of completion questions on a dropdown screen
 // (EXAM-09).
 //
-// Split out from ListeningDropdownQuestionScreen so the list is the piece
-// that knows how a statement and its control are drawn, and the screen is
-// the piece that knows about the shell, the timer and Next. Listening
-// Parts 5 and 6 are the same list under a different media screen.
+// **This is now a thin adapter** (EXAM-UI-03). The list moved to
+// src/components/exam/player/MockTestDropdownCompletion.tsx, which is
+// where the block, the strip, the drawn blank and the select are built,
+// and which Listening Parts 4, 5 and 6 now all render. Keeping this name
+// and this prop list means the Part 4 screen and the Part 6 screen did
+// not have to change to get the shared control.
+//
+// Everything the list used to document about itself still holds and is
+// documented on MockTestDropdownCompletion:
+//
+// - the statement is the select's label, wired with htmlFor
+// - the blank keeps the underscores from the source document, quieted,
+//   with the word "blank" read in their place
+// - the placeholder is a real option with an empty value, so an
+//   unanswered select shows "Select answer" rather than silently reading
+//   as the first answer
 //
 // A client component, because choosing an option is an event handler. It
 // holds no state itself: the answers are owned by the prototype above it,
 // so leaving the screen and coming back shows what was chosen before.
-//
-// Layout decisions worth keeping:
-//
-// - The statement is the select's label, wired with htmlFor. Screen type
-//   7 puts the control where the blank falls, but the option text here is
-//   a sentence fragment several words long, so an inline control would
-//   push the tail of the statement around as the value changed. The
-//   control sits under the statement instead, indented, which the ticket
-//   allows and which keeps the reading order intact.
-// - The blank keeps the underscores from the source document, quieted
-//   rather than replaced, with the word "blank" read in their place.
-// - The placeholder is a real option with an empty value rather than a
-//   disabled first choice, so an unanswered select shows "Select answer"
-//   instead of silently defaulting to the first answer.
 //
 // Nothing here knows which option is correct. The answer key is stripped
 // on the server before the content reaches the browser.
@@ -51,51 +48,12 @@ export function ListeningDropdownQuestionList({
   placeholderLabel = listeningCopy.dropdownPlaceholder,
 }: ListeningDropdownQuestionListProps) {
   return (
-    <ol className={examListeningDropdown.list}>
-      {questions.map((question) => {
-        const selectId = `${question.id}-select`;
-        const selectedOptionId = answers[question.id] ?? "";
-
-        return (
-          <li key={question.id} className={examListeningDropdown.item}>
-            <label htmlFor={selectId} className={examListeningDropdown.statement}>
-              <span className={examListeningDropdown.number}>
-                {question.number}.
-              </span>
-              {question.textBefore}{" "}
-              <span className={examListeningDropdown.blank} aria-hidden="true">
-                ___________
-              </span>
-              <span className="sr-only">
-                {listeningCopy.dropdownBlankLabel}
-              </span>
-              {question.textAfter ? ` ${question.textAfter}` : null}
-            </label>
-
-            <div className={examListeningDropdown.control}>
-              <select
-                id={selectId}
-                className={cx(
-                  examListeningDropdown.select,
-                  selectedOptionId ? "" : examListeningDropdown.selectEmpty,
-                )}
-                value={selectedOptionId}
-                onChange={(event) =>
-                  onSelectOption(question.id, event.target.value)
-                }
-              >
-                <option value="">{placeholderLabel}</option>
-
-                {question.options.map((option) => (
-                  <option key={option.id} value={option.id}>
-                    {option.text}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </li>
-        );
-      })}
-    </ol>
+    <MockTestDropdownCompletion
+      items={questions}
+      answers={answers}
+      onSelectOption={onSelectOption}
+      placeholderLabel={placeholderLabel}
+      blankLabel={listeningCopy.dropdownBlankLabel}
+    />
   );
 }

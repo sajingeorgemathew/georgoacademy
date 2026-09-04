@@ -1,85 +1,40 @@
 import type { ReactNode } from "react";
-import { cx } from "@/features/design/design-tokens";
-import {
-  examColumnTones,
-  examScrollHeights,
-  examTwoColumn,
-} from "@/features/exam-engine/exam-theme";
+import { MockTestSplitPane } from "./player/MockTestSplitPane";
 import type {
   ExamPanelScroll,
   ExamPanelTone,
 } from "@/features/exam-engine/exam-shell-types";
 
-// Split screen layout.
+// Two column split: source material on the left, answers on the right.
 //
-// Left is the content side: a passage, a diagram, an audio panel, or a
-// source information block. Right is the answer side: a question set, an
-// editor, or a radio list.
+// **This is now a thin adapter** (EXAM-UI-02). The split moved to
+// src/components/exam/player/MockTestSplitPane.tsx, which added the one
+// thing the brief asks for and the old layout could not do: a fill mode
+// where the grid takes the height of the content pane and each column
+// hands its scrollbar to its own body, so a long passage and a long
+// question list scroll past each other independently and neither one can
+// move the bars.
 //
-// The split is a single divided work area, not two blocks with a gap
-// between them. The layout draws its own outer rule and its own divider,
-// and the answer side carries a light blue wash, so it is obvious at a
-// glance which half is read and which half is answered.
-//
-// Each column can scroll on its own, which is what the Reading part
-// screens need. On a narrow screen the columns stack, the divider turns
-// horizontal, and the scroll limits still apply so a long passage does
-// not bury the questions.
+// Without fill the columns fall back to the fixed scroll heights, which is
+// what a screen wants on an internal part route, where the frame sits in
+// the dashboard content column and there is no window height to fill.
 
 export type ExamTwoColumnLayoutProps = {
   left: ReactNode;
   right: ReactNode;
-  // Small uppercase labels above each column.
   leftLabel?: string;
   rightLabel?: string;
   leftScroll?: ExamPanelScroll;
   rightScroll?: ExamPanelScroll;
-  // Column washes. The answer side defaults to the light blue accent.
   leftTone?: ExamPanelTone;
   rightTone?: ExamPanelTone;
-  // Set false when the split fills an unpadded canvas, so the canvas
-  // border is the only rule around it.
+  // Give each column the height of the content pane and its own
+  // scrollbar, from the large breakpoint up.
+  fill?: boolean;
   bordered?: boolean;
   className?: string;
 };
 
-export function ExamTwoColumnLayout({
-  left,
-  right,
-  leftLabel,
-  rightLabel,
-  leftScroll = "none",
-  rightScroll = "none",
-  leftTone = "plain",
-  rightTone = "accent",
-  bordered = true,
-  className,
-}: ExamTwoColumnLayoutProps) {
-  return (
-    <div
-      className={cx(
-        examTwoColumn.grid,
-        bordered ? examTwoColumn.bordered : "",
-        className,
-      )}
-    >
-      <div className={cx(examTwoColumn.column, examColumnTones[leftTone])}>
-        {leftLabel ? (
-          <p className={examTwoColumn.columnLabel}>{leftLabel}</p>
-        ) : null}
-        <div className={cx("min-w-0", examScrollHeights[leftScroll])}>
-          {left}
-        </div>
-      </div>
-
-      <div className={cx(examTwoColumn.column, examColumnTones[rightTone])}>
-        {rightLabel ? (
-          <p className={examTwoColumn.columnLabel}>{rightLabel}</p>
-        ) : null}
-        <div className={cx("min-w-0", examScrollHeights[rightScroll])}>
-          {right}
-        </div>
-      </div>
-    </div>
-  );
+export function ExamTwoColumnLayout(props: ExamTwoColumnLayoutProps) {
+  return <MockTestSplitPane {...props} />;
 }

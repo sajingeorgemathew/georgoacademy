@@ -6,12 +6,12 @@ import { ExamShell } from "../ExamShell";
 import { ExamTwoColumnLayout } from "../ExamTwoColumnLayout";
 import { ExamCountdownTimer } from "../timer/ExamCountdownTimer";
 import { ListeningAudioPlayer } from "./ListeningAudioPlayer";
-import { cx } from "@/features/design/design-tokens";
+import { MockTestAudioVisual } from "../player/MockTestAudioVisual";
 import {
-  examAudio,
-  examListening,
-  examText,
-} from "@/features/exam-engine/exam-theme";
+  MockTestOptionList,
+  MockTestOptionRow,
+} from "../player/MockTestOptionRow";
+import { examListening, examText } from "@/features/exam-engine/exam-theme";
 import { LISTENING_QUESTION_TIMER } from "@/features/exam-engine/listening-timing";
 import { listeningCopy } from "@/features/exam-engine/listening-copy";
 import type {
@@ -194,21 +194,23 @@ export function ListeningQuestionScreen({
               // notice says so plainly rather than playing something else.
               // No content in the project reaches this: it is the guard for
               // a future part whose source is short a recording.
-              <div className={examAudio.wrap}>
-                <div className={examAudio.fallback} role="status">
-                  <p className={examAudio.fallbackTitle}>
-                    {listeningCopy.questionAudioMissingHeading}
-                  </p>
-                  <p className={examAudio.fallbackText}>
-                    {listeningCopy.questionAudioMissingText}
-                  </p>
-                </div>
-              </div>
+              <MockTestAudioVisual
+                status="idle"
+                progress={0}
+                hasError
+                showNote={false}
+                fallbackHeading={listeningCopy.questionAudioMissingHeading}
+                fallbackText={listeningCopy.questionAudioMissingText}
+              />
             ) : (
               <ListeningAudioPlayer
                 src={resolvedAudio.url}
                 title={`${listeningCopy.questionPlayerTitle} ${questionNumber}`}
                 autoPlay={autoPlayAudio}
+                // The practice playbar note is said on the clip screens
+                // that open each part. Repeating it under all 38 question
+                // clips would be noise (EXAM-UI-03).
+                showPlaybarNote={false}
               />
             )}
 
@@ -235,33 +237,22 @@ export function ListeningQuestionScreen({
                 {listeningCopy.chooseAnswerInstruction}
               </legend>
 
-              <div className={examListening.optionList}>
-                {question.options.map((option) => {
-                  const isSelected = option.id === selectedOptionId;
-
-                  return (
-                    <label
-                      key={option.id}
-                      className={cx(
-                        examListening.optionRow,
-                        isSelected ? examListening.optionRowSelected : "",
-                      )}
-                    >
-                      <input
-                        type="radio"
-                        name={groupName}
-                        value={option.id}
-                        checked={isSelected}
-                        onChange={() => onSelectOption(option.id)}
-                        className={examListening.optionInput}
-                      />
-                      <span className={examListening.optionText}>
-                        {option.text}
-                      </span>
-                    </label>
-                  );
-                })}
-              </div>
+              {/* The option rows are the shared player control since
+                  EXAM-UI-03, so hover, selection and the alignment of the
+                  circle are decided in one place for every question screen
+                  in the test rather than three times over. */}
+              <MockTestOptionList>
+                {question.options.map((option) => (
+                  <MockTestOptionRow
+                    key={option.id}
+                    name={groupName}
+                    value={option.id}
+                    label={option.text}
+                    selected={option.id === selectedOptionId}
+                    onSelect={() => onSelectOption(option.id)}
+                  />
+                ))}
+              </MockTestOptionList>
             </fieldset>
 
             {requireAnswer && !hasAnswer ? (

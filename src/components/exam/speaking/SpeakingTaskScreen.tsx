@@ -174,15 +174,24 @@ export function SpeakingTaskScreen({
       showBack={showBack}
       // The split manages its own edges and fills the canvas.
       padded={false}
+      // The split pane gives each column its own scrollbar, so the
+      // content pane takes none of its own (EXAM-UI-02).
+      scrollContent={false}
     >
       <ExamTwoColumnLayout
         leftLabel={copy.promptColumnLabel}
         rightLabel={copy.recordColumnLabel}
-        // The prompt scrolls on its own so a long task never pushes the
-        // recorder off the screen. The answer side does not, because Stop
-        // recording must not be below the fold while a clock is running.
+        // Fixed heights, used only below the large breakpoint and on the
+        // internal part routes, where there is no window height to fill.
         leftScroll="none"
         rightScroll="none"
+        // Above that, each column takes the height of the content pane and
+        // its own scrollbar (EXAM-UI-02). A task with a tall picture can
+        // scroll its prompt without the recorder, the two clocks or the
+        // preview player moving, which is what matters when the screen is
+        // being spoken to rather than read. Stop recording is never below
+        // the fold while a clock is running.
+        fill
         bordered={false}
         left={<SpeakingPromptPanel task={task} copy={copy} />}
         right={
