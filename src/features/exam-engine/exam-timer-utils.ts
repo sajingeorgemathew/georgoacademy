@@ -255,3 +255,26 @@ export const examTimerStatusTones: Record<ExamTimerStatus, ExamTimerState> = {
   urgent: "urgent",
   expired: "expired",
 };
+
+// How much of a timed window has been used, as a CSS width (EXAM-UI-03).
+//
+// The Speaking clock cards draw a hairline bar under the seconds, and this
+// is what fills it. It reads the state the card already has rather than
+// opening a clock of its own, so the bar and the number can never disagree
+// by a tick.
+//
+// A window with no length yet reads as empty rather than dividing by zero,
+// and the value is clamped, so nothing can draw a bar past its track.
+export function examCountdownProgressWidth(state: {
+  durationSeconds: number;
+  elapsedSeconds: number;
+}): string {
+  if (state.durationSeconds <= 0) {
+    return "0%";
+  }
+
+  const fraction = state.elapsedSeconds / state.durationSeconds;
+  const clamped = Math.min(Math.max(fraction, 0), 1);
+
+  return `${(clamped * 100).toFixed(1)}%`;
+}

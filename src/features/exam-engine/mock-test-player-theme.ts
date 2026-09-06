@@ -275,9 +275,14 @@ export const playerAudioVisual = {
 //   option a learner is only passing the pointer over must not read as
 //   an option they have chosen, and a saturated wash on hover reads as
 //   feedback about the answer, which a test must never give.
-// - **selected is a controlled pale blue**, player-blue-soft, which is
-//   the same tint the split screen answer column uses. It is legible at a
-//   glance across a screen of thirty two options and it is still quiet.
+// - **selected is a controlled pale green**, player-green-soft with a
+//   green hairline ring. Green is the reference layout's chosen answer
+//   wash and it is the one tint that is not already carrying a meaning
+//   somewhere in the player: the answer column is pale blue, so a pale
+//   blue row disappears into it. It is tuned pale on purpose. A bright
+//   green would read as "this one is right", which a practice test must
+//   never say before marking, and the ring rather than a stronger fill is
+//   what makes the row legible on both the white and the tinted surface.
 // - **rows are ruled, not spaced**. A hairline between options is what
 //   keeps four options compact enough that a whole question fits above
 //   the fold, and it is what the reference exam layout does.
@@ -294,7 +299,7 @@ export const playerOption = {
   // The ring reads on the tinted column and the fill reads on the white
   // one screen parts, so one recipe works on both surfaces.
   rowSelected:
-    "bg-player-blue-soft ring-1 ring-inset ring-player-blue/40 hover:bg-player-blue-soft",
+    "bg-player-green-soft ring-1 ring-inset ring-player-green-line/55 hover:bg-player-green-soft",
   input:
     "mt-[5px] h-3.5 w-3.5 shrink-0 accent-player-blue focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-player-blue",
   text: "min-w-0 text-[15px] leading-6 text-player-ink",
@@ -427,4 +432,94 @@ export const playerReview = {
   // Long review lists scroll inside the panel rather than the pane, so
   // the bottom bar stays put on a 38 question Listening review.
   scroll: "max-h-[26rem] overflow-y-auto overscroll-contain",
+} as const;
+
+// The Writing editor frame (EXAM-UI-03).
+//
+// Before this ticket the writing space was three loose blocks stacked in
+// the answer column: a small caps label, a bordered textarea, a word count
+// row and a hint under it. Four things floating one above the other read
+// as a dashboard form, and the count, which is the one reading a writer
+// glances at while typing, was the furthest thing from the text.
+//
+// So it is one frame now: a hairline box with the field inside it and a
+// grey meta strip along the bottom carrying the count, the target and the
+// hint. The strip is part of the field rather than a paragraph under it,
+// which is what makes the count readable without moving the eye off the
+// writing, and it is what keeps the block compact enough that the prompt
+// above it stays on screen.
+//
+// The field itself draws no border of its own: the frame owns the edge, so
+// there is one rectangle rather than a box inside a box. It is still a
+// plain resizable textarea and nothing else.
+export const playerWritingEditor = {
+  frame:
+    "flex min-w-0 flex-col overflow-hidden rounded-sm border border-player-line bg-player-paper",
+  label:
+    "shrink-0 border-b border-player-line bg-player-chrome-soft px-3 py-1.5 text-[12px] font-semibold uppercase tracking-[0.06em] text-player-ink/60",
+  // No border of its own, no ring: the frame is the edge. The focus
+  // outline is drawn inset so it reads inside the frame rather than
+  // doubling it.
+  field:
+    "block min-h-[14rem] w-full min-w-0 resize-y border-0 bg-player-paper px-3 py-2.5 text-[15px] leading-7 text-player-ink outline-none placeholder:text-player-ink/40 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-player-blue sm:min-h-[17rem]",
+  meta: "flex min-w-0 shrink-0 flex-wrap items-baseline gap-x-3 gap-y-0.5 border-t border-player-line bg-player-chrome-soft px-3 py-1.5 text-[12px] leading-4",
+  metaLabel: "font-semibold uppercase tracking-[0.06em] text-player-ink/55",
+  metaValue: "font-semibold tabular-nums text-player-ink",
+  metaTarget: "tabular-nums text-player-ink/60",
+  // Pushed to the right of the strip on a wide column and wrapping under
+  // the count on a narrow one.
+  metaHint: "min-w-0 text-player-ink/55 sm:ml-auto",
+} as const;
+
+// The Speaking recorder frame and the two clocks beside it (EXAM-UI-03).
+//
+// The recorder is the audio screen's mirror image: the Listening card says
+// "a clip is playing, listen to it" and this one says "you are being
+// recorded, speak". They are drawn from the same parts on purpose, a mark,
+// a status word and a bar, so a learner who has sat the Listening section
+// already knows what this screen is telling them.
+//
+// The mark is a microphone, drawn here from four path commands, the way
+// the speaker beside it is. No icon package is installed for the exam
+// engine and nothing here is taken from any test provider's interface.
+//
+// **The bar is the recording window, not a level meter.** It fills as the
+// window runs down, so it answers "how much of my time is left" and never
+// pretends to show how loud the room is. It is fed the reading the
+// recording clock already has rather than a clock of its own.
+export const playerRecorder = {
+  card: "mx-auto flex w-full min-w-0 max-w-md flex-col items-center gap-2.5 rounded-sm border border-player-line bg-player-chrome-soft px-4 py-4",
+  mic: "flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-player-line bg-player-paper text-player-blue",
+  micIcon: "h-6 w-6",
+  micRecording: "text-academy-red",
+  status:
+    "text-[12px] font-semibold uppercase tracking-[0.08em] text-player-ink/70",
+  hint: "max-w-full text-center text-[13px] leading-5 text-player-ink/70",
+  track: "h-1.5 w-full min-w-0 overflow-hidden rounded-full bg-player-ink/12",
+  fill: "h-full rounded-full bg-player-blue transition-[width] duration-200",
+  fillRecording: "h-full rounded-full bg-academy-red transition-[width] duration-200",
+  times:
+    "flex w-full min-w-0 items-center justify-between text-[11px] leading-4 tabular-nums text-player-ink/55",
+  controls: "flex min-w-0 flex-wrap items-center justify-center gap-2",
+  note: "text-center text-[11px] leading-4 text-player-ink/55",
+  // Errors and anything else that has to sit under the card body at full
+  // width rather than centred with it.
+  footer: "w-full min-w-0",
+} as const;
+
+// One clock card in the Speaking answer column.
+//
+// Compact, because there are two of them and neither is the screen. The
+// reading is 18 pixels rather than the 20 it was, the note under it is one
+// short line, and a hairline bar along the bottom shows the window
+// draining so the pair reads at a glance without being read.
+export const playerTimerCard = {
+  row: "flex min-w-0 flex-wrap gap-2",
+  card: "flex min-w-0 flex-1 basis-40 flex-col gap-0.5 overflow-hidden rounded-sm border border-player-line bg-player-paper px-3 py-2",
+  label:
+    "text-[12px] font-semibold uppercase tracking-[0.06em] text-player-ink/55",
+  value: "text-[18px] font-semibold leading-6 tabular-nums",
+  note: "text-[11px] leading-4 text-player-ink/55",
+  track: "mt-1.5 h-1 w-full min-w-0 overflow-hidden rounded-full bg-player-ink/12",
+  fill: "h-full rounded-full bg-player-blue transition-[width] duration-200",
 } as const;

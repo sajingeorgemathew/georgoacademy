@@ -1,3 +1,4 @@
+import { ExamInstructionRow } from "../ExamInstructionRow";
 import { cx } from "@/features/design/design-tokens";
 import { examWriting } from "@/features/exam-engine/exam-theme";
 import { writingMockCopy } from "@/features/exam-engine/writing-mock-copy";
@@ -58,7 +59,14 @@ export function WritingPromptPanel({
 
   return (
     <div className={examWriting.prompt}>
-      <p className={examWriting.promptInstruction}>{task.promptInstruction}</p>
+      {/* Marked with the shared information glyph and ruled off from the
+          requirements under it (EXAM-UI-03), the way every other task
+          line in the player is. */}
+      <ExamInstructionRow className={examWriting.instructionRow}>
+        <span className={examWriting.promptInstruction}>
+          {task.promptInstruction}
+        </span>
+      </ExamInstructionRow>
 
       {task.promptRequirements.length > 0 ? (
         <ul className={examWriting.requirementList}>

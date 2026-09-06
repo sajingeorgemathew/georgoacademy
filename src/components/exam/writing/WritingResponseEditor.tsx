@@ -1,17 +1,28 @@
-import { WritingWordCount } from "./WritingWordCount";
-import { examWriting } from "@/features/exam-engine/exam-theme";
+import { MockTestWritingEditorFrame } from "../player/MockTestWritingEditorFrame";
+import { playerWritingEditor } from "@/features/exam-engine/mock-test-player-theme";
 import { countWritingWords } from "@/features/exam-engine/writing-mock-flow";
-import { writingMockCopy } from "@/features/exam-engine/writing-mock-copy";
+import {
+  formatWritingWordCount,
+  formatWritingWordTarget,
+  writingMockCopy,
+} from "@/features/exam-engine/writing-mock-copy";
 import type { WritingMockCopy } from "@/features/exam-engine/writing-mock-copy";
 
 // The writing area for one task (EXAM-25).
 //
-// A plain textarea, a label above it and the live word count under it.
-// Nothing else: no toolbar, no formatting controls, no autosave
+// A plain textarea, a label strip above it and the live word count under
+// it. Nothing else: no toolbar, no formatting controls, no autosave
 // indicator, no submit button. A CELPIP writing space is a plain text
 // field with a word count and a spell check, which
 // docs/product/celpip-exam-rules-research.md section 12 records, and this
 // is that.
+//
+// EXAM-UI-03 put the three pieces inside one frame,
+// MockTestWritingEditorFrame, rather than leaving them stacked loose in
+// the answer column. The count now sits in the grey strip along the
+// bottom of the field instead of floating under it, which is where a
+// writer can read it without looking away from the text, and the block is
+// compact enough that the prompt above it stays on screen.
 //
 // It is a controlled field and it owns no state. The text lives in the
 // prototype above it, keyed by task id, which is what lets a response
@@ -58,12 +69,23 @@ export function WritingResponseEditor({
   targetMax,
   copy = writingMockCopy,
 }: WritingResponseEditorProps) {
-  return (
-    <div className={examWriting.editor}>
-      <label htmlFor={editorId} className={examWriting.editorLabel}>
-        {copy.editorLabel}
-      </label>
+  const showTarget = targetMin !== undefined && targetMax !== undefined;
 
+  return (
+    <MockTestWritingEditorFrame
+      label={copy.editorLabel}
+      editorId={editorId}
+      countLabel={copy.wordCountLabel}
+      // Counted here rather than passed down from the prototype, so the
+      // count and the text it counts can never be a render apart.
+      countValue={formatWritingWordCount(countWritingWords(value))}
+      targetText={
+        showTarget
+          ? `${copy.wordTargetLabel} ${formatWritingWordTarget(targetMin, targetMax)}`
+          : undefined
+      }
+      hint={copy.editorHint}
+    >
       <textarea
         id={editorId}
         value={value}
@@ -74,19 +96,8 @@ export function WritingResponseEditor({
         // than typing it.
         autoComplete="off"
         spellCheck
-        className={examWriting.editorField}
+        className={playerWritingEditor.field}
       />
-
-      <WritingWordCount
-        // Counted here rather than passed down from the prototype, so the
-        // count and the text it counts can never be a render apart.
-        wordCount={countWritingWords(value)}
-        targetMin={targetMin}
-        targetMax={targetMax}
-        copy={copy}
-      />
-
-      <p className={examWriting.editorHint}>{copy.editorHint}</p>
-    </div>
+    </MockTestWritingEditorFrame>
   );
 }

@@ -110,6 +110,17 @@
   --player-blue: #1d4ed8;
   --player-blue-dark: #1b3fa8;
   --player-blue-soft: #eaf0fb;
+  /* The chosen answer wash (EXAM-UI-03).
+
+     green-soft #eef6e9  the fill under a selected option row
+     green-line #6f9c57  the hairline ring around it
+
+     Pale on purpose. A saturated green on a test screen reads as "this
+     one is right", which a practice test must never say before marking,
+     so the pair is tuned to be legible against white paper and against
+     the pale blue answer column and no louder than that. */
+  --player-green-soft: #eef6e9;
+  --player-green-line: #6f9c57;
 }
 
 @theme inline {
@@ -150,6 +161,8 @@
   --color-player-blue: var(--player-blue);
   --color-player-blue-dark: var(--player-blue-dark);
   --color-player-blue-soft: var(--player-blue-soft);
+  --color-player-green-soft: var(--player-green-soft);
+  --color-player-green-line: var(--player-green-line);
   /* One humanist sans carries the whole brand. The serif slot is mapped
      to the same family on purpose, so the existing font-serif heading
      classes keep working and render in the brand face. */

@@ -104,13 +104,20 @@ export function buildSpeakingMockCopy({ testLabel }: { testLabel: string }) {
     introSpeakingLabel: "Speaking time",
 
     // 2. The task screens.
-    promptColumnLabel: "Your task",
+    //
+    // The prompt column carried a "Your task" label until EXAM-UI-03. It
+    // is gone: the column opens with the task sentence itself, marked
+    // with the information glyph, and a label over that said the same
+    // thing twice.
+    //
     // The column heading and the preview heading below it are
     // deliberately different words. Both said "Your recording" in the
     // first pass and the screen printed the same label twice, once over
     // the whole answer column and once over the player inside it.
     recordColumnLabel: "Your answer",
-    // Heading above the source prompt.
+    // Read by assistive technology as the recorder section's name. It
+    // stopped being drawn on the screen in EXAM-UI-03, where the prompt
+    // column dropped its small caps heading.
     promptHeading: "Read the task",
     // Heading above the pictures on a task that has them.
     visualHeading: "Look at the picture",

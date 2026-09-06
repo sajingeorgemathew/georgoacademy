@@ -1,3 +1,4 @@
+import { ExamInstructionRow } from "../ExamInstructionRow";
 import { ExamShell } from "../ExamShell";
 import { ExamTwoColumnLayout } from "../ExamTwoColumnLayout";
 import { ExamCountdownTimer } from "../timer/ExamCountdownTimer";
@@ -112,8 +113,13 @@ export function WritingTaskScreen({
       scrollContent={false}
     >
       <ExamTwoColumnLayout
-        leftLabel={copy.situationColumnLabel}
-        rightLabel={copy.responseColumnLabel}
+        // No column labels (EXAM-UI-03). Each half already opens with its
+        // own instruction line, "Read the following information." on the
+        // left and the task on the right, so a small caps INFORMATION
+        // above the first and YOUR RESPONSE above the second said the
+        // same thing twice and cost two rows of the window. The rule
+        // between the columns is what separates them, and the field keeps
+        // its own label strip.
         // Fixed heights, used only below the large breakpoint and on the
         // internal part routes, where there is no window height to fill.
         leftScroll="tall"
@@ -127,9 +133,15 @@ export function WritingTaskScreen({
         bordered={false}
         left={
           <div className={examWriting.situation}>
-            <p className={examWriting.situationInstruction}>
-              {task.situationInstruction}
-            </p>
+            {/* The information glyph and the rule under it are the same
+                opening both columns use (EXAM-UI-03), so the two halves
+                of the screen read as two halves rather than as a heading
+                and its body. */}
+            <ExamInstructionRow className={examWriting.instructionRow}>
+              <span className={examWriting.situationInstruction}>
+                {task.situationInstruction}
+              </span>
+            </ExamInstructionRow>
 
             {task.situationHeading ? (
               <p className={examWriting.situationHeading}>

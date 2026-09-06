@@ -1,13 +1,14 @@
 "use client";
 
 import { ExamButton } from "../ExamButton";
+import { MockTestSpeakingRecorderFrame } from "../player/MockTestSpeakingRecorderFrame";
 import {
   useSpeakingMockRecorder,
   useSpeakingRecordingSupported,
 } from "./useSpeakingMockRecorder";
-import { cx } from "@/features/design/design-tokens";
 import { examSpeaking } from "@/features/exam-engine/exam-theme";
 import { speakingMockCopy } from "@/features/exam-engine/speaking-mock-copy";
+import type { MockTestRecorderStatus } from "../player/MockTestSpeakingRecorderFrame";
 import type { SpeakingMockRecording } from "./useSpeakingMockRecorder";
 import type { SpeakingMockCopy } from "@/features/exam-engine/speaking-mock-copy";
 import type {
@@ -22,6 +23,14 @@ import type {
 // nothing else. The status, the error and the finished audio all belong
 // to the screen above it, which is what lets a recording survive
 // navigation while the recorder itself does not have to.
+//
+// EXAM-UI-03 moved what it looks like into
+// MockTestSpeakingRecorderFrame, the mirror of the Listening audio card:
+// a microphone mark, a status word and the controls, in one centred card
+// instead of five rows of small print stacked down the answer column. The
+// frame is presentational and records nothing, so everything below this
+// comment, the permission rule and the three failure states included, is
+// exactly what it was.
 //
 // The permission rule the ticket sets, and where it is kept
 // --------------------------------------------------------
@@ -99,35 +108,30 @@ export type SpeakingRecorderProps = {
 //
 // The state is never colour alone: the dot carries it visually and the
 // sentence beside it carries it for everybody else.
+// The status word the card carries, and the frame state that colours the
+// microphone mark. "recorded" is not one of the recorder's own states: it
+// is the idle state once a take exists, which is a different thing to say
+// to a learner and so a different thing to draw.
 function statusPresentation(
   status: SpeakingRecordingStatus,
   hasRecording: boolean,
   copy: SpeakingMockCopy,
-): { dot: string; text: string } {
+): { frameStatus: MockTestRecorderStatus; text: string } {
   if (status === "requesting") {
-    return {
-      dot: examSpeaking.statusDotWaiting,
-      text: copy.statusRequestingLabel,
-    };
+    return { frameStatus: "requesting", text: copy.statusRequestingLabel };
   }
 
   if (status === "recording") {
-    return {
-      dot: examSpeaking.statusDotRecording,
-      text: copy.statusRecordingLabel,
-    };
+    return { frameStatus: "recording", text: copy.statusRecordingLabel };
   }
 
   if (status === "stopping") {
-    return {
-      dot: examSpeaking.statusDotWaiting,
-      text: copy.statusStoppingLabel,
-    };
+    return { frameStatus: "stopping", text: copy.statusStoppingLabel };
   }
 
   return hasRecording
-    ? { dot: examSpeaking.statusDotRecorded, text: copy.statusRecordedLabel }
-    : { dot: examSpeaking.statusDotIdle, text: copy.statusIdleLabel };
+    ? { frameStatus: "recorded", text: copy.statusRecordedLabel }
+    : { frameStatus: "idle", text: copy.statusIdleLabel };
 }
 
 // The heading and sentence for one kind of failure.
@@ -246,33 +250,22 @@ export function SpeakingRecorder({
         : copy.startRecordingLabel;
 
   return (
-    <section
-      className={examSpeaking.recorder}
-      aria-label={`${copy.recorderHeading}: ${taskLabel}`}
-    >
-      <h3 className={examSpeaking.recorderHeading}>{copy.recorderHeading}</h3>
-
-      <div className={examSpeaking.status}>
-        <span
-          aria-hidden
-          className={cx(examSpeaking.statusDot, presentation.dot)}
-        />
-
-        {/* Announced politely. This changes a handful of times per task
-            rather than four times a second, so unlike the countdown it is
-            safe to speak. */}
-        <span
-          role="status"
-          aria-live="polite"
-          className={examSpeaking.statusText}
-        >
-          {presentation.text}
-        </span>
-      </div>
-
-      <p className={examSpeaking.recorderHint}>{hint}</p>
-
-      <div className={examSpeaking.recorderControls}>
+    <section aria-label={`${copy.recorderHeading}: ${taskLabel}`}>
+      <MockTestSpeakingRecorderFrame
+        status={presentation.frameStatus}
+        statusLabel={presentation.text}
+        hint={hint}
+        note={copy.recorderPrivacyNote}
+        footer={
+          failure ? (
+            <div className={examSpeaking.error} role="alert">
+              <p className={examSpeaking.errorHeading}>{failure.heading}</p>
+              <p className={examSpeaking.errorText}>{failure.text}</p>
+              <p className={examSpeaking.errorHint}>{copy.errorContinueHint}</p>
+            </div>
+          ) : null
+        }
+      >
         {showStart ? (
           <ExamButton
             variant="primary"
@@ -295,17 +288,7 @@ export function SpeakingRecorder({
             {copy.stopRecordingLabel}
           </ExamButton>
         ) : null}
-      </div>
-
-      {failure ? (
-        <div className={examSpeaking.error} role="alert">
-          <p className={examSpeaking.errorHeading}>{failure.heading}</p>
-          <p className={examSpeaking.errorText}>{failure.text}</p>
-          <p className={examSpeaking.errorHint}>{copy.errorContinueHint}</p>
-        </div>
-      ) : null}
-
-      <p className={examSpeaking.recorderNote}>{copy.recorderPrivacyNote}</p>
+      </MockTestSpeakingRecorderFrame>
     </section>
   );
 }

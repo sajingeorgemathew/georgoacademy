@@ -181,10 +181,23 @@ export function ListeningQuestionScreen({
       nextDisabled={requireAnswer && !hasAnswer}
       onBack={onBack}
       showBack={showBack}
+      // The split manages its own edges and fills the canvas, the way the
+      // Writing and Speaking task screens already did (EXAM-UI-03). Before
+      // this the two columns were a bordered box floating in the top half
+      // of a white content pane, with the audio panel and the answer panel
+      // ending in mid air and the rest of the window empty under them.
+      padded={false}
+      // Each column takes its own scrollbar, so the pane takes none.
+      scrollContent={false}
     >
       <ExamTwoColumnLayout
         leftLabel={listeningCopy.audioPanelLabel}
         rightLabel={listeningCopy.answerPanelLabel}
+        // Full height columns with the rule between them running the whole
+        // way down, which is what makes the screen read as an exam window
+        // rather than as a card on a page.
+        fill
+        bordered={false}
         left={
           <div className={examListening.columnStack}>
             <ExamInstructionRow text={listeningCopy.questionInstruction} />
@@ -227,9 +240,11 @@ export function ListeningQuestionScreen({
                 total={questionCount}
                 showBar={false}
               />
-              <p className={examText.body}>
-                {listeningCopy.chooseAnswerInstruction}
-              </p>
+
+              {/* Marked with the shared information glyph (EXAM-UI-03), so
+                  the answer column opens the same way the audio column
+                  beside it does. */}
+              <ExamInstructionRow text={listeningCopy.chooseAnswerInstruction} />
             </div>
 
             <fieldset className="min-w-0">
