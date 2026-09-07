@@ -647,25 +647,57 @@ export const examWriting = {
 
   // Right column: the positions on a task that offers a choice.
   //
-  // The whole row is the click target, and the chosen row carries the
-  // same pale green wash the Listening option rows use (EXAM-UI-03), so
-  // a chosen answer looks the same in every section of the test. The
-  // fieldset draws no geometry: preflight has already stripped its
-  // border, padding and margin.
+  // The whole row is the click target, and the fieldset draws no
+  // geometry: preflight has already stripped its border, padding and
+  // margin.
+  //
+  // The two states were repainted in EXAM-UI-04 and only here. A Task 2
+  // position is a preference rather than an answer, there is no key to
+  // be right against, so this is the one list in the player where a
+  // coloured hover cannot be misread as the screen saying "this one is
+  // correct". So the pointer leaves a pale green wash as it passes, and
+  // a chosen position holds a warm wash with a hairline ring. The two
+  // are different hues rather than two strengths of one, because a row
+  // under the pointer and a row already chosen have to be told apart at
+  // a glance while both are on screen.
+  //
+  // Every graded option row in Listening and Reading is untouched by
+  // this: those keep the neutral hover and the green chosen wash
+  // EXAM-UI-03 settled, in playerOption.
   choice: "flex min-w-0 flex-col gap-1.5",
   choiceFieldset: "w-full min-w-0",
   choiceLegend:
     "mb-1.5 block w-full min-w-0 text-[12px] font-semibold uppercase tracking-[0.06em] text-academy-navy/55",
   choiceList: "flex min-w-0 flex-col gap-1",
   choiceRow:
-    "flex min-w-0 cursor-pointer items-start gap-2 rounded-sm border border-academy-line bg-academy-paper px-2.5 py-2 transition-colors hover:bg-academy-navy-soft/45",
+    "flex min-w-0 cursor-pointer items-start gap-2 rounded-sm border border-academy-line bg-academy-paper px-2.5 py-2 transition-colors hover:border-player-green-line/40 hover:bg-player-green-soft",
   choiceRowSelected:
-    "border-player-green-line/55 bg-player-green-soft hover:bg-player-green-soft",
+    "border-player-orange-line/55 bg-player-orange-soft hover:border-player-orange-line/55 hover:bg-player-orange-soft",
   choiceInput:
     "mt-1 h-3.5 w-3.5 shrink-0 accent-academy-blue focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-academy-blue",
   choiceText: "min-w-0 text-[15px] leading-6 text-academy-navy",
   choiceLabel: "font-semibold",
   choiceHint: "text-[12px] leading-4 text-academy-navy/60",
+
+  // Shown under the positions when Next is pressed with none chosen
+  // (EXAM-UI-04). The one validation message in the Writing section, so
+  // it is a bordered line rather than a quiet hint: it has to be seen by
+  // someone who has just pressed a control and watched nothing happen.
+  choiceError:
+    "flex min-w-0 items-start gap-2 rounded-sm border border-academy-red/40 bg-academy-red-soft px-2.5 py-2 text-[13px] leading-5 text-academy-red",
+
+  // The chosen position, restated above the response box on the Task 2
+  // editor screen (EXAM-UI-04).
+  //
+  // A reading of what was chosen on the screen before, not a second
+  // control. The radios above it stay live, so this never becomes the
+  // only way to see or change the choice.
+  chosenNote:
+    "flex min-w-0 flex-col gap-0.5 rounded-sm border border-player-orange-line/45 bg-player-orange-soft px-2.5 py-2",
+  chosenNoteLabel:
+    "text-[12px] font-semibold uppercase tracking-[0.06em] text-academy-navy/55",
+  chosenNoteText: "min-w-0 text-[14px] leading-6 text-academy-navy",
+  chosenNoteOption: "font-semibold",
 
   // Right column: the editor.
   //

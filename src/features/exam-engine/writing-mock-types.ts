@@ -229,12 +229,20 @@ export type WritingChoiceMap = Readonly<Record<string, string>>;
 export type WritingSectionScreen =
   // 1. Writing section intro.
   | { kind: "section-intro"; id: string }
-  // 2 and 4. The tasks, in order, one working screen each.
+  // 2 and 5. The tasks, in order, one working screen each.
   | { kind: "task"; id: string; taskIndex: number }
   // 3. Shown before a task that is not the first one. It carries no
   // score, because Writing produces none in this ticket.
   | { kind: "task-transition"; id: string; taskIndex: number }
-  // 5. Writing section complete.
+  // 4. Shown before a task that offers positions to choose between, which
+  // in Mock Test 1 is Task 2 and only Task 2 (EXAM-UI-04).
+  //
+  // It carries the same situation and the same prompt instruction the
+  // task screen after it carries, and the positions, and no editor. A
+  // task with no options never produces one of these, so Task 1 goes
+  // straight from the intro to its editor as it always has.
+  | { kind: "task-choice"; id: string; taskIndex: number }
+  // 6. Writing section complete.
   | { kind: "section-complete"; id: string };
 
 // Narrowed screen kind, for a component that only handles one of them.

@@ -1,9 +1,9 @@
-import { ExamInstructionRow } from "../ExamInstructionRow";
 import { ExamShell } from "../ExamShell";
 import { ExamTwoColumnLayout } from "../ExamTwoColumnLayout";
 import { ExamCountdownTimer } from "../timer/ExamCountdownTimer";
 import { WritingPromptPanel } from "./WritingPromptPanel";
 import { WritingResponseEditor } from "./WritingResponseEditor";
+import { WritingSituationPanel } from "./WritingSituationPanel";
 import { examWriting } from "@/features/exam-engine/exam-theme";
 import { writingMockCopy } from "@/features/exam-engine/writing-mock-copy";
 import type { WritingMockCopy } from "@/features/exam-engine/writing-mock-copy";
@@ -13,11 +13,16 @@ import type { WritingTaskContent } from "@/features/exam-engine/writing-mock-typ
 //
 // Screen type 9 from docs/product/exam-engine-screen-types.md: the
 // situation on the left, and on the right the prompt, the positions where
-// the task has them, and the editor. Both Mock Test 1 tasks use this one
-// screen, which is why there is no WritingTaskOneScreen and no
-// WritingTaskTwoScreen: the two differ only in what their content object
-// holds, and the differences are already expressed there as an empty
-// requirement list or an unset options list.
+// the task has them, and the editor.
+//
+// Both Mock Test 1 tasks used to use this one screen. EXAM-UI-04 changed
+// that for one of them: a task that offers positions to choose between
+// now gets a choice screen and then an editor screen of its own, in
+// WritingTaskTwoChoiceScreen.tsx and WritingTaskTwoEditorScreen.tsx, and
+// the section prototype routes it there. So this screen now draws the
+// tasks that are answered in one step, which in Mock Test 1 is Task 1 and
+// which is unchanged by this ticket: the same split, the same prompt
+// panel, the same editor, the same word count and the same timer.
 //
 // The split is the shared ExamTwoColumnLayout rather than the Reading
 // wrapper over it. Reading passes both columns a fixed scroll height,
@@ -131,37 +136,10 @@ export function WritingTaskScreen({
         // the timer in the top bar and Next in the bottom bar never move.
         fill
         bordered={false}
-        left={
-          <div className={examWriting.situation}>
-            {/* The information glyph and the rule under it are the same
-                opening both columns use (EXAM-UI-03), so the two halves
-                of the screen read as two halves rather than as a heading
-                and its body. */}
-            <ExamInstructionRow className={examWriting.instructionRow}>
-              <span className={examWriting.situationInstruction}>
-                {task.situationInstruction}
-              </span>
-            </ExamInstructionRow>
-
-            {task.situationHeading ? (
-              <p className={examWriting.situationHeading}>
-                {task.situationHeading}
-              </p>
-            ) : null}
-
-            {task.situationParagraphs.map((paragraph, index) => (
-              <p
-                // Paragraphs have no ids of their own and never reorder,
-                // so the index is the stable key here. Same rule the
-                // Reading passage follows.
-                key={`${task.taskId}-situation-${index}`}
-                className={examWriting.situationParagraph}
-              >
-                {paragraph}
-              </p>
-            ))}
-          </div>
-        }
+        // The same left column the Task 2 choice and editor screens draw
+        // (EXAM-UI-04), so all three screens in the section open their
+        // reading half identically.
+        left={<WritingSituationPanel task={task} />}
         right={
           <div className={examWriting.taskColumn}>
             <WritingPromptPanel

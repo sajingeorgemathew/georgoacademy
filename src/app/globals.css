@@ -129,6 +129,20 @@
      the pale blue answer column and no louder than that. */
   --player-green-soft: #eef6e9;
   --player-green-line: #6f9c57;
+  /* The chosen position wash (EXAM-UI-04).
+
+     orange-soft #fdf1e4  the fill under a chosen Writing Task 2 position
+     orange-line #c07f3a  the hairline ring around it
+
+     Used on the Writing Task 2 choice rows and nowhere else. A Task 2
+     position is not a right or a wrong answer, so it is the one place in
+     the player where a warmer chosen state cannot be read as marking. It
+     also has to be told apart from the pale green the pointer leaves as
+     it passes over a row, which is why the chosen state here is warm and
+     the hover is green rather than the other way round. Every graded
+     option row in Listening and Reading keeps the green wash above. */
+  --player-orange-soft: #fdf1e4;
+  --player-orange-line: #c07f3a;
 }
 
 @theme inline {
@@ -172,6 +186,8 @@
   --color-player-blue-ink: var(--player-blue-ink);
   --color-player-green-soft: var(--player-green-soft);
   --color-player-green-line: var(--player-green-line);
+  --color-player-orange-soft: var(--player-orange-soft);
+  --color-player-orange-line: var(--player-orange-line);
   /* One humanist sans carries the whole brand. The serif slot is mapped
      to the same family on purpose, so the existing font-serif heading
      classes keep working and render in the brand face. */

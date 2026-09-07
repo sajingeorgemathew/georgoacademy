@@ -8,6 +8,8 @@ import { WritingSectionIntroScreen } from "./WritingSectionIntroScreen";
 import { WritingSectionResultScreen } from "./WritingSectionResultScreen";
 import { WritingTaskScreen } from "./WritingTaskScreen";
 import { WritingTaskTransitionScreen } from "./WritingTaskTransitionScreen";
+import { WritingTaskTwoChoiceScreen } from "./WritingTaskTwoChoiceScreen";
+import { WritingTaskTwoEditorScreen } from "./WritingTaskTwoEditorScreen";
 import {
   formatWritingSectionMeta,
   formatWritingTaskMeta,
@@ -21,6 +23,7 @@ import {
   setWritingChoice,
   setWritingResponse,
   summarizeWritingSection,
+  writingTaskHasOptions,
 } from "@/features/exam-engine/writing-mock-flow";
 import type { WritingMockCopy } from "@/features/exam-engine/writing-mock-copy";
 import type {
@@ -37,8 +40,18 @@ import type {
 // Mock Test 1 Writing section (EXAM-25, extended by EXAM-26).
 //
 // The whole Writing section as one run: the section intro, Task 1, a
-// short transition, Task 2, and a completion screen. Five screens, built
-// by buildWritingSectionFlow from the content rather than typed out here.
+// short transition, the Task 2 choice screen, Task 2, and a completion
+// screen. Six screens, built by buildWritingSectionFlow from the content
+// rather than typed out here.
+//
+// EXAM-UI-04 added the fifth of those and split Task 2 across two
+// screens. Choosing a position and writing the response used to be one
+// screen with a radio group above an open editor; they are now a decision
+// screen and a writing screen. The section still owns both answers, and
+// owns them in the same two maps as before, so the split is a change to
+// what is drawn and not to what is held: the position chosen on the
+// choice screen is the same value the editor screen reads, and the AI
+// review at the end receives exactly the responses it always did.
 //
 // It owns three pieces of state and nothing else:
 //
@@ -54,7 +67,7 @@ import type {
 // the same state as everything else and saved nowhere.
 //
 // EXAM-26 added the review, and it did not add a screen to the flow. The
-// completion screen is still the last of the five, and the review states
+// completion screen is still the last of them, and the review states
 // are drawn in its place while a review is in flight, has failed, or has
 // come back. Adding a sixth flow screen would have renumbered every
 // screen in the section ("Screen 1 of 6" on the intro), for a screen that
@@ -89,10 +102,14 @@ import type {
 // - it does not construct an OpenAI client, read an environment variable
 //   or hold a prompt. It calls one server action and renders what comes
 //   back
-// - it does not gate Next on an empty response or an unmade choice. A
-//   learner can walk the whole section without typing a word and reach a
-//   completion screen that says 0 words, twice, which is the honest
-//   reading of what they did
+// - it does not gate Next on an empty response. A learner can walk the
+//   whole section without typing a word and reach a completion screen
+//   that says 0 words, twice, which is the honest reading of what they
+//   did. The one gate anywhere in the section is on the Task 2 choice
+//   screen, which holds until a position has been chosen, and it lives in
+//   that screen rather than here. See the note at the top of
+//   WritingTaskTwoChoiceScreen.tsx for why writing is ungated and a
+//   position is not
 // - it does not act on a timer reaching zero. No onTimeExpire is passed
 //   to either task screen, so a closed window shows "Time is up" and
 //   nothing else happens: nothing submits, nothing advances, and nothing
@@ -272,7 +289,7 @@ export function WritingSectionPrototype({
   //
   // Wrapped in a function so the whole flow can be given one key below.
   const renderCurrentScreen = () => {
-    if (screen.kind === "task") {
+    if (screen.kind === "task-choice") {
       const task = content.tasks[screen.taskIndex];
 
       if (!task) {
@@ -280,37 +297,85 @@ export function WritingSectionPrototype({
       }
 
       return (
-        <WritingTaskScreen
+        <WritingTaskTwoChoiceScreen
           task={task}
-          response={getWritingResponse(responses, task.taskId)}
-          onChangeResponse={(text) => changeResponse(task.taskId, text)}
           selectedOptionId={getWritingChoice(choices, task.taskId)}
-          // Passed only where the task has positions to choose between,
-          // so the prompt panel draws no radio group for a task that has
-          // none.
-          onSelectOption={
-            task.options
-              ? (optionId) => chooseOption(task.taskId, optionId)
-              : undefined
-          }
-          // The flow screen id, so the window belongs to the screen and
-          // typing does not restart it.
-          timerScreenKey={screen.id}
-          // No onTimeExpire. See the note at the top of this file.
+          onSelectOption={(optionId) => chooseOption(task.taskId, optionId)}
+          // The task id rather than the flow screen id, so the choice
+          // screen and the editor after it read one Task 2 window rather
+          // than two different ones.
+          timerScreenKey={task.taskId}
           copy={copy}
-          // The last task closes the section, so its forward control
-          // says so. Every other task keeps the shell's own Next.
-          nextLabel={
-            screen.taskIndex === totalTasks - 1
-              ? copy.finishWritingLabel
-              : undefined
-          }
           metaText={formatWritingTaskMeta(
             task.taskNumber,
             totalTasks,
             screenIndex + 1,
             totalScreens,
           )}
+          onNext={goNext}
+          onBack={goBack}
+          showBack={showBack}
+        />
+      );
+    }
+
+    if (screen.kind === "task") {
+      const task = content.tasks[screen.taskIndex];
+
+      if (!task) {
+        return null;
+      }
+
+      // The last task closes the section, so its forward control says
+      // so. Every other task keeps the shell's own Next.
+      const taskNextLabel =
+        screen.taskIndex === totalTasks - 1
+          ? copy.finishWritingLabel
+          : undefined;
+
+      const taskMetaText = formatWritingTaskMeta(
+        task.taskNumber,
+        totalTasks,
+        screenIndex + 1,
+        totalScreens,
+      );
+
+      // A task that offers positions was decided on the screen before
+      // this one, so it gets the editor screen that restates the choice
+      // rather than the one that asks for it (EXAM-UI-04). A task with no
+      // positions, which in Mock Test 1 is Task 1, is unchanged.
+      if (writingTaskHasOptions(task)) {
+        return (
+          <WritingTaskTwoEditorScreen
+            task={task}
+            response={getWritingResponse(responses, task.taskId)}
+            onChangeResponse={(text) => changeResponse(task.taskId, text)}
+            choices={choices}
+            onSelectOption={(optionId) => chooseOption(task.taskId, optionId)}
+            timerScreenKey={task.taskId}
+            // No onTimeExpire. See the note at the top of this file.
+            copy={copy}
+            nextLabel={taskNextLabel}
+            metaText={taskMetaText}
+            onNext={goNext}
+            onBack={goBack}
+            showBack={showBack}
+          />
+        );
+      }
+
+      return (
+        <WritingTaskScreen
+          task={task}
+          response={getWritingResponse(responses, task.taskId)}
+          onChangeResponse={(text) => changeResponse(task.taskId, text)}
+          // The flow screen id, so the window belongs to the screen and
+          // typing does not restart it.
+          timerScreenKey={screen.id}
+          // No onTimeExpire. See the note at the top of this file.
+          copy={copy}
+          nextLabel={taskNextLabel}
+          metaText={taskMetaText}
           onNext={goNext}
           onBack={goBack}
           showBack={showBack}
