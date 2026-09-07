@@ -82,6 +82,23 @@ export function buildWritingMockCopy({ testLabel }: { testLabel: string }) {
     // blocked.
     choiceHint:
       "Choose the option you prefer. You can change your choice at any time, and your writing is kept when you do.",
+
+    // 4. The Task 2 choice screen (EXAM-UI-04).
+    //
+    // The one screen in the section that will not move forward until it
+    // has been answered, so it is also the only place in the Writing
+    // section with a validation message in it. The message says what to
+    // do rather than what went wrong, because nothing went wrong: the
+    // learner pressed a control before the screen was ready for it.
+    choiceScreenNextLabel: "Start writing",
+    choiceScreenHint:
+      "Choose the option you want to write about. You can change your choice on the next screen, and your writing is kept when you do.",
+    choiceRequiredMessage:
+      "Choose Option A or Option B before you start writing.",
+    // Restates the chosen position above the response box on the editor
+    // screen, so the position being argued is on screen while it is being
+    // argued.
+    chosenOptionLabel: "You are writing about",
     // Timer label in the top bar. The same sentence as
     // examCopy.timeRemainingLabel, kept separate so Writing can be
     // reworded without touching the other three sections.
@@ -256,7 +273,7 @@ export function formatWritingTaskPosition(
 }
 
 // Top bar note on a task screen, for example
-// "Writing Task 2 of 2 - Screen 4 of 5".
+// "Writing Task 2 of 2 - Screen 5 of 6".
 export function formatWritingTaskMeta(
   taskNumber: number,
   totalTasks: number,
@@ -272,8 +289,27 @@ export function formatWritingTaskMeta(
   );
 }
 
+// Full top bar title for a task screen, for example
+// "Mock Test 1 - Writing Task 2: Responding to Survey Questions"
+// (EXAM-UI-04).
+//
+// Both halves already exist on the task: title is the test and the task
+// number, taskTitle is the task name the source document prints. They are
+// joined here rather than written into the content file as a third
+// string, so the name of a task cannot come to be spelled two ways.
+//
+// Used by the Task 2 choice screen and the Task 2 editor screen, which
+// are two screens for one task and therefore have to carry one title
+// between them.
+export function formatWritingTaskScreenTitle(
+  title: string,
+  taskTitle: string,
+): string {
+  return title + ": " + taskTitle;
+}
+
 // Top bar note on a screen the section owns rather than a task, for
-// example "Writing section - Screen 1 of 5".
+// example "Writing section - Screen 1 of 6".
 export function formatWritingSectionMeta(
   screenNumber: number,
   totalScreens: number,

@@ -1,5 +1,5 @@
 import { ExamInstructionRow } from "../ExamInstructionRow";
-import { cx } from "@/features/design/design-tokens";
+import { WritingTaskOptionChoice } from "./WritingTaskOptionChoice";
 import { examWriting } from "@/features/exam-engine/exam-theme";
 import { writingMockCopy } from "@/features/exam-engine/writing-mock-copy";
 import type { WritingMockCopy } from "@/features/exam-engine/writing-mock-copy";
@@ -10,29 +10,23 @@ import type { WritingTaskContent } from "@/features/exam-engine/writing-mock-typ
 //
 // Everything the learner is asked to do, in the order the source prints
 // it: the instruction sentence, the requirement bullets under it, and on
-// the survey task the two positions to choose between.
+// a task that offers positions the positions themselves.
 //
 // All of it comes from the content object, so this component carries no
 // Mock Test 1 wording of its own. Task 1 prints three bullets and no
-// choice; Task 2 prints a choice and no bullets, because that is what the
-// source images show. Neither case is special-cased here: an empty
-// requirement list renders nothing and an unset options list renders
-// nothing.
+// choice, because that is what the source image shows. That is not
+// special-cased here: an empty requirement list renders nothing and an
+// unset options list renders nothing.
 //
-// The choice is a real radio group in a fieldset with a legend, rather
-// than two styled buttons, so a keyboard user gets arrow key selection
-// and a screen reader hears the group and its name. The whole row is the
-// click target, which is the pattern the Listening option rows already
-// use.
-//
-// Choosing a position gates nothing. The official screens open the
-// writing space only after a choice is made, which
-// docs/product/celpip-exam-rules-research.md section 12 records, but this
-// prototype leaves the editor open throughout: the ticket asks for empty
-// responses to be allowed and for nothing to block, and an editor that
-// appears halfway down the screen after a click is a worse thing to
-// review than one that is simply there. The difference is written up in
-// docs/product/writing-mock-test-prototype.md.
+// What EXAM-UI-04 changed. Mock Test 1 Task 2 no longer reaches this
+// panel at all: a task with positions to choose between now gets its own
+// choice screen and its own editor screen, in
+// WritingTaskTwoChoiceScreen.tsx and WritingTaskTwoEditorScreen.tsx, and
+// the section prototype routes it there. The rows are still drawn here,
+// through the same shared WritingTaskOptionChoice both of those screens
+// use, so this panel stays correct for any task it is given rather than
+// quietly dropping a choice it was handed. In Mock Test 1 that branch is
+// unreached.
 //
 // Presentational only. It holds no state: the chosen option id is owned
 // by the prototype and passed down, so a choice survives leaving the task
@@ -55,8 +49,6 @@ export function WritingPromptPanel({
   onSelectOption,
   copy = writingMockCopy,
 }: WritingPromptPanelProps) {
-  const options = task.options ?? [];
-
   return (
     <div className={examWriting.prompt}>
       {/* Marked with the shared information glyph and ruled off from the
@@ -80,49 +72,14 @@ export function WritingPromptPanel({
         </ul>
       ) : null}
 
-      {options.length > 0 ? (
-        <div className={examWriting.choice}>
-          <fieldset className={examWriting.choiceFieldset}>
-            <legend className={examWriting.choiceLegend}>
-              {task.optionInstruction ?? copy.choiceLegendLabel}
-            </legend>
-
-            <div className={examWriting.choiceList}>
-              {options.map((option) => {
-                const selected = selectedOptionId === option.id;
-
-                return (
-                  <label
-                    key={option.id}
-                    className={cx(
-                      examWriting.choiceRow,
-                      selected ? examWriting.choiceRowSelected : "",
-                    )}
-                  >
-                    <input
-                      type="radio"
-                      name={`${task.taskId}-option`}
-                      value={option.id}
-                      checked={selected}
-                      onChange={() => onSelectOption?.(option.id)}
-                      className={examWriting.choiceInput}
-                    />
-
-                    <span className={examWriting.choiceText}>
-                      <span className={examWriting.choiceLabel}>
-                        {option.label}:
-                      </span>{" "}
-                      {option.text}
-                    </span>
-                  </label>
-                );
-              })}
-            </div>
-          </fieldset>
-
-          <p className={examWriting.choiceHint}>{copy.choiceHint}</p>
-        </div>
-      ) : null}
+      <WritingTaskOptionChoice
+        task={task}
+        selectedOptionId={selectedOptionId}
+        onSelectOption={onSelectOption}
+        groupScope="prompt-panel"
+        hint={copy.choiceHint}
+        copy={copy}
+      />
     </div>
   );
 }
