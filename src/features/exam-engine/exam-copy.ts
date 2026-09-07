@@ -41,6 +41,11 @@ export const examCopy = {
   // passes its own and these are never read.
   selectAnswerLabel: "Select answer",
   dropdownBlankLabel: "blank",
+  // Accessible name for a question that prints no sentence of its own,
+  // which on the Reading side is a numbered blank inside a reply. A
+  // screen reader gets "Question 7" rather than a bare number
+  // (EXAM-UI-05).
+  questionNumberLabel: "Question",
 
   // Audio visual card (EXAM-UI-03). The status word under the speaker
   // mark, and the line saying the bar is a practice aid.

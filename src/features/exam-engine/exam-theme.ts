@@ -39,7 +39,6 @@
 //
 // House style: normal hyphens only, no long hyphens or em dashes.
 
-import { focus } from "@/features/design/design-tokens";
 import type { ExamTimerState } from "./exam-shell-types";
 import type { ListeningReviewStatus } from "./listening-review-types";
 import type { ReadingReviewStatus } from "./reading-types";
@@ -321,57 +320,43 @@ export const examReading = {
 
   // A numbered blank inside the reply.
   //
-  // Two states. Unanswered draws the number and quieted underscores, the
-  // way the question list draws a blank in a stem. Answered replaces the
-  // underscores with the chosen option text on the answer column wash, so
-  // the letter can be read back as a finished response. Both keep the
-  // number, because the number is how the reply and the list below it
-  // point at each other.
+  // The number stays, because it is what the reply and the review screens
+  // point at, and the reply runs at leading-8 so the inline control in
+  // each blank clears the line above it.
+  //
+  // responseBlankFilled is gone (EXAM-UI-05). The reply used to echo a
+  // chosen answer back into its own sentence, because the control that
+  // set it was in a list under the letter. The control is now in the
+  // blank itself, so the echo would be a second copy of the answer beside
+  // the thing showing it. responseBlank survives as the fallback for a
+  // blank whose question is missing from the group, which no shipped
+  // content is in.
   responseBlank: "text-academy-navy/45",
-  responseBlankFilled:
-    "rounded-sm bg-academy-blue-soft px-1 font-semibold text-academy-navy",
   responseBlankNumber: "font-semibold tabular-nums text-academy-navy/70",
+  responseParagraph: "text-[15px] leading-8 text-academy-navy/85",
 
   // Answered count under the question column, beside Next being
   // unavailable.
   progressNote: "text-[12px] leading-4 text-academy-navy/60",
 } as const;
 
-// Reading question list (EXAM-16).
+// Reading question list (EXAM-16), retired by EXAM-UI-05.
 //
-// The same boxed completion block the second EXAM-15F QA pass settled on
-// for Listening Parts 4 to 6: a bordered item, a tinted header strip
-// carrying the number and the statement, and the select in the body under
-// it. Reading and Listening answer the same kind of question here, so
-// they should look like one screen type rather than two.
+// examReadingQuestion used to live here: the bordered block, the tinted
+// statement strip and the native select the Reading drop-down questions
+// were answered from. It is gone, and so is the second copy of a control
+// the Listening screens already had.
 //
-// It is written out rather than reading the shared playerDropdown recipe
-// the Listening lists use, for one reason. Reading has a question shape
-// Listening does not: the blanks inside a reply print no statement at
-// all, only a number, so the header strip has a second form. Folding that
-// into the shared control would put a Reading-only branch inside a
-// component every Listening screen renders. EXAM-UI-03 left Reading
-// alone, which is also what its brief asked for.
-//
-// The select is capped rather than full width, for the same reason as on
-// the Listening screens: option text here is a sentence fragment, so a
-// control stretched across the column would put its value a long way from
-// the statement it completes.
-export const examReadingQuestion = {
-  list: "flex min-w-0 flex-col gap-2",
-  item: "min-w-0 overflow-hidden rounded-sm border border-academy-line bg-academy-paper",
-  statement:
-    "block w-full min-w-0 border-b border-academy-line bg-academy-navy-soft/60 px-3 py-2 text-[15px] leading-7 text-academy-navy",
-  number: "mr-2 font-semibold tabular-nums text-academy-navy/55",
-  // The blank in a statement. Underscores come from the source document,
-  // so they are drawn rather than replaced, just quieted.
-  blank: "px-0.5 tracking-tight text-academy-navy/45",
-  // The control sits in the body of the box, under the statement strip.
-  control: "min-w-0 p-2",
-  select: `h-8 w-full min-w-0 max-w-md rounded-sm border border-academy-line bg-academy-paper px-2 text-[15px] leading-6 text-academy-navy ${focus.ring}`,
-  // Shown while the question has no answer.
-  selectEmpty: "text-academy-navy/55",
-} as const;
+// EXAM-UI-05 rebuilt the shared drop-down as a compact inline trigger
+// with a floating menu, which is a behaviour change rather than a
+// restyle, and two hand-kept copies of that is the drift the ticket was
+// raised to stop. The one Reading-only item shape, a numbered blank whose
+// sentence lives in the reply above the list, moved into the shared
+// control as one branch. Reading now renders
+// MockTestDropdownCompletion reading playerDropdown and playerSelect in
+// mock-test-player-theme.ts, through the adapter in
+// ReadingQuestionList.tsx. See
+// docs/brand/objective-question-ui-fidelity-pass.md.
 
 // Listening answer review and practice score screens (EXAM-04).
 //
@@ -651,19 +636,22 @@ export const examWriting = {
   // geometry: preflight has already stripped its border, padding and
   // margin.
   //
-  // The two states were repainted in EXAM-UI-04 and only here. A Task 2
-  // position is a preference rather than an answer, there is no key to
-  // be right against, so this is the one list in the player where a
-  // coloured hover cannot be misread as the screen saying "this one is
-  // correct". So the pointer leaves a pale green wash as it passes, and
-  // a chosen position holds a warm wash with a hairline ring. The two
-  // are different hues rather than two strengths of one, because a row
-  // under the pointer and a row already chosen have to be told apart at
-  // a glance while both are on screen.
+  // The two states were painted in EXAM-UI-04 and adopted everywhere in
+  // EXAM-UI-05. The pointer leaves a pale green wash as it passes, and a
+  // chosen row holds a warm wash with a hairline ring. The two are
+  // different hues rather than two strengths of one, because a row under
+  // the pointer and a row already chosen have to be told apart at a
+  // glance while both are on screen.
   //
-  // Every graded option row in Listening and Reading is untouched by
-  // this: those keep the neutral hover and the green chosen wash
-  // EXAM-UI-03 settled, in playerOption.
+  // These rows used to be the only list painted this way, while every
+  // graded option row in Listening and Reading had a neutral hover and a
+  // green chosen wash. That meant the same gesture painted two different
+  // colours depending on which section a learner was in. EXAM-UI-05
+  // moved the whole player onto this pair, so the recipes here and
+  // playerOption in mock-test-player-theme.ts now describe one thing. The
+  // classes stay written out separately because these rows are bordered
+  // cards on the Writing answer column and the Listening rows are ruled
+  // lines in a list, which is geometry rather than state.
   choice: "flex min-w-0 flex-col gap-1.5",
   choiceFieldset: "w-full min-w-0",
   choiceLegend:
@@ -673,8 +661,10 @@ export const examWriting = {
     "flex min-w-0 cursor-pointer items-start gap-2 rounded-sm border border-academy-line bg-academy-paper px-2.5 py-2 transition-colors hover:border-player-green-line/40 hover:bg-player-green-soft",
   choiceRowSelected:
     "border-player-orange-line/55 bg-player-orange-soft hover:border-player-orange-line/55 hover:bg-player-orange-soft",
+  // The dot is the warm chosen colour, so it belongs to the wash under
+  // it rather than sitting on it as a second accent (EXAM-UI-05).
   choiceInput:
-    "mt-1 h-3.5 w-3.5 shrink-0 accent-academy-blue focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-academy-blue",
+    "mt-1 h-3.5 w-3.5 shrink-0 accent-player-orange-line focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-academy-blue",
   choiceText: "min-w-0 text-[15px] leading-6 text-academy-navy",
   choiceLabel: "font-semibold",
   choiceHint: "text-[12px] leading-4 text-academy-navy/60",
