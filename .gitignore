@@ -40,3 +40,12 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# private visual references (EXAM-UI-03)
+#
+# Screenshots of the real CELPIP practice test are used as private layout
+# reference while a screen is being built. They are copyrighted material
+# belonging to the test provider and must never reach the repository, so
+# the folder they live in is ignored rather than trusted to a reviewer
+# spotting it in a diff.
+/_reference/

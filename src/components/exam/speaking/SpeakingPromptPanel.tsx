@@ -1,3 +1,4 @@
+import { ExamInstructionRow } from "../ExamInstructionRow";
 import { SpeakingVisualPrompt } from "./SpeakingVisualPrompt";
 import { examSpeaking } from "@/features/exam-engine/exam-theme";
 import { speakingMockCopy } from "@/features/exam-engine/speaking-mock-copy";
@@ -58,8 +59,6 @@ export function SpeakingPromptPanel({
 
   return (
     <div className={examSpeaking.prompt}>
-      <p className={examSpeaking.promptLabel}>{copy.promptHeading}</p>
-
       {situationParagraphs.map((paragraph, index) => (
         <p
           // Paragraphs have no ids of their own and never reorder, so the
@@ -72,7 +71,21 @@ export function SpeakingPromptPanel({
         </p>
       ))}
 
-      <p className={examSpeaking.promptInstruction}>{task.promptInstruction}</p>
+      {/* The instruction the task actually sets, marked with the shared
+          information glyph and ruled off from what follows it
+          (EXAM-UI-03). It keeps its place after the situation, because on
+          Task 5 the situation is what the instruction refers to and
+          reading them the other way round would not make sense.
+
+          The small caps "Read the task" label that used to head this
+          column is gone with it: the split pane already names the column,
+          and two stacked labels above one sentence is the dashboard look
+          the brief asked the player to drop. */}
+      <ExamInstructionRow className={examSpeaking.instructionRow}>
+        <span className={examSpeaking.promptInstruction}>
+          {task.promptInstruction}
+        </span>
+      </ExamInstructionRow>
 
       {promptParagraphs.map((paragraph, index) => (
         <p

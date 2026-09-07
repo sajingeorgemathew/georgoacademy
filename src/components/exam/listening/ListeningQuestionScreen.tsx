@@ -1,7 +1,6 @@
 "use client";
 
 import { ExamInstructionRow } from "../ExamInstructionRow";
-import { ExamProgressIndicator } from "../ExamProgressIndicator";
 import { ExamShell } from "../ExamShell";
 import { ExamTwoColumnLayout } from "../ExamTwoColumnLayout";
 import { ExamCountdownTimer } from "../timer/ExamCountdownTimer";
@@ -12,6 +11,8 @@ import {
   MockTestOptionRow,
 } from "../player/MockTestOptionRow";
 import { examListening, examText } from "@/features/exam-engine/exam-theme";
+import { playerQuestionHeader } from "@/features/exam-engine/mock-test-player-theme";
+import { formatExamProgress } from "@/features/exam-engine/exam-copy";
 import { LISTENING_QUESTION_TIMER } from "@/features/exam-engine/listening-timing";
 import { listeningCopy } from "@/features/exam-engine/listening-copy";
 import type {
@@ -181,10 +182,25 @@ export function ListeningQuestionScreen({
       nextDisabled={requireAnswer && !hasAnswer}
       onBack={onBack}
       showBack={showBack}
+      // The split manages its own edges and fills the canvas, the way the
+      // Writing and Speaking task screens already did (EXAM-UI-03). Before
+      // this the two columns were a bordered box floating in the top half
+      // of a white content pane, with the audio panel and the answer panel
+      // ending in mid air and the rest of the window empty under them.
+      padded={false}
+      // Each column takes its own scrollbar, so the pane takes none.
+      scrollContent={false}
     >
       <ExamTwoColumnLayout
-        leftLabel={listeningCopy.audioPanelLabel}
-        rightLabel={listeningCopy.answerPanelLabel}
+        // No column captions. The reference pass took the "QUESTION
+        // AUDIO" and "ANSWER" small caps labels off the top of the two
+        // halves: what is in each half is obvious from what is drawn in
+        // it, and a test window does not caption its own panes.
+        // Full height columns with the rule between them running the whole
+        // way down, which is what makes the screen read as an exam window
+        // rather than as a card on a page.
+        fill
+        bordered={false}
         left={
           <div className={examListening.columnStack}>
             <ExamInstructionRow text={listeningCopy.questionInstruction} />
@@ -207,10 +223,11 @@ export function ListeningQuestionScreen({
                 src={resolvedAudio.url}
                 title={`${listeningCopy.questionPlayerTitle} ${questionNumber}`}
                 autoPlay={autoPlayAudio}
-                // The practice playbar note is said on the clip screens
-                // that open each part. Repeating it under all 38 question
-                // clips would be noise (EXAM-UI-03).
-                showPlaybarNote={false}
+                // The note is printed here too. EXAM-UI-03 hid it on the
+                // question screens as noise repeated under 38 clips, but
+                // the scrub bar it is warning about is on every one of
+                // those screens, so the warning belongs on every one of
+                // them (reference pass).
               />
             )}
 
@@ -221,15 +238,20 @@ export function ListeningQuestionScreen({
         }
         right={
           <div className={examListening.columnStack}>
-            <div className={examListening.answerHeader}>
-              <ExamProgressIndicator
-                current={questionNumber}
-                total={questionCount}
-                showBar={false}
-              />
-              <p className={examText.body}>
-                {listeningCopy.chooseAnswerInstruction}
+            <div className={playerQuestionHeader.wrap}>
+              {/* "Question 3 of 8" as a sentence in ink rather than as a
+                  small caps field label over a progress track. A learner
+                  answering one question at a time needs to know which one
+                  they are on, not how far through a bar they are
+                  (reference pass). */}
+              <p className={playerQuestionHeader.position}>
+                {formatExamProgress(questionNumber, questionCount)}
               </p>
+
+              {/* Marked with the shared information glyph (EXAM-UI-03), so
+                  the answer column opens the same way the audio column
+                  beside it does. */}
+              <ExamInstructionRow text={listeningCopy.chooseAnswerInstruction} />
             </div>
 
             <fieldset className="min-w-0">

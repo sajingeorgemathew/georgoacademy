@@ -9,6 +9,7 @@ import { SpeakingPromptPanel } from "./SpeakingPromptPanel";
 import { SpeakingRecorder } from "./SpeakingRecorder";
 import { SpeakingRecordingTimer } from "./SpeakingRecordingTimer";
 import { examSpeaking } from "@/features/exam-engine/exam-theme";
+import { playerTimerCard } from "@/features/exam-engine/mock-test-player-theme";
 import { speakingMockCopy } from "@/features/exam-engine/speaking-mock-copy";
 import type { SpeakingMockRecording } from "./useSpeakingMockRecorder";
 import type { SpeakingMockCopy } from "@/features/exam-engine/speaking-mock-copy";
@@ -179,7 +180,11 @@ export function SpeakingTaskScreen({
       scrollContent={false}
     >
       <ExamTwoColumnLayout
-        leftLabel={copy.promptColumnLabel}
+        // No label over the prompt column (EXAM-UI-03). It opens with the
+        // task itself, marked with the information glyph, so a small caps
+        // YOUR TASK above that said the same thing twice. The answer
+        // column keeps its label: it opens with two clock cards rather
+        // than with a sentence, so the label is the only thing naming it.
         rightLabel={copy.recordColumnLabel}
         // Fixed heights, used only below the large breakpoint and on the
         // internal part routes, where there is no window height to fill.
@@ -196,7 +201,7 @@ export function SpeakingTaskScreen({
         left={<SpeakingPromptPanel task={task} copy={copy} />}
         right={
           <div className={examSpeaking.answerColumn}>
-            <div className={examSpeaking.timerRow}>
+            <div className={playerTimerCard.row}>
               <SpeakingPrepTimer
                 // The flow screen id, so the window belongs to the screen
                 // and a re-render does not restart it.

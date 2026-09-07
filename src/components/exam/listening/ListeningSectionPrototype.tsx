@@ -687,7 +687,6 @@ export function ListeningSectionPrototype({
       return (
         <ListeningSectionInstructionScreen
           content={content.instructionScreen}
-          {...sectionProgress}
           metaText={metaText}
           onNext={goNext}
           onBack={goBack}

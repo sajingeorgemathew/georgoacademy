@@ -99,7 +99,7 @@ export function ExamVideoScreen({
   skipHref,
   onSkip,
   secondaryAction,
-  showContinueHint = true,
+  showContinueHint = false,
   children,
   className,
 }: ExamVideoScreenProps) {

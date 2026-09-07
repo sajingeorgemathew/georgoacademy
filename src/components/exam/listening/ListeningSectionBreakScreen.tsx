@@ -1,7 +1,6 @@
 import { ExamInstructionRow } from "../ExamInstructionRow";
 import { ExamMediaPlaceholder } from "../ExamMediaPlaceholder";
 import { ExamShell } from "../ExamShell";
-import { examCopy } from "@/features/exam-engine/exam-copy";
 import { examListening, examScreenBody } from "@/features/exam-engine/exam-theme";
 import { listeningCopy } from "@/features/exam-engine/listening-copy";
 
@@ -66,8 +65,6 @@ export function ListeningSectionBreakScreen({
             {listeningCopy.sectionBreakHint}
           </p>
         </div>
-
-        <p className={examScreenBody.hint}>{examCopy.continueWhenReadyLabel}</p>
       </div>
     </ExamShell>
   );

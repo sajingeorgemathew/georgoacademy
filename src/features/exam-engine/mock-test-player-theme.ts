@@ -197,21 +197,48 @@ export const playerTimerStates: Record<ExamTimerState, string> = {
   muted: "text-player-ink/55",
 };
 
-// Instruction list on an instructions screen.
+// The instruction row and the instruction list (EXAM-UI-03).
 //
-// Instruction copy runs a size up from question copy, because it is the
-// one block on the screen a learner reads as prose rather than scans. The
-// brief asks for 16 to 18 pixels here and 15 to 17 for body, so this is 16
-// and the rest of the exam sits at 15.
+// One block, because the two are the same idea at two sizes: an
+// instruction row is the line a screen opens with and the list is the
+// rules under it, and the reference layout sets both in the same blue on
+// the same measure.
 //
-// The heading is player blue, which the brief allows, and it is the only
-// colour on the screen.
+// Three decisions the reference pass settled:
+//
+// - **instruction copy is blue, not ink.** player-blue-ink is a quieter
+//   blue than the action blue on the Next control, because this is prose
+//   read a line at a time rather than a control to find. It is the one
+//   colour on an instructions screen.
+// - **the marker is grey, not blue.** A blue bullet in front of blue text
+//   reads as a second emphasis on a screen that already has one. Grey
+//   marks the row and gets out of the way.
+// - **rows are ruled and 16 pixels.** A hairline under each rule keeps a
+//   full set of Listening instructions on one screen without white space
+//   between them, and 16 with a 28 pixel line is the readable-not-
+//   oversized band the brief asks for. Nothing on the screen is set at a
+//   marketing size: the largest thing on it is the 17 pixel lead line.
 export const playerInstruction = {
-  list: "flex min-w-0 flex-col",
-  item: "flex min-w-0 items-start gap-2.5 border-b border-player-line/60 py-1.5 last:border-b-0",
-  marker: "mt-[9px] h-1.5 w-1.5 shrink-0 rounded-full bg-player-blue",
-  heading: "font-semibold text-player-blue",
-  text: "min-w-0 text-[15px] leading-6 text-player-ink",
+  // The information row: the circled glyph, an optional lead line, and
+  // the task.
+  row: "flex min-w-0 items-start gap-2.5",
+  rowHeading: "text-[17px] font-semibold leading-6 text-player-blue-ink",
+  rowText: "min-w-0 text-[16px] leading-6 text-player-blue-ink",
+
+  // The rules under it. Indented to sit under the lead line's text
+  // rather than under its glyph, the way the reference layout hangs a
+  // list off the heading that introduces it.
+  list: "flex min-w-0 flex-col pl-7",
+  item: "flex min-w-0 items-start gap-3 border-b border-player-line/70 py-3 last:border-b-0",
+  marker: "mt-[11px] h-[7px] w-[7px] shrink-0 rounded-full bg-player-ink/30",
+  heading: "font-semibold text-player-blue-ink",
+  text: "min-w-0 text-[16px] leading-7 text-player-blue-ink",
+
+  // The measure an instructions body is set on. The window is 1100 pixels
+  // and a rule drawn the whole way across it reads as a table border
+  // rather than as a divider between two sentences, so the body stops at
+  // roughly four fifths of the window the way the reference layout does.
+  body: "flex w-full min-w-0 max-w-4xl flex-col gap-4",
 } as const;
 
 // The circled information glyph (EXAM-UI-03).
@@ -232,34 +259,52 @@ export const playerInfoIcon = {
   sm: "mt-[3px] h-4 w-4 text-[10px]",
 } as const;
 
-// Audio visual card (EXAM-UI-03).
+// Audio visual card (EXAM-UI-03, restructured in the reference pass).
 //
-// The block a Listening clip plays inside. An original speaker mark, a
-// status word, a progress bar, the browser's own controls, and a line
-// saying the playbar is a practice aid. Compact and centred, because the
-// clip is the only thing on the screen while it runs.
+// The block a Listening clip plays inside. Three things stacked, in the
+// order a learner meets them: the card, the browser's own control under
+// it, and the practice playbar note under that.
 //
-// The bar is a plain div whose width is set from the clip's own
-// currentTime. It drives nothing: seeking, playing and pausing all still
-// happen through the native control below it, so the visual can never
-// disagree with what is actually playing.
+// **The card is a row, not a column.** A speaker plate on the left, and
+// beside it the status word over a wide progress bar. That is the shape
+// the reference exam layout uses and it is the shape that reads at a
+// glance: the plate says "this screen is audio" and the bar beside it
+// says "and it is this far through", without the eye travelling down four
+// stacked blocks to find out.
+//
+// **The native control sits outside the card.** It is a practice aid
+// rather than part of the clip display, and putting it outside is what
+// lets the note under it say so without the note appearing to describe
+// the card as well.
+//
+// **The bar drives nothing.** Its width comes from the clip's own
+// currentTime; seeking, playing and pausing all still happen through the
+// native control, so the picture can lag the clip but it can never
+// disagree with it.
+//
+// The elapsed and total time readings that used to sit under the bar are
+// gone: the native control prints both, a foot apart, and two clocks
+// disagreeing by a frame on the same screen is worse than one.
 export const playerAudioVisual = {
-  card: "mx-auto flex w-full min-w-0 max-w-md flex-col items-center gap-2.5 rounded-sm border border-player-line bg-player-chrome-soft px-4 py-4",
+  stack:
+    "mx-auto flex w-full min-w-0 max-w-[34rem] flex-col items-center gap-3",
+  card: "flex w-full min-w-0 items-center gap-4 rounded-sm bg-player-chrome-soft px-5 py-5",
   speaker:
-    "flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-player-line bg-player-paper text-player-blue",
-  speakerIcon: "h-6 w-6",
-  status:
-    "text-[12px] font-semibold uppercase tracking-[0.08em] text-player-ink/70",
-  title: "max-w-full truncate text-[13px] leading-5 text-player-ink/70",
-  track: "h-1.5 w-full min-w-0 overflow-hidden rounded-full bg-player-ink/12",
-  fill: "h-full rounded-full bg-player-blue transition-[width] duration-200",
-  times:
-    "flex w-full min-w-0 items-center justify-between text-[11px] leading-4 tabular-nums text-player-ink/55",
+    "flex h-14 w-14 shrink-0 items-center justify-center rounded-sm bg-player-paper text-player-ink/55",
+  speakerIcon: "h-7 w-7",
+  body: "flex min-w-0 grow flex-col items-center gap-2.5",
+  status: "text-[16px] leading-5 text-player-ink",
+  title: "max-w-full truncate text-[12px] leading-4 text-player-ink/55",
+  track: "h-3.5 w-full min-w-0 overflow-hidden rounded-[2px] bg-player-paper",
+  fill: "h-full bg-player-blue transition-[width] duration-200",
   controls: "w-full min-w-0",
   element: "block h-9 w-full min-w-0",
-  note: "text-center text-[11px] leading-4 text-player-ink/55",
+  // The practice playbar note. A ruled box rather than a grey line: it is
+  // the one sentence on the screen that is about the simulator rather
+  // than about the test, so it is set apart rather than blended in.
+  note: "w-full min-w-0 border border-player-ink/85 px-3 py-2 text-center text-[13px] leading-5 text-player-ink",
   // Shown in place of the card body when the clip will not load.
-  fallback: "flex min-w-0 flex-col items-center gap-1 text-center",
+  fallback: "flex min-w-0 grow flex-col items-center gap-1 text-center",
   fallbackTitle: "text-[15px] font-semibold leading-5 text-player-ink",
   fallbackText: "max-w-sm text-[12px] leading-4 text-player-ink/60",
   // Shown under the controls when the browser refused to start the clip.
@@ -275,9 +320,14 @@ export const playerAudioVisual = {
 //   option a learner is only passing the pointer over must not read as
 //   an option they have chosen, and a saturated wash on hover reads as
 //   feedback about the answer, which a test must never give.
-// - **selected is a controlled pale blue**, player-blue-soft, which is
-//   the same tint the split screen answer column uses. It is legible at a
-//   glance across a screen of thirty two options and it is still quiet.
+// - **selected is a controlled pale green**, player-green-soft with a
+//   green hairline ring. Green is the reference layout's chosen answer
+//   wash and it is the one tint that is not already carrying a meaning
+//   somewhere in the player: the answer column is pale blue, so a pale
+//   blue row disappears into it. It is tuned pale on purpose. A bright
+//   green would read as "this one is right", which a practice test must
+//   never say before marking, and the ring rather than a stronger fill is
+//   what makes the row legible on both the white and the tinted surface.
 // - **rows are ruled, not spaced**. A hairline between options is what
 //   keeps four options compact enough that a whole question fits above
 //   the fold, and it is what the reference exam layout does.
@@ -286,18 +336,29 @@ export const playerAudioVisual = {
 // The circle itself is nudged to sit on the centre of the first line of
 // its label rather than on the top of it.
 export const playerOption = {
-  list: "flex min-w-0 flex-col divide-y divide-player-line/60",
-  row: "flex min-w-0 cursor-pointer items-start gap-2.5 rounded-sm px-2 py-1.5 transition-colors hover:bg-player-chrome-soft",
+  list: "flex min-w-0 flex-col divide-y divide-player-line/70",
+  row: "flex min-w-0 cursor-pointer items-start gap-3 px-2 py-2 transition-colors hover:bg-player-chrome-soft",
   // The selected row carries a wash and a hairline ring, not just a wash.
   // The Parts 1 to 3 answer column is itself pale blue, so a pale blue
   // fill alone is invisible there and the only cue left is the radio dot.
   // The ring reads on the tinted column and the fill reads on the white
   // one screen parts, so one recipe works on both surfaces.
   rowSelected:
-    "bg-player-blue-soft ring-1 ring-inset ring-player-blue/40 hover:bg-player-blue-soft",
+    "bg-player-green-soft ring-1 ring-inset ring-player-green-line/45 hover:bg-player-green-soft",
   input:
-    "mt-[5px] h-3.5 w-3.5 shrink-0 accent-player-blue focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-player-blue",
+    "mt-[5px] h-4 w-4 shrink-0 accent-player-blue focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-player-blue",
   text: "min-w-0 text-[15px] leading-6 text-player-ink",
+} as const;
+
+// The answer column header on a question screen (reference pass).
+//
+// "Question 2 of 8" reads as a sentence in the reference layout, not as a
+// small caps field label, so it is set at body size in ink. The uppercase
+// column labels that used to sit above each half of the split are gone
+// with it: a test window does not caption its own panes.
+export const playerQuestionHeader = {
+  wrap: "flex min-w-0 flex-col gap-2",
+  position: "text-[15px] font-semibold leading-6 text-player-ink",
 } as const;
 
 // Dropdown completion list (EXAM-UI-03).
@@ -427,4 +488,94 @@ export const playerReview = {
   // Long review lists scroll inside the panel rather than the pane, so
   // the bottom bar stays put on a 38 question Listening review.
   scroll: "max-h-[26rem] overflow-y-auto overscroll-contain",
+} as const;
+
+// The Writing editor frame (EXAM-UI-03).
+//
+// Before this ticket the writing space was three loose blocks stacked in
+// the answer column: a small caps label, a bordered textarea, a word count
+// row and a hint under it. Four things floating one above the other read
+// as a dashboard form, and the count, which is the one reading a writer
+// glances at while typing, was the furthest thing from the text.
+//
+// So it is one frame now: a hairline box with the field inside it and a
+// grey meta strip along the bottom carrying the count, the target and the
+// hint. The strip is part of the field rather than a paragraph under it,
+// which is what makes the count readable without moving the eye off the
+// writing, and it is what keeps the block compact enough that the prompt
+// above it stays on screen.
+//
+// The field itself draws no border of its own: the frame owns the edge, so
+// there is one rectangle rather than a box inside a box. It is still a
+// plain resizable textarea and nothing else.
+export const playerWritingEditor = {
+  frame:
+    "flex min-w-0 flex-col overflow-hidden rounded-sm border border-player-line bg-player-paper",
+  label:
+    "shrink-0 border-b border-player-line bg-player-chrome-soft px-3 py-1.5 text-[12px] font-semibold uppercase tracking-[0.06em] text-player-ink/60",
+  // No border of its own, no ring: the frame is the edge. The focus
+  // outline is drawn inset so it reads inside the frame rather than
+  // doubling it.
+  field:
+    "block min-h-[14rem] w-full min-w-0 resize-y border-0 bg-player-paper px-3 py-2.5 text-[15px] leading-7 text-player-ink outline-none placeholder:text-player-ink/40 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-player-blue sm:min-h-[17rem]",
+  meta: "flex min-w-0 shrink-0 flex-wrap items-baseline gap-x-3 gap-y-0.5 border-t border-player-line bg-player-chrome-soft px-3 py-1.5 text-[12px] leading-4",
+  metaLabel: "font-semibold uppercase tracking-[0.06em] text-player-ink/55",
+  metaValue: "font-semibold tabular-nums text-player-ink",
+  metaTarget: "tabular-nums text-player-ink/60",
+  // Pushed to the right of the strip on a wide column and wrapping under
+  // the count on a narrow one.
+  metaHint: "min-w-0 text-player-ink/55 sm:ml-auto",
+} as const;
+
+// The Speaking recorder frame and the two clocks beside it (EXAM-UI-03).
+//
+// The recorder is the audio screen's mirror image: the Listening card says
+// "a clip is playing, listen to it" and this one says "you are being
+// recorded, speak". They are drawn from the same parts on purpose, a mark,
+// a status word and a bar, so a learner who has sat the Listening section
+// already knows what this screen is telling them.
+//
+// The mark is a microphone, drawn here from four path commands, the way
+// the speaker beside it is. No icon package is installed for the exam
+// engine and nothing here is taken from any test provider's interface.
+//
+// **The bar is the recording window, not a level meter.** It fills as the
+// window runs down, so it answers "how much of my time is left" and never
+// pretends to show how loud the room is. It is fed the reading the
+// recording clock already has rather than a clock of its own.
+export const playerRecorder = {
+  card: "mx-auto flex w-full min-w-0 max-w-md flex-col items-center gap-2.5 rounded-sm border border-player-line bg-player-chrome-soft px-4 py-4",
+  mic: "flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-player-line bg-player-paper text-player-blue",
+  micIcon: "h-6 w-6",
+  micRecording: "text-academy-red",
+  status:
+    "text-[12px] font-semibold uppercase tracking-[0.08em] text-player-ink/70",
+  hint: "max-w-full text-center text-[13px] leading-5 text-player-ink/70",
+  track: "h-1.5 w-full min-w-0 overflow-hidden rounded-full bg-player-ink/12",
+  fill: "h-full rounded-full bg-player-blue transition-[width] duration-200",
+  fillRecording: "h-full rounded-full bg-academy-red transition-[width] duration-200",
+  times:
+    "flex w-full min-w-0 items-center justify-between text-[11px] leading-4 tabular-nums text-player-ink/55",
+  controls: "flex min-w-0 flex-wrap items-center justify-center gap-2",
+  note: "text-center text-[11px] leading-4 text-player-ink/55",
+  // Errors and anything else that has to sit under the card body at full
+  // width rather than centred with it.
+  footer: "w-full min-w-0",
+} as const;
+
+// One clock card in the Speaking answer column.
+//
+// Compact, because there are two of them and neither is the screen. The
+// reading is 18 pixels rather than the 20 it was, the note under it is one
+// short line, and a hairline bar along the bottom shows the window
+// draining so the pair reads at a glance without being read.
+export const playerTimerCard = {
+  row: "flex min-w-0 flex-wrap gap-2",
+  card: "flex min-w-0 flex-1 basis-40 flex-col gap-0.5 overflow-hidden rounded-sm border border-player-line bg-player-paper px-3 py-2",
+  label:
+    "text-[12px] font-semibold uppercase tracking-[0.06em] text-player-ink/55",
+  value: "text-[18px] font-semibold leading-6 tabular-nums",
+  note: "text-[11px] leading-4 text-player-ink/55",
+  track: "mt-1.5 h-1 w-full min-w-0 overflow-hidden rounded-full bg-player-ink/12",
+  fill: "h-full rounded-full bg-player-blue transition-[width] duration-200",
 } as const;

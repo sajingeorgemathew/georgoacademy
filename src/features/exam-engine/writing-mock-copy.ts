@@ -68,9 +68,13 @@ export function buildWritingMockCopy({ testLabel }: { testLabel: string }) {
     // 2 and 4. The task screens.
     taskIntroSubtitle:
       "Read the information on the left, then write your response on the right.",
-    // Column labels on the task split screen.
-    situationColumnLabel: "Information",
-    responseColumnLabel: "Your response",
+    // The task split screen carried a small caps column label over each
+    // half until EXAM-UI-03. Both are gone: each column now opens with
+    // its own instruction line, "Read the following information." on the
+    // left and the task itself on the right, and a label above those said
+    // the same thing twice. The field keeps its own label strip, which is
+    // editorLabel below.
+
     // Heading above the two positions on the survey task.
     choiceLegendLabel: "Choose one option",
     // Shown under the positions while none has been chosen. It states

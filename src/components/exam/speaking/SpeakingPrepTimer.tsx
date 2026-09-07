@@ -3,11 +3,10 @@
 import { useExamCountdown } from "../timer/useExamCountdown";
 import { cx } from "@/features/design/design-tokens";
 import { examCopy } from "@/features/exam-engine/exam-copy";
+import { examSpeakingTimerStates } from "@/features/exam-engine/exam-theme";
+import { playerTimerCard } from "@/features/exam-engine/mock-test-player-theme";
 import {
-  examSpeaking,
-  examSpeakingTimerStates,
-} from "@/features/exam-engine/exam-theme";
-import {
+  examCountdownProgressWidth,
   examTimerStatusTones,
   formatExamClock,
 } from "@/features/exam-engine/exam-timer-utils";
@@ -75,19 +74,19 @@ export function SpeakingPrepTimer(props: SpeakingPrepTimerProps) {
   // Preparation is over. A static card, and no clock mounted behind it.
   if (!props.active) {
     return (
-      <div className={examSpeaking.timerCard}>
-        <p className={examSpeaking.timerCardLabel}>{copy.prepTimerLabel}</p>
+      <div className={playerTimerCard.card}>
+        <p className={playerTimerCard.label}>{copy.prepTimerLabel}</p>
 
         <p
           className={cx(
-            examSpeaking.timerCardValue,
+            playerTimerCard.value,
             examSpeakingTimerStates.muted,
           )}
         >
           {copy.prepTimerDoneValue}
         </p>
 
-        <p className={examSpeaking.timerCardNote}>{copy.prepTimerDoneNote}</p>
+        <p className={playerTimerCard.note}>{copy.prepTimerDoneNote}</p>
       </div>
     );
   }
@@ -117,8 +116,8 @@ function SpeakingPrepTimerWindow({
   const tone = examTimerStatusTones[countdown.status];
 
   return (
-    <div className={examSpeaking.timerCard}>
-      <p className={examSpeaking.timerCardLabel}>{copy.prepTimerLabel}</p>
+    <div className={playerTimerCard.card}>
+      <p className={playerTimerCard.label}>{copy.prepTimerLabel}</p>
 
       <p
         // Silent on purpose. A reading that refreshes four times a second
@@ -127,16 +126,26 @@ function SpeakingPrepTimerWindow({
         // announcement worth making is in the region below.
         role="status"
         aria-live="off"
-        className={cx(examSpeaking.timerCardValue, examSpeakingTimerStates[tone])}
+        className={cx(playerTimerCard.value, examSpeakingTimerStates[tone])}
       >
         {countdown.isExpired
           ? examCopy.timeExpiredValue
           : formatExamClock(countdown.remainingSeconds)}
       </p>
 
-      <p className={examSpeaking.timerCardNote}>
+      <p className={playerTimerCard.note}>
         {countdown.isExpired ? copy.timerExpiredNote : copy.prepTimerNote}
       </p>
+
+      {/* The window draining, drawn from the reading this card already
+          has rather than from a clock of its own (EXAM-UI-03). Decorative:
+          the seconds above it are the accessible reading. */}
+      <div className={playerTimerCard.track} aria-hidden="true">
+        <div
+          className={playerTimerCard.fill}
+          style={{ width: examCountdownProgressWidth(countdown) }}
+        />
+      </div>
 
       {/* The spoken half. Empty until the window closes, and in the
           document from the start so the change is announced when it
