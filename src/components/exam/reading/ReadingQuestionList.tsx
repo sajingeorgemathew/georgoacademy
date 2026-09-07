@@ -1,7 +1,7 @@
 "use client";
 
-import { cx } from "@/features/design/design-tokens";
-import { examReadingQuestion } from "@/features/exam-engine/exam-theme";
+import { MockTestDropdownCompletion } from "../player/MockTestDropdownCompletion";
+import type { MockTestDropdownItem } from "../player/MockTestDropdownCompletion";
 import { readingCopy } from "@/features/exam-engine/reading-copy";
 import type {
   ReadingAnswerMap,
@@ -10,43 +10,32 @@ import type {
 
 // The numbered list of drop-down questions on a Reading panel (EXAM-16).
 //
-// Split out from ReadingQuestionPanel so the list is the piece that knows
-// how a question and its control are drawn, and the panel is the piece
-// that knows about the instruction line and the reply above it. The two
-// Reading Part 1 panels are the same list with different questions in it,
-// and Parts 2 and 4 have the same pair.
+// **This is now a thin adapter** (EXAM-UI-05), the same shape
+// ListeningDropdownQuestionList has been since EXAM-UI-03. The list is
+// drawn by MockTestDropdownCompletion in src/components/exam/player, so
+// one component decides how a drop-down question looks and behaves across
+// the whole player instead of two lists drifting apart.
 //
-// A client component, because choosing an option is an event handler. It
-// holds no state itself: the answers are owned by the prototype at the
-// top of the part, so leaving the screen and coming back shows what was
-// chosen before.
+// **Why it was two lists, and why it is not any more.** EXAM-16 wrote
+// this one out separately because Reading has a question shape Listening
+// did not: a numbered blank inside a reply, which prints no sentence at
+// all because its sentence is in the reply paragraph above the list.
+// Folding that into the shared control would have put a Reading-only
+// branch inside a component every Listening screen renders. EXAM-UI-05
+// rebuilt the shared control around a floating menu and an inline
+// trigger, which is a real behaviour change rather than a restyle, and
+// keeping two copies of that in step by hand is exactly the drift the
+// ticket was raised to stop. So the third item shape moved into the
+// shared list, where it costs one branch, and this file became the
+// mapping between the Reading question type and the shared item type.
 //
-// It draws three shapes of question, which is the one thing that makes it
-// more than the Listening dropdown list:
+// The mapping is the only thing here. Reading calls a whole question
+// text, the shared list calls it prompt, and the two blank shapes carry
+// the same field names on both sides.
 //
-// - A stem question prints its sentence in the header strip, with the
-//   blank drawn where the source document's underscores fall.
-// - A blank inside a reply prints nothing but "Question 7". Its sentence
-//   is in the reply above the list, so repeating anything here would be
-//   inventing a stem the source does not have.
-// - A whole question, added by EXAM-18 for Reading Part 2 questions 6 to
-//   8, prints its sentence and draws no blank at all. The source writes
-//   those as complete questions ending in a question mark, so there is no
-//   blank to draw and splitting one around an invented gap would be
-//   inventing source text.
-//
-// Layout decisions carried over from ListeningDropdownQuestionList,
-// because they were right there for the same reasons:
-//
-// - The header strip is the select's label, wired with htmlFor. Option
-//   text here is a sentence fragment several words long, so a control
-//   sitting inside the sentence would push its tail around as the value
-//   changed. The control sits under the statement instead.
-// - The blank keeps the underscores from the source document, quieted
-//   rather than replaced, with the word "blank" read in their place.
-// - The placeholder is a real option with an empty value rather than a
-//   disabled first choice, so an unanswered select shows "Select answer"
-//   instead of silently defaulting to the first answer.
+// A client component, because the control under it is one. It holds no
+// state: the answers are owned by the prototype at the top of the part,
+// so leaving the screen and coming back shows what was chosen before.
 //
 // Nothing here knows which option is correct. The answer key is stripped
 // on the server before the content reaches the browser.
@@ -64,68 +53,25 @@ export function ReadingQuestionList({
   onSelectOption,
   placeholderLabel = readingCopy.dropdownPlaceholder,
 }: ReadingQuestionListProps) {
+  const items: MockTestDropdownItem[] = questions.map((question) => ({
+    id: question.id,
+    number: question.number,
+    // A whole question on the Reading side is text, and the shared list
+    // calls that shape prompt. Both print the sentence and draw no blank.
+    prompt: question.text,
+    textBefore: question.textBefore,
+    textAfter: question.textAfter,
+    options: question.options,
+  }));
+
   return (
-    <ol className={examReadingQuestion.list}>
-      {questions.map((question) => {
-        const selectId = `${question.id}-select`;
-        const selectedOptionId = answers[question.id] ?? "";
-
-        return (
-          <li key={question.id} className={examReadingQuestion.item}>
-            <label htmlFor={selectId} className={examReadingQuestion.statement}>
-              <span className={examReadingQuestion.number}>
-                {question.number}.
-              </span>
-
-              {question.text ? (
-                // A whole question. No blank is drawn, because the source
-                // document writes it as a complete sentence.
-                question.text
-              ) : question.textBefore ? (
-                <>
-                  {question.textBefore}{" "}
-                  <span
-                    className={examReadingQuestion.blank}
-                    aria-hidden="true"
-                  >
-                    ___________
-                  </span>
-                  <span className="sr-only">{readingCopy.blankLabel}</span>
-                  {question.textAfter ? ` ${question.textAfter}` : null}
-                </>
-              ) : (
-                // A blank inside the reply. The number above is decorative
-                // on its own, so the label says which question this is.
-                <span className="sr-only">
-                  {`${readingCopy.questionNumberLabel} ${question.number}`}
-                </span>
-              )}
-            </label>
-
-            <div className={examReadingQuestion.control}>
-              <select
-                id={selectId}
-                className={cx(
-                  examReadingQuestion.select,
-                  selectedOptionId ? "" : examReadingQuestion.selectEmpty,
-                )}
-                value={selectedOptionId}
-                onChange={(event) =>
-                  onSelectOption(question.id, event.target.value)
-                }
-              >
-                <option value="">{placeholderLabel}</option>
-
-                {question.options.map((option) => (
-                  <option key={option.id} value={option.id}>
-                    {option.text}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </li>
-        );
-      })}
-    </ol>
+    <MockTestDropdownCompletion
+      items={items}
+      answers={answers}
+      onSelectOption={onSelectOption}
+      placeholderLabel={placeholderLabel}
+      blankLabel={readingCopy.blankLabel}
+      questionNumberLabel={readingCopy.questionNumberLabel}
+    />
   );
 }

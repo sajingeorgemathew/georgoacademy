@@ -311,42 +311,49 @@ export const playerAudioVisual = {
   notice: "text-center text-[12px] leading-4 text-player-ink",
 } as const;
 
-// Option row on a question screen (EXAM-UI-03).
+// Option row on a question screen (EXAM-UI-03, repainted EXAM-UI-05).
 //
 // The fix for the option list the QA pass reported as feeling like a web
-// quiz. Three rules:
+// quiz, now carrying the one pair of states every objective control in
+// the player uses:
 //
-// - **hover is a neutral grey**, player-chrome-soft, not a colour. An
-//   option a learner is only passing the pointer over must not read as
-//   an option they have chosen, and a saturated wash on hover reads as
-//   feedback about the answer, which a test must never give.
-// - **selected is a controlled pale green**, player-green-soft with a
-//   green hairline ring. Green is the reference layout's chosen answer
-//   wash and it is the one tint that is not already carrying a meaning
-//   somewhere in the player: the answer column is pale blue, so a pale
-//   blue row disappears into it. It is tuned pale on purpose. A bright
-//   green would read as "this one is right", which a practice test must
-//   never say before marking, and the ring rather than a stronger fill is
-//   what makes the row legible on both the white and the tinted surface.
+// - **hover is a pale green wash**, player-green-soft. It is the lightest
+//   tint in the ramp, it never appears anywhere else on a question
+//   screen, and it says "the pointer is here" and nothing more.
+// - **selected is a warm wash**, player-orange-soft with an orange
+//   hairline ring. Warm rather than green, so a row under the pointer and
+//   a row already chosen can be told apart at a glance while both are on
+//   screen, which is the thing a single hue in two strengths cannot do.
+// - **neither state is loud.** Both are pale on purpose. A saturated wash
+//   on a test screen reads as feedback about the answer, and a practice
+//   test must never say "this one is right" before marking. Nothing here
+//   knows the key: these are pointer and choice states, not results.
 // - **rows are ruled, not spaced**. A hairline between options is what
 //   keeps four options compact enough that a whole question fits above
-//   the fold, and it is what the reference exam layout does.
+//   the fold, and it is what an exam layout does.
+//
+// EXAM-UI-05 flipped the pair. Until this ticket hover was neutral grey
+// and chosen was green here, while the Writing Task 2 positions used
+// green hover and a warm chosen row, so the same gesture painted two
+// different colours depending on which section a learner was in. One pair
+// now runs through Listening, Reading, the drop-down menus and Writing.
 //
 // The whole row is the click target, so nobody has to hit the circle.
 // The circle itself is nudged to sit on the centre of the first line of
-// its label rather than on the top of it.
+// its label rather than on the top of it, and its accent is the warm
+// chosen colour so the dot belongs to the wash under it.
 export const playerOption = {
   list: "flex min-w-0 flex-col divide-y divide-player-line/70",
-  row: "flex min-w-0 cursor-pointer items-start gap-3 px-2 py-2 transition-colors hover:bg-player-chrome-soft",
+  row: "flex min-w-0 cursor-pointer items-start gap-3 px-2 py-2 transition-colors hover:bg-player-green-soft",
   // The selected row carries a wash and a hairline ring, not just a wash.
-  // The Parts 1 to 3 answer column is itself pale blue, so a pale blue
-  // fill alone is invisible there and the only cue left is the radio dot.
-  // The ring reads on the tinted column and the fill reads on the white
-  // one screen parts, so one recipe works on both surfaces.
+  // The Parts 1 to 3 answer column is itself pale blue, so a pale fill
+  // alone can be hard to read there and the only cue left is the radio
+  // dot. The ring reads on the tinted column and the fill reads on the
+  // white one screen parts, so one recipe works on both surfaces.
   rowSelected:
-    "bg-player-green-soft ring-1 ring-inset ring-player-green-line/45 hover:bg-player-green-soft",
+    "bg-player-orange-soft ring-1 ring-inset ring-player-orange-line/45 hover:bg-player-orange-soft",
   input:
-    "mt-[5px] h-4 w-4 shrink-0 accent-player-blue focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-player-blue",
+    "mt-[5px] h-4 w-4 shrink-0 accent-player-orange-line focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-player-blue",
   text: "min-w-0 text-[15px] leading-6 text-player-ink",
 } as const;
 
@@ -361,30 +368,104 @@ export const playerQuestionHeader = {
   position: "text-[15px] font-semibold leading-6 text-player-ink",
 } as const;
 
-// Dropdown completion list (EXAM-UI-03).
+// Drop-down completion list (EXAM-UI-03, rebuilt EXAM-UI-05).
 //
-// The control Listening Parts 4, 5 and 6 are answered with. Each item is
-// a bordered block: a tinted strip carrying the number and the question
-// or the statement, and the select under it in the body of the block.
+// The control every drop-down question in the player is answered with:
+// Listening Parts 4, 5 and 6, and all four Reading parts.
 //
-// The select is capped rather than full width. Option text here is a
-// sentence fragment, so a control stretched across an 1100 pixel window
-// would put its value a long way from the words it completes.
+// **What EXAM-UI-05 changed.** Each item used to be a bordered block: a
+// tinted strip carrying the statement, and a full width native select in
+// the body under it. Five of those stacked down a screen is five boxes
+// where the source material has five sentences, the control sat a line
+// below the words it completes, and on the Reading side the same shape
+// was written out a second time in exam-theme.ts. The list is now what
+// the sentence itself is: a numbered line of prose with a compact
+// control sitting inline where the blank falls. Nothing is boxed, nothing
+// is full width, and the menu no longer changes the height of anything.
+//
+// So the recipes below are prose recipes. leading-8 rather than leading-6
+// because an inline control is taller than a line of text and the lines
+// have to clear it without the paragraph looking loose.
+//
+// The blank recipe is kept for the one place underscores are still drawn:
+// a reply paragraph on the Reading side, where the sentence is printed
+// above the list and the control is not in it.
 export const playerDropdown = {
-  list: "flex min-w-0 flex-col gap-2",
-  item: "min-w-0 overflow-hidden rounded-sm border border-player-line bg-player-paper",
+  list: "flex min-w-0 flex-col gap-2.5",
+  item: "min-w-0",
   statement:
-    "block w-full min-w-0 border-b border-player-line bg-player-chrome-soft px-3 py-2 text-[15px] leading-6 text-player-ink",
-  number: "mr-2 font-semibold tabular-nums text-player-ink/55",
-  // The blank in a statement. Underscores come from the source document,
-  // so they are drawn rather than replaced, just quieted.
+    "min-w-0 text-[15px] leading-8 text-player-ink [overflow-wrap:anywhere]",
+  number: "mr-1.5 font-semibold tabular-nums text-player-ink/55",
+  // Underscores from the source document, quieted rather than replaced.
   blank: "px-0.5 tracking-tight text-player-ink/45",
-  control: "min-w-0 px-3 py-2.5",
-  select: `h-9 w-full min-w-0 max-w-lg rounded-sm border border-player-line bg-player-paper px-2 text-[15px] leading-6 text-player-ink ${focus.ring}`,
-  // Shown while the question has no answer.
-  selectEmpty: "text-player-ink/55",
   // Answered count under the list.
   note: "text-[12px] leading-4 text-player-ink/60",
+} as const;
+
+// The compact drop-down control and its floating menu (EXAM-UI-05).
+//
+// This is the fix the ticket was raised for. A native select opens a menu
+// the page cannot style, cannot keep inside a scrolling pane, and cannot
+// draw as the radio list an exam question is: on the Reading screens it
+// also stretched the answer column and pushed the passage beside it
+// around. The control here is a button and a floating listbox, so:
+//
+// - **the trigger is compact and inline.** It sits in the sentence where
+//   the blank is, capped so a long option cannot stretch the line, and it
+//   never changes the height of the row it is in.
+// - **the menu floats.** It is positioned in the viewport rather than in
+//   the flow, so opening one adds nothing to the page, moves nothing on
+//   it, and cannot be clipped by the pane it was opened inside. It flips
+//   above the trigger when there is no room below it and it is clamped to
+//   the viewport on both axes, so a menu near the right edge or the foot
+//   of a Reading column stays on screen.
+// - **the rows are the option rows.** Same drawn circle, same pale green
+//   pointer wash and same warm chosen wash as playerOption above, so a
+//   drop-down question and a radio question answer the same way.
+//
+// The menu is scrolled rather than allowed to grow: a Reading Part 3
+// selector has five options and a Part 1 selector has four, but the cap
+// is what keeps a longer set from filling a laptop screen.
+//
+// visibility is hidden in the recipe and turned on by the component once
+// it has measured and placed the menu, so the first paint never shows a
+// menu in the wrong corner.
+export const playerSelect = {
+  wrap: "relative inline-flex min-w-0 max-w-full align-middle",
+  trigger:
+    `inline-flex h-7 max-w-[16rem] min-w-[6.5rem] cursor-pointer items-center justify-between gap-1.5 rounded-sm border border-player-line bg-player-paper px-2 text-left text-[14px] leading-5 text-player-ink transition-colors hover:border-player-green-line/50 hover:bg-player-green-soft ${focus.ring}`,
+  // The chosen value carries the same warm wash the chosen option row
+  // does, so a finished question reads as finished at a glance.
+  // The border carries most of the weight here. The wash is the same pale
+  // warm tint the option rows use, and a pale warm tint on the pale blue
+  // Reading answer column is close to invisible on its own.
+  triggerSelected:
+    "border-player-orange-line/75 bg-player-orange-soft hover:border-player-orange-line/75 hover:bg-player-orange-soft",
+  // While the menu is open, whatever the value is.
+  triggerOpen: "border-player-blue/60",
+  triggerText: "min-w-0 truncate",
+  triggerTextEmpty: "text-player-ink/50",
+  // Drawn, not imported. A small solid triangle built from borders.
+  caret:
+    "h-0 w-0 shrink-0 border-x-[4px] border-t-[5px] border-x-transparent border-t-player-ink/55",
+  // block, because the menu is a span: it sits inside the sentence the
+  // trigger is in, and a div inside a paragraph is markup a browser
+  // silently repairs.
+  menu:
+    "invisible fixed z-50 block min-w-[10rem] overflow-y-auto overscroll-contain rounded-sm border border-player-line bg-player-paper py-1 shadow-[0_10px_28px_rgba(31,41,55,0.18)]",
+  option:
+    "flex min-w-0 cursor-pointer items-start gap-2.5 px-3 py-1.5 text-[15px] leading-6 text-player-ink transition-colors",
+  // The pointer or the arrow keys are on this row.
+  optionActive: "bg-player-green-soft",
+  optionSelected: "bg-player-orange-soft",
+  // A drawn radio circle. The menu rows are listbox options rather than
+  // real radios, so the circle is two spans: a ring and, when chosen, a
+  // dot inside it.
+  radio:
+    "mt-[5px] flex h-4 w-4 shrink-0 items-center justify-center rounded-full border border-player-ink/40 bg-player-paper",
+  radioSelected: "border-player-orange-line",
+  radioDot: "h-2 w-2 rounded-full bg-player-orange-line",
+  optionText: "min-w-0",
 } as const;
 
 // Media frame: the box an image, an audio player or a video sits in.
