@@ -1,9 +1,4 @@
 import { ExamInstructionScreen } from "../ExamInstructionScreen";
-import { ExamSectionIntroCard } from "../ExamSectionIntroCard";
-import { ListeningSectionProgressBar } from "./ListeningSectionProgressBar";
-import { examCopy } from "@/features/exam-engine/exam-copy";
-import { listeningSectionCopy } from "@/features/exam-engine/listening-section-copy";
-import type { ListeningSectionCopy } from "@/features/exam-engine/listening-section-copy";
 import type { ListeningSectionInstructionContent } from "@/features/exam-engine/listening-section-types";
 
 // Listening section instruction text screen (EXAM-15).
@@ -14,24 +9,34 @@ import type { ListeningSectionInstructionContent } from "@/features/exam-engine/
 // new layout. It is the section counterpart of ListeningPartIntroScreen:
 // that one opens a part, this one opens the whole section.
 //
-// The five instruction lines, the notice and the intro card summary all
-// come from the content object, which builds them from
-// listening-section-copy.ts, so this component holds no wording of its
-// own.
+// The instruction lines and the notice come from the content object,
+// which builds them from listening-section-copy.ts, so this component
+// holds no wording of its own.
 //
-// The progress bar renders under the list rather than above it. The
-// learner has not started a part yet, so it draws an empty bar and the
-// answered count reads zero, which is the honest state and a useful
-// preview of the control they will see on the transitions.
+// **What the reference pass took off this screen.** It carried three
+// blocks the exam frame around it already says, and together they were
+// what made the first screen of the test read as a product page:
+//
+// - an intro card, with an uppercase eyebrow, a bold "Listening Test"
+//   headline, a summary sentence and a row of counts. The window title
+//   bar says which test this is, so the card was saying it a second time
+//   in marketing type.
+// - the section progress bar, drawing an empty track and "0 of 38
+//   questions answered" before the learner has been shown a question.
+// - the "Read the following information before the Listening section
+//   begins" line under the heading, which is what an instructions screen
+//   is for.
+//
+// What is left is what the reference layout has: the heading with its
+// information glyph, the rules under it, and the practice caveat as a
+// quiet last line. The progress bar is unchanged and still appears on
+// the part transitions, where it is answering a question a learner in the
+// middle of a six part run actually has.
 //
 // No timer. Instruction screens carry no countdown.
 
 export type ListeningSectionInstructionScreenProps = {
   content: ListeningSectionInstructionContent;
-  totalParts: number;
-  totalQuestions: number;
-  answeredCount: number;
-  copy?: ListeningSectionCopy;
   metaText?: string;
   onNext?: () => void;
   onBack?: () => void;
@@ -40,10 +45,6 @@ export type ListeningSectionInstructionScreenProps = {
 
 export function ListeningSectionInstructionScreen({
   content,
-  totalParts,
-  totalQuestions,
-  answeredCount,
-  copy = listeningSectionCopy,
   metaText,
   onNext,
   onBack,
@@ -53,29 +54,12 @@ export function ListeningSectionInstructionScreen({
     <ExamInstructionScreen
       title={content.title}
       heading={content.heading}
-      subtitle={content.subtitle}
       instructions={content.instructions}
       noticeText={content.noticeText}
       metaText={metaText}
       onNext={onNext}
       onBack={onBack}
       showBack={showBack}
-      intro={
-        <ExamSectionIntroCard
-          label={examCopy.practiceLabel}
-          title={content.introTitle}
-          summary={content.introSummary}
-          details={content.introDetails}
-        />
-      }
-    >
-      <ListeningSectionProgressBar
-        currentPart={0}
-        totalParts={totalParts}
-        answeredCount={answeredCount}
-        totalQuestions={totalQuestions}
-        copy={copy}
-      />
-    </ExamInstructionScreen>
+    />
   );
 }

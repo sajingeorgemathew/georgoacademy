@@ -74,6 +74,10 @@ export type ListeningAudioPlayerProps = {
   // Running time as text. Shown beside the clip name when one is given.
   durationLabel?: string;
   captionText?: string;
+  // Whether the clip name is printed in the card. Off by default since
+  // the reference pass: the screen title bar already names the part and
+  // the section, so a caption under the bar was the third place on one
+  // screen saying which clip is playing.
   showCaption?: boolean;
   // Whether the practice playbar note is printed under the card. The
   // Parts 1 to 3 question screens turn it off: the note earns its place
@@ -95,7 +99,7 @@ export function ListeningAudioPlayer({
   title,
   durationLabel,
   captionText,
-  showCaption = true,
+  showCaption = false,
   showPlaybarNote = true,
   preload = "metadata",
   autoPlay = false,
@@ -153,8 +157,6 @@ export function ListeningAudioPlayer({
       className={className}
       status={status}
       progress={progress}
-      currentSeconds={currentSeconds}
-      durationSeconds={hasDuration ? durationSeconds : undefined}
       title={captionLine}
       showNote={showPlaybarNote}
       hasError={hasError}

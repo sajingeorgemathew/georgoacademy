@@ -44,30 +44,19 @@ import type { ExamTimerState } from "./exam-shell-types";
 import type { ListeningReviewStatus } from "./listening-review-types";
 import type { ReadingReviewStatus } from "./reading-types";
 
-// Screen heading row: a small circled information glyph, then the title
-// of the screen and the sentence under it.
+// Screen heading row, retired by the EXAM-UI-03 reference pass.
 //
-// This is the closest thing the player has to a page heading, and it is
-// the one place EXAM-UI-02 raised rather than shrank. It used to be set at
-// question size, which meant a Listening part intro and a Listening
-// question option were the same weight and the same size, and a learner
-// arriving on a screen had nothing to land on.
+// examInstruction lived here: the row recipe, the heading and the
+// sentence under it, written against the academy tokens. It moved to
+// playerInstruction in mock-test-player-theme.ts, beside the rules list
+// it introduces, for two reasons.
 //
-// It is a heading now at 18 pixels, the bottom of the 18 to 22 band the
-// brief asks for, with the sentence under it at body size. That is a
-// heading, not a marketing headline: no display face, no 40 pixel hero, no
-// eyebrow above it.
-//
-// The circled glyph moved to playerInfoIcon in mock-test-player-theme.ts
-// in EXAM-UI-03, with MockTestInfoIcon drawing it. It is chrome rather
-// than screen body: the same mark appears beside a screen heading, a task
-// line and a question instruction, so it belongs with the player recipes
-// that have one owner rather than with the forty screen recipes here.
-export const examInstruction = {
-  row: "flex min-w-0 items-start gap-2.5",
-  text: "min-w-0 text-[15px] leading-6 text-academy-navy/85",
-  heading: "text-[18px] font-semibold leading-7 text-academy-navy",
-} as const;
+// The circled glyph had already gone that way in EXAM-UI-03, so the mark
+// and the line it sits in were being described in two files. And the
+// reference pass sets both the lead line and the rules under it in the
+// same instruction blue on the same measure, which is one decision and
+// should have one owner. See MockTestInstructionList and
+// ExamInstructionRow, which both read playerInstruction now.
 
 // Media placeholder.
 //
@@ -127,15 +116,24 @@ export const examVideo = {
 // A quiet bordered strip, not a dashboard card: no shadow, no artwork, no
 // pill. It states which section the learner is about to start and, when
 // they are known, a few facts about it such as the number of parts.
+// Quieted by the reference pass. It used to be a filled, bordered card
+// with a 17 pixel bold title on it, which is a card on a page rather than
+// a line above a set of rules: on the Listening part intro it repeated
+// the part name the window title bar was already showing, in the largest
+// type on the screen.
+//
+// It is a ruled strip now. The facts it carries are the same and the
+// counts still read, but nothing on it outweighs the instructions under
+// it, and it ends in a hairline rather than in a box.
 export const examIntroCard = {
-  card: "flex min-w-0 flex-col gap-1 rounded-sm border border-academy-line bg-academy-navy-soft/40 px-3 py-2.5",
-  label: "text-[12px] font-semibold uppercase tracking-[0.06em] text-academy-navy/55",
-  title: "text-[17px] font-semibold leading-6 text-academy-navy",
-  summary: "text-[15px] leading-6 text-academy-navy/80",
+  card: "flex min-w-0 flex-col gap-0.5 border-b border-academy-line/70 pb-2.5",
+  label: "text-[11px] font-semibold uppercase tracking-[0.08em] text-academy-navy/45",
+  title: "text-[15px] font-semibold leading-6 text-academy-navy",
+  summary: "text-[15px] leading-6 text-academy-navy/75",
   detailList: "mt-1 flex min-w-0 flex-wrap gap-x-4 gap-y-1",
   detailItem: "flex min-w-0 items-baseline gap-1 text-[12px] leading-4",
-  detailLabel: "font-semibold uppercase tracking-[0.06em] text-academy-navy/50",
-  detailValue: "tabular-nums text-academy-navy/75",
+  detailLabel: "font-semibold uppercase tracking-[0.06em] text-academy-navy/45",
+  detailValue: "tabular-nums text-academy-navy/70",
 } as const;
 
 // Shared body scaffolding for the instruction and video screens.
@@ -149,8 +147,13 @@ export const examScreenBody = {
   videoStack: "mx-auto flex w-full min-w-0 max-w-2xl flex-col gap-3",
   actions: "flex min-w-0 flex-wrap items-center gap-3",
   // Quiet note under the list or the player.
-  notice:
-    "rounded-sm border border-academy-line bg-academy-navy-soft/35 px-3 py-2 text-[12px] leading-4 text-academy-navy/70",
+  //
+  // A line, not a box. The reference pass took the border and the grey
+  // fill off it: an instructions screen that ends in a bordered panel
+  // reads as a product page with a callout on it, and the practice
+  // caveats this carries are a footnote to the rules above rather than a
+  // second block competing with them.
+  notice: "text-[12px] leading-5 text-academy-navy/60",
   hint: "text-[12px] leading-4 text-academy-navy/60",
 } as const;
 
@@ -207,9 +210,11 @@ export const examAudio = {
 // option look like and what happens on hover", which is how the three
 // drifted into three different hover washes. One owner, one answer.
 export const examListening = {
-  // Question number line at the top of the answer panel.
-  answerHeader:
-    "flex min-w-0 flex-col gap-1 border-b border-academy-line/70 pb-2",
+  // The answerHeader recipe that used to sit here is gone. The reference
+  // pass replaced the small caps question label and the rule under it
+  // with playerQuestionHeader in mock-test-player-theme.ts, which sets
+  // "Question 3 of 8" as a plain line and draws no rule: the first rule
+  // in the answer column is the one above the first option.
   // The scenario picture is drawn by MockTestMediaFrame now (EXAM-UI-02),
   // which caps its height against the viewport so it cannot push the audio
   // controls and the questions after it out of reach. The figure, image

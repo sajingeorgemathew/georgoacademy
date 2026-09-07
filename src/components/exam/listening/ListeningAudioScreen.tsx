@@ -44,7 +44,11 @@ export type ListeningAudioScreenProps = {
   // What the learner is being asked to do, for example "Listen to the
   // following news item."
   instructionText?: string;
-  // Quiet line under the player.
+  // Quiet line under the player. Empty by default since the reference
+  // pass: the clip starts on its own on the full Listening route, so a
+  // line telling a learner to press play was describing a screen they
+  // were not on, and the reference layout ends this screen at the
+  // practice playbar note.
   hintText?: string;
   // Ask the browser to start the clip when the screen opens.
   autoPlayMedia?: boolean;
@@ -63,7 +67,7 @@ export function ListeningAudioScreen({
   durationLabel,
   sectionLabel,
   instructionText = listeningCopy.conversationInstruction,
-  hintText = listeningCopy.conversationHint,
+  hintText,
   autoPlayMedia = false,
   metaText,
   onAudioEnded,

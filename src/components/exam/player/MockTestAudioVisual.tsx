@@ -11,13 +11,22 @@ import { examCopy } from "@/features/exam-engine/exam-copy";
 // it", the one thing the learner needed to know was the one thing the
 // screen did not show.
 //
-// So the card carries four things, in the order a learner reads them:
+// So the screen carries four things, in the order a learner reads them:
 //
-// - **a speaker mark**, so the screen announces itself as audio before
+// - **a speaker plate**, so the screen announces itself as audio before
 //   any text is read
-// - **a status word**, Ready to play, Playing..., Paused or Finished
-// - **a progress bar**, with the elapsed and total time under it
-// - **the browser's own control**, unchanged
+// - **a status word** beside it, Ready to play, Playing..., Paused or
+//   Finished
+// - **a progress bar** under the status word
+// - **the browser's own control**, unchanged, under the card
+//
+// The reference pass turned the card from a column into a row and moved
+// the native control out of it. A plate on the left with the status over
+// a wide bar beside it is read in one glance; the same four things
+// stacked were read one at a time down the middle of an otherwise empty
+// screen. The elapsed and total time readings that used to sit under the
+// bar are gone, because the native control prints both a few pixels
+// below and two clocks on one screen can disagree by a frame.
 //
 // **This component is a picture and nothing else.** It holds no audio
 // element, calls no play or pause, and owns no clock. It is handed a
@@ -47,29 +56,17 @@ const STATUS_LABELS: Record<MockTestAudioStatus, string> = {
   ended: examCopy.audioEndedLabel,
 };
 
-// mm:ss from a number of seconds. Returns a dash for a duration the
-// browser has not worked out yet, which is what a clip streamed from a
-// remote host reports until its metadata arrives.
-export function formatMockTestAudioTime(seconds: number): string {
-  if (!Number.isFinite(seconds) || seconds < 0) {
-    return "--:--";
-  }
-
-  const whole = Math.floor(seconds);
-  const minutes = Math.floor(whole / 60);
-  const rest = whole % 60;
-
-  return `${minutes}:${String(rest).padStart(2, "0")}`;
-}
+// The mm:ss formatter that used to live here is gone with the time
+// readings it fed. The native control below the card prints the elapsed
+// and total time itself, so the player has one clock again.
 
 export type MockTestAudioVisualProps = {
   status: MockTestAudioStatus;
   // How far through the clip is, from 0 to 1. Anything outside that is
   // clamped rather than allowed to draw a bar past its track.
   progress: number;
-  currentSeconds?: number;
-  durationSeconds?: number;
-  // Learner facing clip name, for example "News item audio".
+  // Learner facing clip name, for example "News item audio". Off on the
+  // Listening screens, which name the clip in the title bar instead.
   title?: string;
   // The native control. Passed in rather than built here, so nothing in
   // this file can change how a clip plays.
@@ -89,8 +86,6 @@ export type MockTestAudioVisualProps = {
 export function MockTestAudioVisual({
   status,
   progress,
-  currentSeconds,
-  durationSeconds,
   title,
   children,
   note = examCopy.audioPlaybarNote,
@@ -105,41 +100,34 @@ export function MockTestAudioVisual({
   const percent = `${(clamped * 100).toFixed(1)}%`;
 
   return (
-    <div className={cx(playerAudioVisual.card, className)}>
-      <span className={playerAudioVisual.speaker} aria-hidden="true">
-        <SpeakerMark />
-      </span>
+    <div className={cx(playerAudioVisual.stack, className)}>
+      <div className={playerAudioVisual.card}>
+        <span className={playerAudioVisual.speaker} aria-hidden="true">
+          <SpeakerMark />
+        </span>
 
-      {hasError ? (
-        <div className={playerAudioVisual.fallback} role="status">
-          <p className={playerAudioVisual.fallbackTitle}>{fallbackHeading}</p>
-          <p className={playerAudioVisual.fallbackText}>{fallbackText}</p>
-        </div>
-      ) : (
-        <>
-          <p className={playerAudioVisual.status} role="status">
-            {STATUS_LABELS[status]}
-          </p>
-
-          {title ? <p className={playerAudioVisual.title}>{title}</p> : null}
-
-          <div className={playerAudioVisual.track} aria-hidden="true">
-            <div
-              className={playerAudioVisual.fill}
-              style={{ width: percent }}
-            />
+        {hasError ? (
+          <div className={playerAudioVisual.fallback} role="status">
+            <p className={playerAudioVisual.fallbackTitle}>{fallbackHeading}</p>
+            <p className={playerAudioVisual.fallbackText}>{fallbackText}</p>
           </div>
+        ) : (
+          <div className={playerAudioVisual.body}>
+            <p className={playerAudioVisual.status} role="status">
+              {STATUS_LABELS[status]}
+            </p>
 
-          <div className={playerAudioVisual.times} aria-hidden="true">
-            <span>{formatMockTestAudioTime(currentSeconds ?? 0)}</span>
-            <span>
-              {durationSeconds === undefined
-                ? "--:--"
-                : formatMockTestAudioTime(durationSeconds)}
-            </span>
+            <div className={playerAudioVisual.track} aria-hidden="true">
+              <div
+                className={playerAudioVisual.fill}
+                style={{ width: percent }}
+              />
+            </div>
+
+            {title ? <p className={playerAudioVisual.title}>{title}</p> : null}
           </div>
-        </>
-      )}
+        )}
+      </div>
 
       {children ? (
         <div className={playerAudioVisual.controls}>{children}</div>

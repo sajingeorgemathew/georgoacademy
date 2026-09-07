@@ -7,7 +7,9 @@ inside that frame for the Listening test and corrected the control
 Listening Part 5 is answered with. This document is the second half: it
 covers the Writing and Speaking task screens, the chosen answer colour
 across the whole player, and it re-confirms the Listening work against the
-reference.
+reference. Section 11 is a later pass over the Listening screens again,
+after the first re-confirmation was judged too generic against the
+reference screenshots.
 
 Read the two together. Where they disagree, this one is later and wins,
 and there is exactly one such place: the chosen answer wash, which was a
@@ -21,9 +23,9 @@ quotes only.
 
 | Screen | Route | What changed here |
 | --- | --- | --- |
-| Listening instructions | `/dashboard/mock-tests/mock-test-1/listening` | confirmed against the reference, no further change |
-| Listening audio playback | same run, clip screens | confirmed, no further change |
-| Listening question and options | same run, Parts 1 to 3 | full height split, information glyph on the answer column, green chosen state |
+| Listening instructions | `/dashboard/mock-tests/mock-test-1/listening` | intro card, progress bar and continue hint removed, instruction copy set in the new instruction blue (section 11) |
+| Listening audio playback | same run, clip screens | card turned into a row, native control moved out of it, playbar note set in a ruled box (section 11) |
+| Listening question and options | same run, Parts 1 to 3 | full height split, information glyph on the answer column, green chosen state, then column labels dropped and the playbar note restored (section 11) |
 | Listening Part 5 | `.../listening/part-5` and in the run | confirmed drop-down, no further change |
 | Listening Part 6 | `.../listening/part-6` and in the run | confirmed drop-down, no further change |
 | Writing Task 1 | `/dashboard/mock-tests/mock-test-1/writing` | editor frame, information glyphs, column labels dropped |
@@ -57,6 +59,11 @@ feel, and for nothing else.
 
 ## 3. Listening instruction screen
 
+**Superseded by section 11.** The first pass confirmed this screen and
+changed nothing on it; a second look against the reference found three
+blocks on it that do not belong on a test screen, and section 11 says
+what came off. What follows is what the first pass found.
+
 Confirmed against the reference and left as the first pass built it. The
 screen already has:
 
@@ -73,6 +80,11 @@ screen already has:
 No change was needed and none was made.
 
 ## 4. Audio screen
+
+**Superseded by section 11.** The first pass confirmed this screen and
+changed nothing on it; the second pass turned the card from a column into
+a row and moved the native control out of it. What follows is what the
+first pass found.
 
 Confirmed and left as the first pass built it. `MockTestAudioVisual`
 carries, in reading order: the speaker mark, a status word (Ready to play,
@@ -240,6 +252,15 @@ Also:
   refers to and reading them the other way round would not make sense.
 - **The answer column keeps its label.** It opens with two clock cards
   rather than with a sentence, so the label is the only thing naming it.
+- **The practice eyebrow came off the section intro.** The first
+  Speaking screen opened with an uppercase "CELPIP-STYLE PRACTICE"
+  label over the section name. The window it sits in is the practice
+  test, so a screen inside it saying so in small caps is a product
+  label on an exam. The Listening part intro dropped the same eyebrow
+  in section 11, and the two sections now open the same way. The card
+  itself stays: it carries the task count and the two time sums, which
+  are facts about the section rather than a headline.
+
 - **Visual prompts already fit.** They are drawn by `MockTestMediaFrame`,
   which caps the picture against the viewport height and letterboxes
   rather than cropping. Checked on Task 4, where the picture and the
@@ -356,3 +377,120 @@ Regression
 - [ ] no file from `_reference/` appears in `git status`
 - [ ] `npm run lint` clean
 - [ ] `npm run build` succeeds
+
+## 11. Second reference pass: Listening screens
+
+The first pass confirmed the Listening instruction and audio screens
+without changing them. Held beside the reference screenshots again they
+were not close enough: the structure was right and the texture was a
+product page. This pass fixes the texture. Nothing about content,
+marking, timing or playback moved.
+
+### Instruction screens
+
+Three blocks came off the screen, and they are the whole reason it read
+as a product page rather than as the first screen of a test.
+
+- **The intro card is gone from the section instruction screen.** It
+  carried an uppercase "CELPIP-STYLE PRACTICE" eyebrow, a bold "Listening
+  Test" headline, a summary sentence and a row of counts. The window
+  title bar says which test this is, so the card said it a second time in
+  the largest type on the screen.
+- **The section progress bar is gone from it too.** It drew an empty
+  track and "0 of 38 questions answered" before the learner had been
+  shown a question. It is unchanged everywhere else, including on the
+  part transitions, where a learner in the middle of a six part run has
+  the question it answers.
+- **The "Read the following information" subtitle is gone.** That is what
+  an instructions screen is for.
+
+On the part intro screens the intro card stays, because it carries the
+part scenario and the counts, but `examIntroCard` is a ruled strip now
+rather than a filled bordered card with a 17 pixel bold title on it, and
+the practice eyebrow above it is dropped.
+
+Two more changes apply to every instructions screen in the player:
+
+- **"Continue when you are ready" is off by default**, on
+  `ExamInstructionScreen` and `ExamVideoScreen`, and is gone from the two
+  Listening screens that wrote it themselves. Next is in the top bar of
+  every screen in the test; a line saying so is hand holding, and a test
+  window does not hand hold.
+- **The practice notice is a line, not a bordered panel.** The wording is
+  unchanged, so the honesty caveats are still said where a learner meets
+  them.
+
+### Instruction type
+
+`examInstruction` moved out of `exam-theme.ts` and into
+`playerInstruction` in `mock-test-player-theme.ts`, beside the rules list
+it introduces, so the lead line and the bullets under it are one
+decision. What changed with the move:
+
+- instruction copy is set in `player-blue-ink` (`#1a5b8f`), a new token
+  and a quieter blue than the action blue on the Next control. It is the
+  one colour on an instructions screen and it is only ever used for text
+- markers are grey rather than blue. A blue bullet in front of blue text
+  is a second emphasis on a screen that already has one
+- rules are 16 pixels on 28, ruled apart with a hairline, and indented to
+  hang off the lead line above them
+- the body is capped at `max-w-4xl` rather than run across the full 1100
+  pixel window, because a rule drawn the whole way across reads as a
+  table border
+
+### Audio screen
+
+`MockTestAudioVisual` is three things stacked instead of one tall card:
+
+- **the card is a row**: a white speaker plate on the left, and beside it
+  the status word over a wide progress bar. The plate says the screen is
+  audio and the bar beside it says how far through it is, in one glance
+- **the native control sits under the card**, not inside it. It is a
+  practice aid rather than part of the clip display
+- **the practice playbar note is a ruled box under that**. It is the one
+  sentence on the screen that is about the simulator rather than about
+  the test, so it is set apart
+
+The elapsed and total time readings under the bar are gone with the
+`formatMockTestAudioTime` helper that fed them: the native control prints
+both a few pixels below, and two clocks on one screen can disagree by a
+frame. The clip name caption is off by default for the same reason, the
+title bar already naming the part and the section. The hint line under
+the player is gone: the clip starts on its own on the full route, so a
+line telling a learner to press play described a screen they were not on.
+
+**Playback is untouched.** The card still holds no audio element, calls
+no play or pause and owns no clock, and `ListeningAudioPlayer` still
+calls `play()` in exactly one place, for the autoplay attempt.
+
+### Question and options screen
+
+- **the two small caps column labels are gone.** "QUESTION AUDIO" over
+  the left half and "ANSWER" over the right half: what is in each half is
+  obvious from what is drawn in it, and a test window does not caption
+  its own panes
+- **"Question 3 of 8" is a line of body text**, not a small caps field
+  label over a progress track. A learner answering one question at a time
+  needs to know which one they are on
+- **the practice playbar note is printed here too.** The first pass hid
+  it on the question screens as noise repeated under 38 clips. The scrub
+  bar it warns about is on every one of those screens, so the warning
+  belongs on every one of them
+- options are a little roomier and their circles a little larger. Hover
+  is still a neutral grey and selected is still the controlled pale green
+  from section 5, unchanged
+
+### Part 5 and Part 6
+
+Confirmed again, both on the internal part routes and inside the full
+run. Part 5 renders eight numbered question blocks each with one
+drop-down, and Part 6 six numbered statements with the blank drawn and
+one drop-down each. Neither is a vertical radio list. No question id, no
+option id, no answer key and no marking path was touched by this pass.
+
+### Answer Key
+
+Confirmed hidden. `SHOW_EXAM_ANSWER_KEY_REFERENCE` is off unless
+`NEXT_PUBLIC_SHOW_EXAM_ANSWER_KEY` is the string `true`, the variable is
+not set in `.env.local`, and the full Listening run does not render the
+part level review screen that panel lives on at all.

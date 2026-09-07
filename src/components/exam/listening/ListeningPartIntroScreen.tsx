@@ -1,6 +1,5 @@
 import { ExamInstructionScreen } from "../ExamInstructionScreen";
 import { ExamSectionIntroCard } from "../ExamSectionIntroCard";
-import { examCopy } from "@/features/exam-engine/exam-copy";
 import { listeningCopy } from "@/features/exam-engine/listening-copy";
 import type {
   ExamInstruction,
@@ -91,8 +90,10 @@ export function ListeningPartIntroScreen({
       onBack={onBack}
       showBack={showBack}
       intro={
+        // No practice eyebrow above the part name. The window this screen
+        // sits in is the practice test, and a screen inside it saying so
+        // in small caps is a product label on an exam (reference pass).
         <ExamSectionIntroCard
-          label={examCopy.practiceLabel}
           title={content.partTitle}
           summary={content.scenario.text}
           details={introDetails}

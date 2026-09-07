@@ -75,8 +75,6 @@ export function ListeningScenarioScreen({
             />
           </MockTestMediaFrame>
         ) : null}
-
-        <p className={examScreenBody.hint}>{examCopy.continueWhenReadyLabel}</p>
       </div>
     </ExamShell>
   );

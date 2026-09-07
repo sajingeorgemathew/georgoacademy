@@ -4,6 +4,7 @@ import { ExamInstructionRow } from "./ExamInstructionRow";
 import { ExamShell } from "./ExamShell";
 import { examCopy } from "@/features/exam-engine/exam-copy";
 import { examScreenBody } from "@/features/exam-engine/exam-theme";
+import { playerInstruction } from "@/features/exam-engine/mock-test-player-theme";
 import type {
   ExamTimerReading,
   ExamTimerState,
@@ -67,8 +68,10 @@ export type ExamInstructionScreenProps = {
 
   // Optional action on the right of the bottom bar.
   secondaryAction?: ReactNode;
-  // "Continue when you are ready", shown under the body. Hidden when the
-  // screen has no forward control.
+  // "Continue when you are ready", shown under the body. Off by default
+  // since the reference pass: the Next control is in the top bar of every
+  // screen in the test, so a line telling a learner it is there is the
+  // sort of hand holding that stops a test window reading as one.
   showContinueHint?: boolean;
   children?: ReactNode;
   className?: string;
@@ -96,7 +99,7 @@ export function ExamInstructionScreen({
   backHref,
   onBack,
   secondaryAction,
-  showContinueHint = true,
+  showContinueHint = false,
   children,
   className,
 }: ExamInstructionScreenProps) {
@@ -122,7 +125,11 @@ export function ExamInstructionScreen({
       secondaryAction={secondaryAction}
       className={className}
     >
-      <div className={examScreenBody.stack}>
+      {/* Capped rather than run to the full width of the window. An
+          instructions screen is prose with rules under it, and a rule
+          drawn across 1100 pixels reads as a table border (reference
+          pass). */}
+      <div className={playerInstruction.body}>
         {intro}
 
         {heading || subtitle ? (

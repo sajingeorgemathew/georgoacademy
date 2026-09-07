@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { cx } from "@/features/design/design-tokens";
 import { MockTestInfoIcon } from "./player/MockTestInfoIcon";
-import { examInstruction } from "@/features/exam-engine/exam-theme";
+import { playerInstruction } from "@/features/exam-engine/mock-test-player-theme";
 
 // Instruction line with a circled information glyph.
 //
@@ -16,7 +16,12 @@ import { examInstruction } from "@/features/exam-engine/exam-theme";
 // installed for the exam engine.
 //
 // The glyph sits a size down when the row has no heading, because it is
-// then aligned to body copy rather than to an 18 pixel screen heading.
+// then aligned to body copy rather than to a 17 pixel screen heading.
+//
+// The recipe moved to playerInstruction in the reference pass, beside the
+// rules list this row introduces, so the lead line and the bullets under
+// it are set in the same instruction blue at the same measure by one
+// decision rather than two.
 //
 // Pass heading for the bold lead line, then text or children for the
 // instruction body.
@@ -35,13 +40,13 @@ export function ExamInstructionRow({
   className,
 }: ExamInstructionRowProps) {
   return (
-    <div className={cx(examInstruction.row, className)}>
+    <div className={cx(playerInstruction.row, className)}>
       <MockTestInfoIcon size={heading ? "md" : "sm"} />
 
       <div className="min-w-0">
-        {heading ? <p className={examInstruction.heading}>{heading}</p> : null}
-        {text ? <p className={examInstruction.text}>{text}</p> : null}
-        {children ? <div className={examInstruction.text}>{children}</div> : null}
+        {heading ? <p className={playerInstruction.rowHeading}>{heading}</p> : null}
+        {text ? <p className={playerInstruction.rowText}>{text}</p> : null}
+        {children ? <div className={playerInstruction.rowText}>{children}</div> : null}
       </div>
     </div>
   );
