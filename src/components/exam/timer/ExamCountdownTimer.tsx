@@ -30,11 +30,16 @@ import {
 // than the reading it replaces, so the bar can only get roomier at the end
 // of a window, never tighter.
 //
-// What it does not do, because the ticket is explicit about it: no
+// What it does not do, because two tickets are explicit about it: no
 // submitting, no advancing, no clearing of answers, no dialog, no sound,
-// no flashing. Reaching zero changes the words in the bar. Everything else
-// on the screen carries on as it was, and the learner's selection is
-// untouched.
+// no flashing. Reaching zero changes the words in the bar and tells the
+// caller. Everything else on the screen carries on as it was, and the
+// learner's selection is untouched.
+//
+// TIMER-01 is where that became true everywhere. The full Listening run
+// used to hand goNext to this component's onExpire, so a closing window
+// moved the test on by itself. It no longer does, and no caller in the
+// engine does anything at zero except raise a message that clears itself.
 
 export type ExamCountdownTimerProps = {
   // Which timed screen this window belongs to. A new value starts a new
@@ -48,7 +53,10 @@ export type ExamCountdownTimerProps = {
   // Label in front of the reading. Dropped once the window has closed,
   // because "Time remaining: Time is up" is not a sentence.
   label?: string;
-  // Fired once when the window reaches zero. Nothing passes one yet.
+  // Fired once when the window reaches zero. Every mock test section
+  // passes one and every one of them does the same thing with it: raise
+  // the shared time up message (TIMER-01). Nothing that navigates,
+  // submits or clears an answer belongs here.
   onExpire?: () => void;
   className?: string;
 };

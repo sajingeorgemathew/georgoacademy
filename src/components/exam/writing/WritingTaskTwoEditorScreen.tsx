@@ -68,7 +68,10 @@ export type WritingTaskTwoEditorScreenProps = {
   // What the countdown resets on. Pass the task id, so this screen and
   // the choice screen before it read the same window.
   timerScreenKey?: string;
-  // Fired once when the window reaches zero. Nothing passes one.
+  // Fired once when the window reaches zero (TIMER-01). A notification
+  // and nothing more: the section run uses it to raise the shared time up
+  // message, and the response text, the chosen position and Finish Writing
+  // are all untouched.
   onTimeExpire?: () => void;
   copy?: WritingMockCopy;
   metaText?: string;

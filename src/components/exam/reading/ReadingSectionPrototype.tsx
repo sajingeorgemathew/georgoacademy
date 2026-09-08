@@ -4,6 +4,10 @@ import { Fragment, useMemo, useRef, useState } from "react";
 import { ExamButton } from "../ExamButton";
 import { ExamInstructionRow } from "../ExamInstructionRow";
 import { ExamShell } from "../ExamShell";
+import {
+  MockTestTimeUpToast,
+  useMockTestTimeUpToast,
+} from "../player/MockTestTimeUpToast";
 import { ReadingCorrespondenceScreen } from "./ReadingCorrespondenceScreen";
 import { ReadingPartFourInformationScreen } from "./ReadingPartFourInformationScreen";
 import { ReadingPartIntroScreen } from "./ReadingPartIntroScreen";
@@ -79,13 +83,16 @@ import type {
 // option.
 //
 // Timing is the part level behaviour, unchanged (EXAM-24 scope). Each
-// part carries its own window, keyed to its own working screen, and no
-// handler is passed for expiry: the countdown runs, reaches "Time is up",
-// and stops, with every answer still selected. Nothing auto-submits and
-// nothing advances by itself, so a learner whose window closes keeps
-// their answers and continues by hand. There is no section wide clock.
-// Strict full Reading timing is left for a later polish ticket and is
-// written up as such.
+// part carries its own window, keyed to its own working screen: the
+// countdown runs, reaches "Time is up" in red, and stops, with every
+// answer still selected. Nothing auto-submits and nothing advances by
+// itself, so a learner whose window closes keeps their answers and
+// continues by hand. There is no section wide clock. Strict full Reading
+// timing is left for a later polish ticket and is written up as such.
+//
+// TIMER-01 added an expiry handler, and it changes none of the above. All
+// it does is raise the shared time up message for a few seconds, so the
+// learner is told in a sentence what the red reading only implies.
 //
 // Back is enabled throughout, which the official-style flow would not
 // allow, so the sequence can be walked through repeatedly during review.
@@ -153,6 +160,11 @@ export function ReadingSectionPrototype({
   const [answers, setAnswers] = useState<ReadingSectionAnswerMap>({});
   const [marking, setMarking] = useState<MarkingState>({ status: "idle" });
 
+  // The one time up message for the whole run (TIMER-01). See
+  // MockTestTimeUpToast for why it belongs to the section rather than to a
+  // screen.
+  const { toastKey, showTimeUp, dismissTimeUp } = useMockTestTimeUpToast();
+
   // Which marking request is the current one. A learner can leave the
   // score, change an answer and come back faster than a reply arrives,
   // and the older reply would then overwrite the newer one with a score
@@ -202,10 +214,14 @@ export function ReadingSectionPrototype({
       void requestMarking(answers);
     }
 
+    // A time up message belongs to the screen it was raised on, so moving
+    // takes it away rather than carrying it onto the next one (TIMER-01).
+    dismissTimeUp();
     setScreenIndex(nextIndex);
   };
 
   const goBack = () => {
+    dismissTimeUp();
     setScreenIndex((current) => Math.max(current - 1, 0));
   };
 
@@ -222,6 +238,7 @@ export function ReadingSectionPrototype({
   // fresh run.
   const restart = () => {
     markingRequestId.current += 1;
+    dismissTimeUp();
     setScreenIndex(0);
     setAnswers({});
     setMarking({ status: "idle" });
@@ -320,15 +337,17 @@ export function ReadingSectionPrototype({
     // the timer key is the flow screen id so the part window belongs to
     // the screen and is not restarted by a selection made on it.
     //
-    // No onTimeExpire is passed, to any of them. Nothing auto-submits and
-    // nothing advances when a window closes: the reading reaches "Time is
-    // up", the answers stay put, and the learner continues by hand. That
-    // is what the ticket asks for at this stage.
+    // onTimeExpire raises the time up message and does nothing else
+    // (TIMER-01). Nothing auto-submits and nothing advances when a window
+    // closes: the reading reaches "Time is up" in red, the passage and
+    // every answer on the screen stay exactly where they are, and the
+    // learner continues by hand.
     const taskProps = {
       content: part.content,
       answers,
       onSelectOption: selectAnswer,
       timerScreenKey: partScreen.id,
+      onTimeExpire: showTimeUp,
       metaText,
       onNext: goNext,
       onBack: goBack,
@@ -458,5 +477,14 @@ export function ReadingSectionPrototype({
   // A fragment rather than a wrapper element, because the exam frame
   // fills its parent by height and an extra div in the chain would have
   // to be taught the same flex rules.
-  return <Fragment key={screen.id}>{renderCurrentScreen()}</Fragment>;
+  // The toast sits outside the keyed fragment on purpose (TIMER-01).
+  // Inside it, a change of screen would remount the message and start its
+  // few seconds again on a screen it does not belong to.
+  return (
+    <Fragment>
+      <Fragment key={screen.id}>{renderCurrentScreen()}</Fragment>
+
+      <MockTestTimeUpToast toastKey={toastKey} />
+    </Fragment>
+  );
 }

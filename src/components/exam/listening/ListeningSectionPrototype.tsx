@@ -4,6 +4,10 @@ import { Fragment, useMemo, useRef, useState } from "react";
 import { ExamButton } from "../ExamButton";
 import { ExamInstructionRow } from "../ExamInstructionRow";
 import { ExamShell } from "../ExamShell";
+import {
+  MockTestTimeUpToast,
+  useMockTestTimeUpToast,
+} from "../player/MockTestTimeUpToast";
 import { ListeningAudioScreen } from "./ListeningAudioScreen";
 import { ListeningDropdownQuestionScreen } from "./ListeningDropdownQuestionScreen";
 import { ListeningPartIntroScreen } from "./ListeningPartIntroScreen";
@@ -104,18 +108,23 @@ import type {
 //   previous question or a previous part, which is the published rule. The
 //   two closing screens keep Back, because it is what moves between the
 //   score and the review and neither of them is answerable.
-// - **A window that closes moves the test on.** Every question screen is
-//   handed goNext as its onTimeExpire, so reaching zero advances to the
-//   next question, the next part transition or the review, exactly as
-//   pressing Next would. Nothing else happens: no modal, no alert, no
-//   sound, no flashing, no scroll and no focus move. The answer map is not
-//   touched, so a question answered before its window closed keeps its
-//   answer and a question left blank stays blank and marks as incorrect.
+// - **A window that closes says so and stops there (TIMER-01).** Every
+//   question screen is handed showTimeUp as its onTimeExpire, so reaching
+//   zero turns the reading red, prints "Time is up" and raises the toast
+//   below for a few seconds. Nothing else happens: no advance, no submit,
+//   no modal, no alert, no sound, no flashing, no scroll and no focus
+//   move. The answer map is not touched, so a question answered before its
+//   window closed keeps its answer and a question left blank stays blank.
+//   The learner presses Next when they are ready.
+//
+//   This is what TIMER-01 changed. Until then the same prop was goNext, so
+//   a closing window advanced the run by itself and took the screen away
+//   from a learner who was still reading it. Auto-advance is gone from
+//   this file, and it was the only file in the engine that had it.
 // - **Next never waits for an answer.** requireAnswer and
-//   requireAllAnswered are false throughout the run. A gate that blocks
-//   Next until every question is answered cannot survive a window that has
-//   to advance regardless, and leaving a question blank and taking the
-//   zero is what the official test allows.
+//   requireAllAnswered are false throughout the run. Leaving a question
+//   blank and taking the zero is what the official test allows, and a
+//   forward only run should not be able to trap a learner behind a gate.
 //
 // Timer durations come from listening-timing.ts, which is also where the
 // working behind them is written down. Parts 1 to 3 keep the published 30
@@ -183,6 +192,11 @@ export function ListeningSectionPrototype({
   const [answers, setAnswers] = useState<ListeningSectionAnswerMap>({});
   const [marking, setMarking] = useState<MarkingState>({ status: "idle" });
 
+  // The one time up message for the whole run (TIMER-01). It lives here
+  // rather than on a screen because a screen is unmounted by the very Next
+  // press the message is telling the learner they are free to make.
+  const { toastKey, showTimeUp, dismissTimeUp } = useMockTestTimeUpToast();
+
   // Which marking request is the current one. A learner can leave the
   // review, change an answer and come back faster than a reply arrives,
   // and the older reply would then overwrite the newer one with a score
@@ -238,10 +252,14 @@ export function ListeningSectionPrototype({
       void requestMarking(answers);
     }
 
+    // A time up message belongs to the screen it was raised on, so moving
+    // takes it away rather than carrying it onto the next one (TIMER-01).
+    dismissTimeUp();
     setScreenIndex(nextIndex);
   };
 
   const goBack = () => {
+    dismissTimeUp();
     setScreenIndex((current) => Math.max(current - 1, 0));
   };
 
@@ -257,6 +275,7 @@ export function ListeningSectionPrototype({
   // id moves on so a reply still in flight cannot land on the fresh run.
   const restart = () => {
     markingRequestId.current += 1;
+    dismissTimeUp();
     setScreenIndex(0);
     setAnswers({});
     setMarking({ status: "idle" });
@@ -266,11 +285,13 @@ export function ListeningSectionPrototype({
   //
   // Back is hidden for the whole of the test itself (EXAM-15F). The
   // official rule is that a learner cannot return to a previous part, and
-  // once a question window expires and advances by itself the same is true
-  // within a part: a question whose window has closed is closed. So rather
-  // than clamping Back to the current part and then having to explain why
-  // it sometimes does nothing, the run is forward only from the section
-  // instructions to the last question screen of Part 6.
+  // the same holds within a part: a question that has been left is left.
+  // So rather than clamping Back to the current part and then having to
+  // explain why it sometimes does nothing, the run is forward only from
+  // the section instructions to the last question screen of Part 6.
+  //
+  // Forward only is unchanged by TIMER-01. What changed is who moves the
+  // run forward: a closing window used to do it, and now only Next does.
   //
   // The two screens that keep it are the practice score and the end of
   // section screen, and neither is answerable. Back on the score returns to
@@ -480,9 +501,10 @@ export function ListeningSectionPrototype({
           timerSeconds={LISTENING_QUESTION_TIMER.seconds}
           timerWarningAtSeconds={LISTENING_QUESTION_TIMER.warningAtSeconds}
           timerUrgentAtSeconds={LISTENING_QUESTION_TIMER.urgentAtSeconds}
-          // 30 seconds up moves to the next question, or to the part
-          // transition after the last one (EXAM-15F).
-          onTimeExpire={goNext}
+          // 30 seconds up turns the reading red and raises the time up
+          // message. The question stays on screen with its answer, and
+          // Next stays the learner's to press (TIMER-01).
+          onTimeExpire={showTimeUp}
           metaText={metaText}
           onNext={goNext}
           onBack={goBack}
@@ -584,9 +606,10 @@ export function ListeningSectionPrototype({
           timerSeconds={screenTimer.seconds}
           timerWarningAtSeconds={screenTimer.warningAtSeconds}
           timerUrgentAtSeconds={screenTimer.urgentAtSeconds}
-          // The screen window closing moves the run to the next part
-          // transition, or to the answer review after Part 6 (EXAM-15F).
-          onTimeExpire={goNext}
+          // The screen window closing turns the reading red and raises
+          // the time up message. Every selection on the screen is kept and
+          // the run waits for Next (TIMER-01).
+          onTimeExpire={showTimeUp}
           metaText={metaText}
           onNext={goNext}
           onBack={goBack}
@@ -615,9 +638,10 @@ export function ListeningSectionPrototype({
           timerSeconds={screenTimer.seconds}
           timerWarningAtSeconds={screenTimer.warningAtSeconds}
           timerUrgentAtSeconds={screenTimer.urgentAtSeconds}
-          // The screen window closing moves the run to the next part
-          // transition, or to the answer review after Part 6 (EXAM-15F).
-          onTimeExpire={goNext}
+          // The screen window closing turns the reading red and raises
+          // the time up message. Every selection on the screen is kept and
+          // the run waits for Next (TIMER-01).
+          onTimeExpire={showTimeUp}
           metaText={metaText}
           onNext={goNext}
           onBack={goBack}
@@ -646,9 +670,10 @@ export function ListeningSectionPrototype({
           timerSeconds={screenTimer.seconds}
           timerWarningAtSeconds={screenTimer.warningAtSeconds}
           timerUrgentAtSeconds={screenTimer.urgentAtSeconds}
-          // The screen window closing moves the run to the next part
-          // transition, or to the answer review after Part 6 (EXAM-15F).
-          onTimeExpire={goNext}
+          // The screen window closing turns the reading red and raises
+          // the time up message. Every selection on the screen is kept and
+          // the run waits for Next (TIMER-01).
+          onTimeExpire={showTimeUp}
           metaText={metaText}
           onNext={goNext}
           onBack={goBack}
@@ -813,5 +838,14 @@ export function ListeningSectionPrototype({
   // A fragment rather than a wrapper element, because the exam frame fills
   // its parent by height and an extra div in the chain would have to be
   // taught the same flex rules.
-  return <Fragment key={screen.id}>{renderCurrentScreen()}</Fragment>;
+  // The toast sits outside the keyed fragment on purpose (TIMER-01).
+  // Inside it, a change of screen would remount the message and start its
+  // few seconds again on a screen it does not belong to.
+  return (
+    <Fragment>
+      <Fragment key={screen.id}>{renderCurrentScreen()}</Fragment>
+
+      <MockTestTimeUpToast toastKey={toastKey} />
+    </Fragment>
+  );
 }

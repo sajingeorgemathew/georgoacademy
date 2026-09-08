@@ -660,3 +660,39 @@ export const playerTimerCard = {
   track: "mt-1.5 h-1 w-full min-w-0 overflow-hidden rounded-full bg-player-ink/12",
   fill: "h-full rounded-full bg-player-blue transition-[width] duration-200",
 } as const;
+
+// The time up toast (TIMER-01).
+//
+// A short message that appears when a mock test window reaches zero and
+// clears itself a few seconds later. It is the smallest thing that can
+// carry the news, because the news is that nothing happened: the screen
+// is unchanged, the answers are unchanged, and the learner presses Next
+// when they are ready.
+//
+// Four decisions, and each one is there to keep the toast from behaving
+// like a dialog:
+//
+// - **fixed, and outside the flow.** It is positioned against the
+//   viewport rather than placed in the exam window, so appearing and
+//   clearing cannot reflow a question list, a passage or an editor by a
+//   single pixel. z-[110] puts it over the player viewport, which sits at
+//   z-[100].
+// - **pointer-events-none.** The toast can never intercept a click. Next,
+//   Back, Finish Writing and Submit for AI Review stay reachable through
+//   it even in the moment it is drawn over one of them, which matters
+//   because the whole point of the message is that the learner is still
+//   in charge.
+// - **bottom centred, above the bottom bar.** Out of the reading column
+//   and away from the top bar, where the expired reading it belongs to is
+//   already showing.
+// - **no animation.** The player chrome refuses flashing and pulsing
+//   everywhere else, and a message about staying calm is a poor place to
+//   start.
+//
+// The red is the expired timer red the badge already uses, so the bar and
+// the toast read as one state rather than two.
+export const playerTimeUpToast = {
+  region: "pointer-events-none fixed inset-x-0 bottom-6 z-[110] flex justify-center px-4",
+  toast:
+    "pointer-events-none max-w-[26rem] rounded-sm border border-academy-red/45 bg-player-paper px-4 py-2.5 text-center text-[13px] font-semibold leading-5 text-academy-red shadow-[0_8px_24px_rgba(15,23,42,0.16)]",
+} as const;

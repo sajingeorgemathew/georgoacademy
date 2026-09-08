@@ -50,6 +50,12 @@ import type { SpeakingTaskTimer } from "@/features/exam-engine/speaking-mock-typ
 // happens. No recording starts, no screen advances and nothing is
 // submitted, which is what the ticket asks a prototype timer to do.
 //
+// TIMER-01 added onExpire, and it is worth being clear about what it is
+// for. It is a notification, not a control: the section prototype passes a
+// handler that raises the shared time up message and does nothing else.
+// The preparation window closing still starts no recording and moves no
+// screen, and this component would not know how to do either.
+//
 // The preparation window ends early when recording starts, because at
 // that point the learner is speaking rather than preparing. The card then
 // reads "Complete" and stops counting: the inner component is unmounted,
@@ -65,6 +71,10 @@ export type SpeakingPrepTimerProps = {
   // False once recording has started, which ends the preparation window
   // whether or not it had run out.
   active: boolean;
+  // Fired once when the window reaches zero (TIMER-01). The section
+  // prototype uses it to raise the time up message. Nothing about this
+  // card changes because of it.
+  onExpire?: () => void;
   copy?: SpeakingMockCopy;
 };
 
@@ -97,21 +107,25 @@ export function SpeakingPrepTimer(props: SpeakingPrepTimerProps) {
 function SpeakingPrepTimerWindow({
   screenKey,
   timer,
+  onExpire,
   copy = speakingMockCopy,
 }: SpeakingPrepTimerProps) {
-  // No onExpire. Reaching zero changes the words on the card and does
-  // nothing else, which is the rule every other timed screen in the
+  // Reaching zero changes the words on the card and tells the caller, and
+  // does nothing else, which is the rule every other timed screen in the
   // engine already follows.
-  const countdown = useExamCountdown({
-    screenKey,
-    durationSeconds: timer.seconds,
-    warningAtSeconds: timer.warningAtSeconds,
-    urgentAtSeconds: timer.urgentAtSeconds,
-    // The preparation window opens with the screen, which is what the
-    // source screens do.
-    autoStart: true,
-    label: copy.prepTimerLabel,
-  });
+  const countdown = useExamCountdown(
+    {
+      screenKey,
+      durationSeconds: timer.seconds,
+      warningAtSeconds: timer.warningAtSeconds,
+      urgentAtSeconds: timer.urgentAtSeconds,
+      // The preparation window opens with the screen, which is what the
+      // source screens do.
+      autoStart: true,
+      label: copy.prepTimerLabel,
+    },
+    onExpire,
+  );
 
   const tone = examTimerStatusTones[countdown.status];
 
