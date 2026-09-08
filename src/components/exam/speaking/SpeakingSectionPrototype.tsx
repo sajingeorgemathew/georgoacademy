@@ -1,6 +1,10 @@
 "use client";
 
 import { Fragment, useMemo, useRef, useState } from "react";
+import {
+  MockTestTimeUpToast,
+  useMockTestTimeUpToast,
+} from "../player/MockTestTimeUpToast";
 import { SpeakingEvaluationErrorScreen } from "./SpeakingEvaluationErrorScreen";
 import { SpeakingEvaluationProcessingScreen } from "./SpeakingEvaluationProcessingScreen";
 import { SpeakingSectionCompleteScreen } from "./SpeakingSectionCompleteScreen";
@@ -123,9 +127,11 @@ import type {
 //   whole section without recording a word and reach a completion screen
 //   that says 0 of 8 tasks recorded, which is the honest reading of what
 //   they did
-// - it does not act on a timer reaching zero. Neither clock is given an
-//   expiry handler, so a closed window shows "Time is up" and nothing
-//   else happens: nothing stops, nothing advances and nothing is erased
+// - it does not act on a timer reaching zero. Both clocks are given an
+//   expiry handler (TIMER-01), and all it does is raise the shared time
+//   up message for a few seconds. A closed window shows "Time is up" in
+//   red and nothing else happens: no recording is stopped, no task is
+//   advanced, no take is erased, and Submit for AI Review is unchanged
 //
 // Back is enabled throughout, which the official-style flow would not
 // allow, so the sequence can be walked through repeatedly during review.
@@ -175,6 +181,10 @@ export function SpeakingSectionPrototype({
   const [responses, setResponses] = useState<SpeakingResponseMap>({});
   const [review, setReview] = useState<ReviewState>({ status: "idle" });
 
+  // The one time up message for the whole section (TIMER-01). See
+  // MockTestTimeUpToast for why it belongs here rather than to a screen.
+  const { toastKey, showTimeUp, dismissTimeUp } = useMockTestTimeUpToast();
+
   // Which review request is the current one.
   //
   // A learner can submit, go back, re-record a task and submit again
@@ -192,10 +202,14 @@ export function SpeakingSectionPrototype({
   const totalTasks = content.tasks.length;
 
   const goNext = () => {
+    // A time up message belongs to the screen it was raised on, so moving
+    // takes it away rather than carrying it onto the next one (TIMER-01).
+    dismissTimeUp();
     setScreenIndex((current) => Math.min(current + 1, totalScreens - 1));
   };
 
   const goBack = () => {
+    dismissTimeUp();
     setScreenIndex((current) => Math.max(current - 1, 0));
   };
 
@@ -285,6 +299,8 @@ export function SpeakingSectionPrototype({
   // cannot land on the fresh run and show a review of recordings that
   // have just been thrown away.
   const restart = () => {
+    dismissTimeUp();
+
     setResponses((current) => {
       listSpeakingAudioUrls(current).forEach((url) => {
         URL.revokeObjectURL(url);
@@ -333,6 +349,9 @@ export function SpeakingSectionPrototype({
           // The flow screen id, so the preparation window belongs to the
           // screen and a re-render does not restart it.
           timerScreenKey={screen.id}
+          // Either window closing raises the time up message and does
+          // nothing else (TIMER-01).
+          onTimeExpire={showTimeUp}
           copy={copy}
           // The last task closes the section, so its forward control says
           // so. Every other task keeps the shell's own Next.
@@ -490,9 +509,17 @@ export function SpeakingSectionPrototype({
   // review states share one flow screen. Without it, moving from the
   // completion screen to a result many times as long would leave the
   // canvas scrolled to wherever the shorter screen had been left.
+  //
+  // The toast sits outside that key (TIMER-01). Inside it, a change of
+  // screen would remount the message and start its few seconds again on a
+  // screen it does not belong to.
   return (
-    <Fragment key={screen.id + "-" + review.status}>
-      {renderCurrentScreen()}
+    <Fragment>
+      <Fragment key={screen.id + "-" + review.status}>
+        {renderCurrentScreen()}
+      </Fragment>
+
+      <MockTestTimeUpToast toastKey={toastKey} />
     </Fragment>
   );
 }

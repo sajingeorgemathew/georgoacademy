@@ -72,18 +72,19 @@ import type {
 // Next is gated on every question having an answer by default, which is
 // what allAnswered carries, and the count under the list says how many are
 // left. The full Listening route turns that gate off through
-// requireAllAnswered (EXAM-15F): a window that expires has to advance
-// whether or not the form is finished, and an official-style test lets a
+// requireAllAnswered (EXAM-15F), because an official-style test lets a
 // learner leave a question blank and take the zero. The individual Part 6
 // route keeps the gate, because it is a development route.
 //
 // The timer belongs to the screen rather than to any one question on it:
 // this part answers all six questions in one window, so the window is
 // keyed to the screen and answering a question does not restart it. What
-// happens at zero is the caller's decision. Passing onTimeExpire, which
-// the full route does and the part route does not, advances the flow; with
-// no handler the reading simply becomes "Time is up" and the screen stays
-// put. Either way no answer is cleared and nothing is submitted. See
+// happens at zero is the caller's decision, and no caller moves anywhere
+// (TIMER-01). The reading becomes "Time is up" in red and the screen stays
+// put. onTimeExpire, which the full route passes and the part route does
+// not, is a notification: the full route uses it to raise the shared time
+// up message for a few seconds. Either way no answer is cleared, nothing
+// is submitted and Next remains the learner's to press. See
 // docs/product/listening-format-strict-timing-polish.md.
 
 export type ListeningViewpointsQuestionScreenProps = {

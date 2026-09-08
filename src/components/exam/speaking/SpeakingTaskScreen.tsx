@@ -89,6 +89,11 @@ export type SpeakingTaskScreenProps = {
   // preparation window belongs to the screen and nothing that happens on
   // it starts a new one.
   timerScreenKey?: string;
+  // Fired once when either countdown on this screen reaches zero
+  // (TIMER-01). The section above raises the shared time up message with
+  // it. Neither window stops the recorder, advances the task or clears a
+  // take, before or after it fires.
+  onTimeExpire?: () => void;
   copy?: SpeakingMockCopy;
   metaText?: string;
   nextLabel?: string;
@@ -102,6 +107,7 @@ export function SpeakingTaskScreen({
   response,
   onRecorded,
   timerScreenKey,
+  onTimeExpire,
   copy = speakingMockCopy,
   metaText,
   nextLabel,
@@ -208,12 +214,21 @@ export function SpeakingTaskScreen({
                 screenKey={`${timerScreenKey ?? task.taskId}-prep`}
                 timer={task.prepTimer}
                 active={preparationActive}
+                // Preparation running out says so and stops there. The
+                // learner presses Start recording when they are ready,
+                // exactly as before (TIMER-01).
+                onExpire={onTimeExpire}
                 copy={copy}
               />
 
               <SpeakingRecordingTimer
                 timer={task.responseTimer}
                 runKey={takeKey}
+                // The recording window running out says so and stops
+                // there. The take is not stopped, the audio already
+                // captured is kept, and Stop recording stays the
+                // learner's to press (TIMER-01).
+                onExpire={onTimeExpire}
                 copy={copy}
               />
             </div>

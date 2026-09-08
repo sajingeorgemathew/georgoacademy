@@ -39,12 +39,12 @@ import type {
 // window is keyed to the flow screen id and answering a question does not
 // restart it.
 //
-// What happens at zero is the caller's decision, exactly as it is on the
-// Listening question screens. EXAM-16 passes no onTimeExpire, so the
-// reading becomes "Time is up" and the screen stays put with every answer
-// still selected. Nothing is submitted, nothing is cleared, and nothing
-// advances. A Reading section flow that has to move a learner on will
-// pass a handler.
+// What happens at zero is the caller's decision, and no caller moves
+// anywhere (TIMER-01). The reading becomes "Time is up" in red and the
+// screen stays put with every answer still selected. Nothing is
+// submitted, nothing is cleared, and nothing advances. onTimeExpire is a
+// notification: the section run passes one and uses it to raise the
+// shared time up message for a few seconds.
 //
 // A client component, because choosing an option is an event handler. It
 // holds no state: the answers are owned by the prototype above it, so

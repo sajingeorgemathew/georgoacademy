@@ -39,11 +39,14 @@ import type { WritingTaskContent } from "@/features/exam-engine/writing-mock-typ
 // screen id: typing, choosing a position and every re-render that follows
 // keep the same key and therefore the same window.
 //
-// What happens at zero is the caller's decision, and EXAM-25 passes no
-// onTimeExpire. The reading becomes "Time is up", the screen stays put,
-// every word stays on it, and the learner continues by pressing Next when
-// they are ready. Nothing auto-submits, nothing advances and nothing is
-// erased. Strict Writing timing is a later ticket.
+// What happens at zero is the caller's decision, and no caller moves
+// anywhere (TIMER-01). The reading becomes "Time is up" in red, the
+// screen stays put, every word stays on it, and the learner continues by
+// pressing Next or Finish Writing when they are ready. Nothing
+// auto-submits, nothing advances and nothing is erased. onTimeExpire is a
+// notification: the section run passes one and uses it to raise the
+// shared time up message for a few seconds. Strict Writing timing is a
+// later ticket.
 //
 // The screen holds no state. The response text and the chosen position
 // are owned by the prototype above it, so leaving the task and coming

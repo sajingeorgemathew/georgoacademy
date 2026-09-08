@@ -32,6 +32,17 @@ export const examCopy = {
   recordingLabel: "Recording",
   timeExpiredValue: "Time is up",
 
+  // Shown once, in a small toast, when a mock test window reaches zero
+  // (TIMER-01).
+  //
+  // The reading in the bar says "Time is up" and stops there, which is
+  // true but silent about the thing a learner most needs to know at that
+  // moment: nothing has been taken away and nothing has moved. So the
+  // toast says it in a sentence. It is a message, not a decision: there
+  // is no button on it, it clears itself after a few seconds, and the
+  // screen behind it is exactly as it was.
+  timeUpToastText: "Time is up. You can continue when you are ready.",
+
   // Instruction row.
   infoIconLabel: "Information",
   instructionsHeading: "Instructions:",

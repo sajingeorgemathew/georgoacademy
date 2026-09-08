@@ -76,9 +76,13 @@ export type ExamCountdown = ExamCountdownState & {
 export function useExamCountdown(
   config: ExamTimerConfig,
   // Fired once when a window reaches zero, and once more if start is
-  // called and the new window also runs out. Nothing in this ticket passes
-  // one: it is here so the Speaking recording timer can stop a recorder
-  // later without a second clock being written for it.
+  // called and the new window also runs out.
+  //
+  // Every caller in the mock test engine passes one and every one of them
+  // does the same thing with it: raise the shared time up message
+  // (TIMER-01). It is a notification, not a control. Nothing that
+  // navigates, submits, stops a recorder or clears an answer is wired to
+  // it, and the hook itself still does none of those things.
   onExpire?: () => void,
 ): ExamCountdown {
   const { durationSeconds, warningAtSeconds, urgentAtSeconds, autoStart } =

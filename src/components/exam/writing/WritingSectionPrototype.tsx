@@ -1,6 +1,10 @@
 "use client";
 
 import { Fragment, useMemo, useRef, useState } from "react";
+import {
+  MockTestTimeUpToast,
+  useMockTestTimeUpToast,
+} from "../player/MockTestTimeUpToast";
 import { WritingEvaluationErrorScreen } from "./WritingEvaluationErrorScreen";
 import { WritingEvaluationProcessingScreen } from "./WritingEvaluationProcessingScreen";
 import { WritingSectionCompleteScreen } from "./WritingSectionCompleteScreen";
@@ -110,10 +114,13 @@ import type {
 //   that screen rather than here. See the note at the top of
 //   WritingTaskTwoChoiceScreen.tsx for why writing is ungated and a
 //   position is not
-// - it does not act on a timer reaching zero. No onTimeExpire is passed
-//   to either task screen, so a closed window shows "Time is up" and
-//   nothing else happens: nothing submits, nothing advances, and nothing
-//   is erased
+// - it does not act on a timer reaching zero. Both task screens are
+//   handed showTimeUp as their onTimeExpire (TIMER-01), so a closed
+//   window shows "Time is up" in red and raises the toast for a few
+//   seconds. Nothing submits, nothing advances, and nothing is erased:
+//   the response text is held in this component's state, above the screen
+//   key, so a closing window cannot reach it. Finish Writing and Submit
+//   for AI Review behave exactly as they did before the window closed
 //
 // Back is enabled throughout, which the official-style flow would not
 // allow, so the sequence can be walked through repeatedly during review.
@@ -170,6 +177,10 @@ export function WritingSectionPrototype({
   const [choices, setChoices] = useState<WritingChoiceMap>({});
   const [review, setReview] = useState<ReviewState>({ status: "idle" });
 
+  // The one time up message for the whole section (TIMER-01). See
+  // MockTestTimeUpToast for why it belongs here rather than to a screen.
+  const { toastKey, showTimeUp, dismissTimeUp } = useMockTestTimeUpToast();
+
   // Which review request is the current one.
   //
   // A learner can submit, go back, change a paragraph and submit again
@@ -187,10 +198,14 @@ export function WritingSectionPrototype({
   const totalTasks = content.tasks.length;
 
   const goNext = () => {
+    // A time up message belongs to the screen it was raised on, so moving
+    // takes it away rather than carrying it onto the next one (TIMER-01).
+    dismissTimeUp();
     setScreenIndex((current) => Math.min(current + 1, totalScreens - 1));
   };
 
   const goBack = () => {
+    dismissTimeUp();
     setScreenIndex((current) => Math.max(current - 1, 0));
   };
 
@@ -263,6 +278,7 @@ export function WritingSectionPrototype({
   // land on the fresh run.
   const restart = () => {
     reviewRequestId.current += 1;
+    dismissTimeUp();
     setScreenIndex(0);
     setResponses({});
     setChoices({});
@@ -353,7 +369,9 @@ export function WritingSectionPrototype({
             choices={choices}
             onSelectOption={(optionId) => chooseOption(task.taskId, optionId)}
             timerScreenKey={task.taskId}
-            // No onTimeExpire. See the note at the top of this file.
+            // The window closing raises the time up message and does
+            // nothing else. The typed response is untouched (TIMER-01).
+            onTimeExpire={showTimeUp}
             copy={copy}
             nextLabel={taskNextLabel}
             metaText={taskMetaText}
@@ -372,7 +390,9 @@ export function WritingSectionPrototype({
           // The flow screen id, so the window belongs to the screen and
           // typing does not restart it.
           timerScreenKey={screen.id}
-          // No onTimeExpire. See the note at the top of this file.
+          // The window closing raises the time up message and does
+          // nothing else. The typed response is untouched (TIMER-01).
+          onTimeExpire={showTimeUp}
           copy={copy}
           nextLabel={taskNextLabel}
           metaText={taskMetaText}
@@ -509,9 +529,17 @@ export function WritingSectionPrototype({
   // states share one flow screen. Without it, moving from the completion
   // screen to a result four times as long would leave the canvas scrolled
   // to wherever the shorter screen had been left.
+  //
+  // The toast sits outside that key (TIMER-01). Inside it, a change of
+  // screen would remount the message and start its few seconds again on a
+  // screen it does not belong to.
   return (
-    <Fragment key={screen.id + "-" + review.status}>
-      {renderCurrentScreen()}
+    <Fragment>
+      <Fragment key={screen.id + "-" + review.status}>
+        {renderCurrentScreen()}
+      </Fragment>
+
+      <MockTestTimeUpToast toastKey={toastKey} />
     </Fragment>
   );
 }

@@ -52,6 +52,11 @@ import type { SpeakingTaskTimer } from "@/features/exam-engine/speaking-mock-typ
 // Speaking timing, where the window closes the recorder, is a later
 // ticket.
 //
+// TIMER-01 added onExpire, and it changes none of that. The section
+// prototype passes a handler that raises the shared time up message. The
+// recorder is still not stopped by the clock, the take is still the
+// learner's to end, and no task is advanced.
+//
 // House style: normal hyphens only, no long hyphens or em dashes.
 
 export type SpeakingRecordingTimerProps = {
@@ -60,12 +65,17 @@ export type SpeakingRecordingTimerProps = {
   // Changing it opens a new window; setting it to null closes the card
   // back to its idle reading.
   runKey: string | null;
+  // Fired once when the window reaches zero (TIMER-01). The section
+  // prototype uses it to raise the time up message. The recorder is not
+  // touched.
+  onExpire?: () => void;
   copy?: SpeakingMockCopy;
 };
 
 export function SpeakingRecordingTimer({
   timer,
   runKey,
+  onExpire,
   copy = speakingMockCopy,
 }: SpeakingRecordingTimerProps) {
   // Nothing is recording. Show what the window will be, in the muted
@@ -94,26 +104,37 @@ export function SpeakingRecordingTimer({
     );
   }
 
-  return <SpeakingRecordingTimerWindow key={runKey} timer={timer} copy={copy} />;
+  return (
+    <SpeakingRecordingTimerWindow
+      key={runKey}
+      timer={timer}
+      onExpire={onExpire}
+      copy={copy}
+    />
+  );
 }
 
 function SpeakingRecordingTimerWindow({
   timer,
+  onExpire,
   copy = speakingMockCopy,
 }: Omit<SpeakingRecordingTimerProps, "runKey">) {
-  // No onExpire. The recorder is not stopped by the clock, which is the
-  // ticket's own rule: time up is a change of reading and nothing else.
-  const countdown = useExamCountdown({
-    // This component is already keyed on the take, so the window is
-    // opened by the mount and this value only has to be stable within
-    // it.
-    screenKey: "speaking-recording-window",
-    durationSeconds: timer.seconds,
-    warningAtSeconds: timer.warningAtSeconds,
-    urgentAtSeconds: timer.urgentAtSeconds,
-    autoStart: true,
-    label: copy.responseTimerLabel,
-  });
+  // The recorder is not stopped by the clock, which is the ticket's own
+  // rule: time up is a change of reading, a message, and nothing else.
+  const countdown = useExamCountdown(
+    {
+      // This component is already keyed on the take, so the window is
+      // opened by the mount and this value only has to be stable within
+      // it.
+      screenKey: "speaking-recording-window",
+      durationSeconds: timer.seconds,
+      warningAtSeconds: timer.warningAtSeconds,
+      urgentAtSeconds: timer.urgentAtSeconds,
+      autoStart: true,
+      label: copy.responseTimerLabel,
+    },
+    onExpire,
+  );
 
   const tone = examTimerStatusTones[countdown.status];
 

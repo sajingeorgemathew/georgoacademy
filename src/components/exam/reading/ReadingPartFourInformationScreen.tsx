@@ -53,11 +53,12 @@ import type {
 // window is keyed to the flow screen id and answering a question does not
 // restart it.
 //
-// What happens at zero is the caller's decision, exactly as it is on the
-// three Reading screens before it. EXAM-22 passes no onTimeExpire, so the
-// reading becomes "Time is up" and the screen stays put with every answer
-// still selected. Nothing is submitted, nothing is cleared, and nothing
-// advances.
+// What happens at zero is the caller's decision, and no caller moves
+// anywhere (TIMER-01). The reading becomes "Time is up" in red and the
+// screen stays put with every answer still selected. Nothing is
+// submitted, nothing is cleared, and nothing advances. onTimeExpire is a
+// notification: the section run passes one and uses it to raise the
+// shared time up message for a few seconds.
 //
 // Next is never gated on the answers. A learner may leave any question
 // blank and still leave the screen, which is the EXAM-17 rule this part

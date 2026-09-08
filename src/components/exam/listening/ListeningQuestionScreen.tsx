@@ -41,11 +41,11 @@ import type {
 // before.
 //
 // Next is gated on an option being selected by default. The full Listening
-// route turns that gate off through requireAnswer (EXAM-15F): a window
-// that expires has to advance whether or not the question was answered,
-// and the official-style test lets a learner leave a question blank and
-// take the zero for it. The individual part routes keep the gate, because
-// they are development routes.
+// route turns that gate off through requireAnswer (EXAM-15F), because the
+// official-style test lets a learner leave a question blank and take the
+// zero for it, and a forward only run must not be able to trap them behind
+// a gate. The individual part routes keep the gate, because they are
+// development routes.
 //
 // The question stem is spoken, not printed, in this part. prompt is
 // rendered when a part has one, which is what Parts 4 to 6 will need.
@@ -66,12 +66,17 @@ import type {
 // window is 30 seconds, which is the one Listening duration published
 // directly, and it comes from listening-timing.ts with the rest of them.
 //
-// What happens at zero is the caller's decision (EXAM-15F). Passing
-// onTimeExpire, which the full route does and the part routes do not,
-// advances to the next question or the next transition; with no handler
-// the reading simply becomes "Time is up" and the screen stays put. Either
-// way the selection stays selected, no option is disabled and nothing is
-// submitted. See docs/product/listening-format-strict-timing-polish.md.
+// What happens at zero is the caller's decision, and no caller moves
+// anywhere (TIMER-01). The reading becomes "Time is up" in red and the
+// screen stays exactly where it is. onTimeExpire, which the full route
+// passes and the part routes do not, is a notification: the full route
+// uses it to raise the shared time up message for a few seconds. Either
+// way the selection stays selected, no option is disabled, nothing is
+// submitted and Next remains the learner's to press. See
+// docs/product/listening-format-strict-timing-polish.md.
+//
+// Until TIMER-01 the full route passed goNext here, so a closing window
+// advanced the run by itself. That is what this ticket removed.
 //
 // The question clip can be asked to start on its own (EXAM-15F). The full
 // route passes autoPlayAudio, because the official test speaks the
